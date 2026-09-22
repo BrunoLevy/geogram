@@ -46,28 +46,64 @@
 namespace {
     using namespace GEO;
 
+    /**
+     * \brief A PowerDiagram encoded as a weighted Delaunay triangulation
+     */
     class PowerDiagram : public PeriodicDelaunay3d {
     public:
+
+	/**
+	 * \brief PowerDiagram constructor
+	 */
 	PowerDiagram() : PeriodicDelaunay3d(false) {
 	    set_keeps_infinite(true);
 	}
 
+	/**
+	 * \brief gets the number of tetrahedra
+	 * \return the total number of tetrahedra, including the infinite ones
+	 */
 	index_t nb_tets() const {
 	    return nb_cells();
 	}
 
+	/**
+	 * \brief tests whether a tetrahedron is finite
+	 * \retval true if all the vertices of this tetrahedron are real vertices
+	 * \retval false if one of the vertices is the vertex at infinity
+	 */
 	bool tet_is_finite(index_t t) const {
 	    return cell_is_finite(t);
 	}
 
+	/**
+	 * \brief Gets a vertex of a tetrahedron
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lv a local vertex index, in 0 .. 3
+	 * \return the global vertex index corresponding to vertex \p lv of
+	 *  tetrahedron \p t, or NO_INDEX if it is the vertex at infinity
+	 */
 	index_t tet_vertex(index_t t, index_t lv) const {
 	    return cell_vertex(t,lv);
 	}
 
+	/**
+	 * \brief Gets a tetrahedron adjacent to another tetrahedron
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lf a local facet index, in 0 .. 3
+	 * \return the tetrahedron adjacent to \p t accross facet \p lf
+	 */
 	index_t tet_adjacent(index_t t, index_t lf) const {
 	    return cell_adjacent(t,lf);
 	}
 
+	/**
+	 * \brief Finds the local index of a vertex in a tetrahedron
+	 * \pre \p t is incident to \p v
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] v a global vertex index
+	 * \return lv such that tet_vertex(t,lv) == v
+	 */
 	index_t find_tet_vertex(index_t t, index_t v) const {
 	    for(index_t lv=0; lv<4; ++lv) {
 		if(tet_vertex(t,lv) == v) {
@@ -77,6 +113,14 @@ namespace {
 	    geo_assert_not_reached;
 	}
 
+	/**
+	 * \brief Finds the local facet index accross which a tetrahedron
+	 *  is adjacent to another one
+	 * \pre \p t is adjacent to \p t2
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] t2 a tetrahedron, in 0 .. nb_tets() - 1
+	 * \return lf such that tet_adjacent(t,lf) == t2
+	 */
 	index_t find_tet_adjacent(index_t t, index_t t2) const {
 	    for(index_t lf=0; lf<4; ++lf) {
 		if(tet_adjacent(t,lf) == t2) {
@@ -86,32 +130,75 @@ namespace {
 	    geo_assert_not_reached;
 	}
 
+	/**
+	 * \brief Gets a local vertex index from a local facet index
+	 *   and local vertex index in the facet
+	 * \param[in] lf a local facet index, in 0 .. 3
+	 * \param[in] lv a local vertex index in the facet, in 0 .. 2
+	 * \return the local vertex index in the tetrahedron, in 0 .. 3
+	 */
 	static index_t tet_facet_lv(index_t lf, index_t lv) {
 	    geo_debug_assert(lf < 4);
 	    geo_debug_assert(lv < 3);
 	    return index_t(tet_facet_vertex_[lf][lv]);
 	}
 
+	/**
+	 * \brief Gets a global vertex index from a tetrahedron,
+	 *   a local facet index in the tetrahedron and a local vertex
+	 *   index in the facet
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lf a local facet index, in 0 .. 3
+	 * \param[in] lv a local vertex index in the facet, in 0 .. 2
+	 * \return the global vertex index
+	 */
 	index_t tet_facet_vertex(index_t t, index_t lf, index_t lv) const {
 	    geo_debug_assert(lf < 4);
 	    geo_debug_assert(lv < 3);
 	    return tet_vertex(t, tet_facet_lv(lf, lv));
 	}
 
-	index_t make_halfedge_from_t_lf_le(index_t t, index_t lf, index_t le) const {
+	/**
+	 * \brief Makes a global halfedge index from a tetrahedron, a local
+	 *  facet index in the tetrahedron and a local edge index in the facet
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lf a local facet index, in 0 .. 3
+	 * \param[in] le a local edge index in the facet, in 0 .. 2
+	 * \return the global halfedge index
+	 */
+	index_t make_halfedge_from_t_lf_le(
+	    index_t t, index_t lf, index_t le
+	) const {
 	    geo_debug_assert(t < nb_tets());
 	    geo_debug_assert(lf < 4);
 	    geo_debug_assert(le < 3);
 	    return (t << 4) | (lf << 2) | le;
 	}
 
+	/**
+	 * \brief Makes a global halfedge index from a tetrahedron and a local
+	 *  halfedge index in the tetrahedron
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lh a local halfedge index, in 0..15 (only 12 valid values)
+	 * \return the global halfedge index
+	 */
 	index_t make_halfedge_from_t_lh(index_t t, index_t lh) const {
 	    geo_debug_assert(t < nb_tets());
 	    geo_debug_assert(lh < 16);
 	    return (t << 4) | lh;
 	}
 
-	index_t make_halfedge_from_t_lv_lv(index_t t, index_t lv1, index_t lv2) const {
+	/**
+	 * \brief Makes a global halfedge index from a tetrahedron and two
+	 *  local vertex indices in the tetrahedron
+	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \param[in] lv1 , lv2 the local indices of the extremities of the
+	 *  halfedge in the tetrahedron, in 0..3
+	 * \return the global halfedge index
+	 */
+	index_t make_halfedge_from_t_lv_lv(
+	    index_t t, index_t lv1, index_t lv2
+	) const {
 	    geo_debug_assert(lv1 < 4);
 	    geo_debug_assert(lv2 < 4);
 	    geo_debug_assert(lv1 != lv2);
@@ -119,22 +206,51 @@ namespace {
 	    return make_halfedge_from_t_lh(t,lh);
 	}
 
+	/**
+	 * \brief Gets the local halfedge index from a global halfedge index
+	 * \param[in] h a global halfedge index
+	 * \return the local halfedge index, in 0..15 (only 12 valid values)
+	 */
 	static index_t halfedge_lh(index_t h) {
 	    return h & 15u;
 	}
 
+	/**
+	 * \brief Gets the local facet index from a global halfedge index
+	 * \param[in] h a global halfedge index
+	 * \return the local facet index, in 0..3
+	 */
 	static index_t halfedge_lf(index_t h) {
 	    return (h & 12u) >> 2;
 	}
 
+	/**
+	 * \brief Gets the local edge index from a global halfedge index
+	 * \param[in] h a global halfedge index
+	 * \return the local edge index, in 0..2, relative to the facet
+	 *  returned by halfedge_lf(h)
+	 */
 	static index_t halfedge_le(index_t h) {
 	    return h & 3u;
 	}
 
+	/**
+	 * \brief Gets the tetrahedron index from a global halfedge index
+	 * \param[in] h a global halfedge index
+	 * \return the global index of the tetrahedron that \p h is adjacent to
+	 */
 	static index_t halfedge_t(index_t h) {
 	    return h >> 4;
 	}
 
+	/**
+	 * \brief Gets the global vertex index of one of the extremities of an
+	 *  halfedge
+	 * \param[in] h a global halfedge index
+	 * \param[in] lv one of 0, 1
+	 * \return the global index of the first or second extremity of \p h,
+	 *  depending on \p lv
+	 */
 	index_t halfedge_v(index_t h, index_t lv) const {
 	    geo_debug_assert(lv < 2);
 	    index_t t = halfedge_t(h);
@@ -146,6 +262,12 @@ namespace {
 	    return tet_vertex(t,lv);
 	}
 
+	/**
+	 * \brief Flips a halfedge
+	 * \param[in] h a global halfedge index
+	 * \return the global halfedge index of the unique halfedge in the
+	 *  same tetrahedron as \p h but with its extremities swapped
+	 */
 	index_t halfedge_flip(index_t h) const {
 	    index_t t = halfedge_t(h);
 	    geo_debug_assert(t < nb_tets());
@@ -156,6 +278,16 @@ namespace {
 	    return make_halfedge_from_t_lv_lv(t,lv2,lv1);
 	}
 
+	/**
+	 * \brief Traverses the halfedges incident to the same edge
+	 * \param[in] h a global halfedge index
+	 * \param[in] v1 , v2 the global vertex indices of the two
+	 *  extremities of \p h
+	 * \return the next halfedge around the edge (\p v1, \p v2)
+	 * \pre v1 == halfedge_v(h,0) && v2 == halfedge_v(h,1)
+	 * \details There is also a variant that does not take \p v1 and
+	 *  \p v2 as arguments
+	 */
 	index_t next_halfedge_around_edge(
 	    index_t h, index_t v1, index_t v2
 	) const {
@@ -170,13 +302,29 @@ namespace {
 	    return make_halfedge_from_t_lv_lv(t2, lv1, lv2);
 	}
 
+	/**
+	 * \brief Traverses the halfedges incident to the same edge
+	 * \param[in] h a global halfedge index
+	 * \return the next halfedge around the edge defined by the
+	 *  extremities of \p h
+	 */
 	index_t next_halfedge_around_edge(index_t h) const {
 	    return next_halfedge_around_edge(
 		h, halfedge_v(h,0), halfedge_v(h,1)
 	    );
 	}
 
-	void compute_skeleton(index_t max_v) {
+	/**
+	 * \brief Computes the Delaunay skeleton
+	 * \param[in] max_v one position past the maximum vertex index
+	 *  for which the Delaunay skeleton should be stored, or NO_INDEX
+	 *  if it should be stored for all vertices
+	 * \see skel_begin(), skel_end(), skel_h()
+	 */
+	void compute_skeleton(index_t max_v = NO_INDEX) {
+	    if(max_v == NO_INDEX) {
+		max_v = nb_vertices();
+	    }
 	    skel_ptr_.assign(max_v+1, 0);
 	    // Step 1: compute number of tets incident to each vertex
 	    for(index_t t=0; t<nb_tets(); ++t) {
@@ -224,6 +372,82 @@ namespace {
 	    }
 	}
 
+	/**
+	 * \short gets the first element of the list of halfedges incident
+	 *  to a vertex
+	 * \param v a global vertex index, smaller than the parameter max_v
+	 *   passed compute_skeleton()
+	 * \details the list of halfedges incident to vertex v is traversed as
+	 *  follows. Note the NO_INDEX test. It is because sometimes more
+	 *  elements may be allocated in the list than needed.
+	 * \code
+	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
+	 *       h = skel_h(k);
+	 *       if(h != NO_INDEX) {
+	 *          do something with h
+	 *       }
+	 *    }
+	 * \endcode
+	 * \see skel_end(), skel_h()
+	 */
+	index_t skel_begin(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v];
+	}
+
+	/**
+	 * \short gets one position past the last element of the list of
+	 *  halfedges incident to a vertex
+	 * \param v a global vertex index, smaller than the parameter max_v
+	 *   passed compute_skeleton()
+	 * \details the list of halfedges incident to vertex v is traversed as
+	 *  follows. Note the NO_INDEX test. It is because sometimes more
+	 *  elements may be allocated in the list than needed.
+	 * \code
+	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
+	 *       h = skel_h(k);
+	 *       if(h != NO_INDEX) {
+	 *          do something with h
+	 *       }
+	 *    }
+	 * \endcode
+	 * \see skel_begin(), skel_h()
+	 */
+	index_t skel_end(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v+1];
+	}
+
+	/**
+	 * \short gets an element of the list of halfedges incident to a vertex
+	 * \param k the index of the element
+	 * \details the list of halfedges incident to vertex v is traversed as
+	 *  follows. Note the NO_INDEX test. It is because sometimes more
+	 *  elements may be allocated in the list than needed.
+	 * \code
+	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
+	 *       h = skel_h(k);
+	 *       if(h != NO_INDEX) {
+	 *          do something with h
+	 *       }
+	 *    }
+	 * \endcode
+	 * \see skel_begin(), skel_end()
+	 */
+	index_t skel_h(index_t k) const {
+	    geo_debug_assert(k < skel_h_.size());
+	    return skel_h_[k];
+	}
+
+    protected:
+	/**
+	 * \brief Inserts a halfedge in the Delaunay skeleton, utility function
+	 *  for compute_skel()
+	 * \details Ignored if a halfedge with the same extremities was already
+	 *  present in the skeleton
+	 * \param[in] h a global halfedge index
+	 * \param[in] v1 , v2 the two global indices of the extremities of \p h
+	 */
 	void insert_in_skel(index_t v1, index_t v2, index_t h) {
 	    for(index_t k = skel_ptr_[v1]; k<skel_ptr_[v1+1]; ++k) {
 		if(skel_h_[k] == NO_INDEX) {
@@ -236,20 +460,6 @@ namespace {
 	    geo_assert_not_reached;
 	}
 
-	index_t skel_begin(index_t v) const {
-	    geo_debug_assert(v+1 < skel_ptr_.size());
-	    return skel_ptr_[v];
-	}
-
-	index_t skel_end(index_t v) const {
-	    geo_debug_assert(v+1 < skel_ptr_.size());
-	    return skel_ptr_[v+1];
-	}
-
-	index_t skel_h(index_t k) const {
-	    geo_debug_assert(k < skel_h_.size());
-	    return skel_h_[k];
-	}
 
     private:
 
@@ -273,21 +483,21 @@ namespace {
 	// maps a local halfedge to the two local vertex indices
 	// of its extremities
 	static constexpr char h2v_[16][2] = {
-	    {2,3},
-	    {3,1},
-	    {1,2},
+	    { 2, 3},
+	    { 3, 1},
+	    { 1, 2},
 	    {ZZ,ZZ},
-	    {3,2},
-	    {2,0},
-	    {0,3},
+	    { 3, 2},
+	    { 2, 0},
+	    { 0, 3},
 	    {ZZ,ZZ},
-	    {0,1},
-	    {1,3},
-	    {3,0},
+	    { 0, 1},
+	    { 1, 3},
+	    { 3, 0},
 	    {ZZ,ZZ},
-	    {0,2},
-	    {2,1},
-	    {1,0},
+	    { 0, 2},
+	    { 2, 1},
+	    { 1, 0},
 	    {ZZ,ZZ}
 	};
 
@@ -298,9 +508,10 @@ namespace {
 	    {10,  1,  4, ZZ}
 	};
 
+	// Encodes for each vertex the list of halfedges emanating from
+	// this vertex, stored in compressed row storage.
 	vector<index_t> skel_ptr_;
 	vector<index_t> skel_h_;
-
     };
 
     /*************************************************************************/
@@ -499,7 +710,9 @@ namespace {
 	    ++nb_triangles_;
 	}
 
-	void draw_shrunk_power_facet(index_t h0, index_t v1, index_t v2, bool flipped = false) {
+	void draw_shrunk_power_facet(
+	    index_t h0, index_t v1, index_t v2, bool flipped = false
+	) {
 	    index_t h = h0;
 	    index_t t1 = NO_INDEX;
 	    index_t t2 = NO_INDEX;
@@ -667,9 +880,12 @@ namespace {
 			continue;
 		    }
 
-		    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
-		    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
-		    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
+		    index_t h1 =
+			diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
+		    index_t h2 =
+			diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
+		    index_t h3 =
+			diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
 
 		    draw_quad_facet(h1,true);
 		    draw_quad_facet(h2,true);
