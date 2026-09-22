@@ -395,10 +395,7 @@ namespace {
 	    }
 	}
 
-	void draw_shrunk_power_facet(index_t t0, index_t v1, index_t v2) {
-	    index_t lv1 = diagram_->find_tet_vertex(t0,v1);
-	    index_t lv2 = diagram_->find_tet_vertex(t0,v2);
-	    index_t h0 = diagram_->make_halfedge_from_t_lv_lv(t0, lv1, lv2);
+	void draw_shrunk_power_facet(index_t h0, index_t v1, index_t v2) {
 	    index_t h = h0;
 	    index_t t1 = NO_INDEX;
 	    index_t t2 = NO_INDEX;
@@ -418,11 +415,32 @@ namespace {
 	    } while(h != h0);
 	}
 
+	void draw_quad_facet(index_t h) {
+	    index_t v1 = diagram_->halfedge_v(h,0);
+	    index_t v2 = diagram_->halfedge_v(h,1);
+	    index_t t1 = diagram_->halfedge_t(h);
+	    index_t t2 = diagram_->tet_adjacent(t1,diagram_->halfedge_lf(h));
+	    vec3 p11 = mixed_vertex(v1,t1);
+	    vec3 p12 = mixed_vertex(v1,t2);
+	    vec3 p21 = mixed_vertex(v2,t1);
+	    vec3 p22 = mixed_vertex(v2,t2);
+	    glupVertex(p22);
+	    glupVertex(p21);
+	    glupVertex(p11);
+	    glupVertex(p12);
+	    glupVertex(p22);
+	    glupVertex(p11);
+	}
+
 
 	void draw() {
 	    draw_atoms();
+	    glCullFace(GL_BACK);
+	    glEnable(GL_CULL_FACE);
 	    draw_shrunk_tets();
 	    draw_shrunk_power_cells();
+	    draw_H1_cells();
+	    glDisable(GL_CULL_FACE);
 	    // draw_power_vertices();
 	    // draw_additional_vertices();
 	    // draw_Delaunay();
@@ -430,9 +448,6 @@ namespace {
 
 	void draw_shrunk_tets() {
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_MESH_COLOR, 0.0, 0.0, 0.0);
-	    glupSetMeshWidth(1.0);
-	    glupEnable(GLUP_DRAW_MESH);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
@@ -453,12 +468,10 @@ namespace {
 
 
 	void draw_shrunk_power_cells() {
+	    // TODO: replace with Delaunay skeleton traversal
 	    std::set<std::pair<index_t, index_t>> visited;
 
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_MESH_COLOR, 0.0, 0.0, 0.0);
-	    glupSetMeshWidth(1.0);
-	    glupEnable(GLUP_DRAW_MESH);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
@@ -473,17 +486,78 @@ namespace {
 		    diagram_->tet_vertex(t,3)
 		};
 		for(index_t lv1=0; lv1<4; ++lv1) {
+		    index_t v1 = v[lv1];
+		    if(!is_atom(v1)) {
+			continue;
+		    }
 		    for(index_t lv2=0; lv2<4; ++lv2) {
-			if((lv1 != lv2) && is_atom(v[lv1])) {
-			    auto K = std::make_pair(v[lv1],v[lv2]);
-			    if(visited.find(K) == visited.end()) {
-				draw_shrunk_power_facet(t,v[lv1],v[lv2]);
-				visited.insert(K);
-			    }
+			if(lv1 == lv2) {
+			    continue;
+			}
+			index_t v2 = v[lv2];
+			geo_assert(v2 != NO_INDEX);
+			auto K = std::make_pair(v1,v2);
+			if(visited.find(K) == visited.end()) {
+			    index_t h = diagram_->make_halfedge_from_t_lv_lv(
+				t, lv1, lv2
+			    );
+			    draw_shrunk_power_facet(h,v1,v2);
+			    visited.insert(K);
 			}
 		    }
 		}
 	    }
+	    glupEnd();
+	}
+
+	void draw_H1_cells() {
+	    // TODO: replace with Delaunay skeleton traversal
+	    std::set<std::pair<index_t, index_t>> visited;
+
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
+
+	    glupBegin(GLUP_TRIANGLES);
+
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+		if(!diagram_->tet_is_finite(t)) {
+		    continue;
+		}
+		index_t v[4] = {
+		    diagram_->tet_vertex(t,0),
+		    diagram_->tet_vertex(t,1),
+		    diagram_->tet_vertex(t,2),
+		    diagram_->tet_vertex(t,3)
+		};
+		for(index_t lv1=0; lv1<4; ++lv1) {
+		    index_t v1 = v[lv1];
+		    if(!is_atom(v1)) {
+			continue;
+		    }
+		    for(index_t lv2=0; lv2<4; ++lv2) {
+			if(lv1 == lv2) {
+			    continue;
+			}
+			index_t v2 = v[lv2];
+			if(!is_atom(v2) || v2 < v1) {
+			    continue;
+			}
+			auto K = std::make_pair(v1,v2);
+			if(visited.find(K) == visited.end()) {
+			    index_t h0 = diagram_->make_halfedge_from_t_lv_lv(
+				t, lv1, lv2
+			    );
+			    index_t h = h0;
+			    do {
+				draw_quad_facet(h);
+				h = diagram_->next_halfedge_around_edge(h,v1,v2);
+			    } while(h != h0);
+			    visited.insert(K);
+			}
+		    }
+		}
+	    }
+
 	    glupEnd();
 	}
 
