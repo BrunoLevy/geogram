@@ -178,6 +178,7 @@ namespace {
 
 	void compute_skeleton(index_t max_v) {
 	    skel_ptr_.assign(max_v+1, 0);
+	    // Step 1: compute number of tets incident to each vertex
 	    for(index_t t=0; t<nb_tets(); ++t) {
 		for(index_t lv=0; lv<4; ++lv) {
 		    index_t v = tet_vertex(t,lv);
@@ -186,14 +187,26 @@ namespace {
 		    }
 		}
 	    }
+	    // Step 2: compute number of edges incident to each vertex
+	    // using Euler-Poincaré characteristic (Nicolas Ray's idea):
+	    // The outer boundary of the set of tets incident to a
+	    // vertex v is a topological sphere, hence V-E+F=2, where:
+	    //   V = number of edges incident to v
+	    //   E = 3F/2
+	    //   F = number of tetrahedra incident to v
+	    // Hence, V - 3F/2 + F = 2, or V = 2 + F/2, and finally:
+	    // Number of incident edges = 2 + (number of incident tets)/2
 	    for(index_t v=0; v<max_v; ++v) {
 		geo_debug_assert((skel_ptr_[v] & 1) == 0);
 		skel_ptr_[v] = 2 + skel_ptr_[v]/2;
 	    }
+	    // Step 3: update row pointers and assign space for skel_h_
 	    for(index_t v=1; v<=max_v; ++v) {
 		skel_ptr_[v] += skel_ptr_[v-1];
 	    }
 	    skel_h_.assign(skel_ptr_[max_v], NO_INDEX);
+	    // Step 4: insert all halfedges in skel_h_, keeping a single
+	    // halfedge per oriented edge (see insert_in_skel()).
 	    for(index_t t=0; t<nb_tets(); ++t) {
 		for(index_t lv1=0; lv1<4; ++lv1) {
 		    for(index_t lv2=0; lv2<4; ++lv2) {
@@ -599,44 +612,6 @@ namespace {
 		}
 	    }
 	    glupEnd();
-
-	    /*
-	    std::set<std::pair<index_t, index_t>> visited;
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
-		if(!diagram_->tet_is_finite(t)) {
-		    continue;
-		}
-		index_t v[4] = {
-		    diagram_->tet_vertex(t,0),
-		    diagram_->tet_vertex(t,1),
-		    diagram_->tet_vertex(t,2),
-		    diagram_->tet_vertex(t,3)
-		};
-		for(index_t lv1=0; lv1<4; ++lv1) {
-		    index_t v1 = v[lv1];
-		    if(!is_atom(v1)) {
-			continue;
-		    }
-		    for(index_t lv2=0; lv2<4; ++lv2) {
-			if(lv1 == lv2) {
-			    continue;
-			}
-			index_t v2 = v[lv2];
-			geo_assert(v2 != NO_INDEX);
-			auto K = std::make_pair(v1,v2);
-			if(visited.find(K) == visited.end()) {
-			    index_t h = diagram_->make_halfedge_from_t_lv_lv(
-				t, lv1, lv2
-			    );
-			    draw_shrunk_power_facet(h,v1,v2);
-			    visited.insert(K);
-			}
-		    }
-		}
-	    }
-	    glupEnd();
-	    */
 	}
 
 	void draw_H1_cells() {
@@ -669,56 +644,6 @@ namespace {
 		}
 	    }
 	    glupEnd();
-
-	    /*
-	    std::set<std::pair<index_t, index_t>> visited;
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
-		if(!diagram_->tet_is_finite(t)) {
-		    continue;
-		}
-		index_t v[4] = {
-		    diagram_->tet_vertex(t,0),
-		    diagram_->tet_vertex(t,1),
-		    diagram_->tet_vertex(t,2),
-		    diagram_->tet_vertex(t,3)
-		};
-		for(index_t lv1=0; lv1<4; ++lv1) {
-		    index_t v1 = v[lv1];
-		    if(!is_atom(v1)) {
-			continue;
-		    }
-		    for(index_t lv2=0; lv2<4; ++lv2) {
-			if(lv1 == lv2) {
-			    continue;
-			}
-			index_t v2 = v[lv2];
-			if(!is_atom(v2) || v2 < v1) {
-			    continue;
-			}
-			auto K = std::make_pair(v1,v2);
-			if(visited.find(K) == visited.end()) {
-			    index_t h0 = diagram_->make_halfedge_from_t_lv_lv(
-				t, lv1, lv2
-			    );
-			    index_t h = h0;
-			    do {
-				draw_quad_facet(h);
-				h = diagram_->next_halfedge_around_edge(h,v1,v2);
-			    } while(h != h0);
-			    visited.insert(K);
-
-			    draw_shrunk_power_facet(h, v1, v2, true);
-			    h = diagram_->make_halfedge_from_t_lv_lv(
-				t, lv2, lv1
-			    );
-			    draw_shrunk_power_facet(h, v2, v1, true);
-			}
-		    }
-		}
-	    }
-	    glupEnd();
-	    */
 	}
 
 	void draw_H2_cells() {
