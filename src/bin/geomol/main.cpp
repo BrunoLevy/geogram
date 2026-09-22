@@ -56,7 +56,6 @@ namespace {
 
 	Molecule() : delaunay_(new PeriodicDelaunay3d(false)) {
 	    delaunay_->set_keeps_infinite(true);
-	    delaunay_->set_abort_on_empty_cell(false);
 	}
 
 	bool load(const std::string& filename) {
@@ -120,8 +119,9 @@ namespace {
 	    {
 		Stopwatch W("close");
 		while(close_cells()) {
-		    Logger::out("delaunay") << delaunay_->nb_cells() << " tetrahedra"
-					    << std::endl;
+		    Logger::out("delaunay")
+			<< delaunay_->nb_cells() << " tetrahedra"
+			<< std::endl;
 		}
 	    }
 	    {
@@ -138,54 +138,51 @@ namespace {
 				    << std::endl;
 	}
 
+	bool is_atom(index_t v) {
+	    return v < nb_atoms_;
+	}
+
+
 	bool close_cells() {
 	    bool changed = false;
 	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
-		if(!delaunay_->cell_is_finite(t)) {
+		if(delaunay_->cell_is_finite(t)) {
 		    continue;
 		}
 		for(index_t lf=0; lf<4; ++lf) {
-		    index_t t2 = delaunay_->cell_adjacent(t,lf);
-		    if(delaunay_->cell_is_finite(t2)) {
-			continue;
+		    if(delaunay_->cell_vertex(t,lf) == NO_INDEX) {
+			index_t lv1 = index_t(tet_facet_vertex_[lf][0]);
+			index_t lv2 = index_t(tet_facet_vertex_[lf][1]);
+			index_t lv3 = index_t(tet_facet_vertex_[lf][2]);
+			index_t v1 = delaunay_->cell_vertex(t,lv1);
+			index_t v2 = delaunay_->cell_vertex(t,lv2);
+			index_t v3 = delaunay_->cell_vertex(t,lv3);
+			if(is_atom(v1) || is_atom(v2) || is_atom(v3)) {
+			    vec3 p1 = delaunay_->vertex(v1);
+			    vec3 p2 = delaunay_->vertex(v2);
+			    vec3 p3 = delaunay_->vertex(v3);
+			    double w1 = delaunay_->weight(v1);
+			    double w2 = delaunay_->weight(v2);
+			    double w3 = delaunay_->weight(v3);
+			    vec3 g = (1.0/3.0)*(p1+p2+p3);
+			    vec3 N = normalize(cross(p3-p1,p2-p1));
+			    double Ag = length2(g-p1);
+			    double Acc = 4.0 * r_max_ * r_max_ / shrink_factor_;
+			    while(Acc < Ag) {
+				Acc += 0.5;
+			    }
+			    double Bcc = ::sqrt(Acc - Ag);
+			    vec3 cc = g + Bcc * N;
+			    double w = weight_factor_ * r_min_ / 5.0;
+			    vec3 p = cc - (w/w1)*(p1-cc)
+				        - (w/w2)*(p2-cc)
+				        - (w/w3)*(p3-cc);
+			    atom_pos_.push_back(p);
+			    atom_weight_.push_back(w);
+			    changed = true;
+			}
+			break;
 		    }
-
-		    index_t lv1 = index_t(tet_facet_vertex_[lf][0]);
-		    index_t lv2 = index_t(tet_facet_vertex_[lf][1]);
-		    index_t lv3 = index_t(tet_facet_vertex_[lf][2]);
-
-		    index_t v1 = delaunay_->cell_vertex(t,lv1);
-		    index_t v2 = delaunay_->cell_vertex(t,lv2);
-		    index_t v3 = delaunay_->cell_vertex(t,lv3);
-
-		    if(v1 >= nb_atoms_ && v2 >= nb_atoms_ && v3 >= nb_atoms_) {
-			continue;
-		    }
-
-		    vec3 p1 = delaunay_->vertex(v1);
-		    vec3 p2 = delaunay_->vertex(v2);
-		    vec3 p3 = delaunay_->vertex(v3);
-		    double w1 = delaunay_->weight(v1);
-		    double w2 = delaunay_->weight(v2);
-		    double w3 = delaunay_->weight(v3);
-
-		    vec3 g = (1.0/3.0)*(p1+p2+p3);
-		    vec3 N = normalize(cross(p2-p1,p3-p1));
-
-		    double Ag = length2(g-p1);
-		    double Acc = 4.0 * r_max_ * r_max_ / shrink_factor_;
-		    while(Acc < Ag) {
-			Acc += 0.5;
-		    }
-		    double Bcc = ::sqrt(Acc - Ag);
-		    vec3 cc = g + Bcc * N;
-
-		    double w = weight_factor_ * r_min_ / 5.0;
-		    vec3 p = cc - (w/w1)*(p1-cc) - (w/w2)*(p2-cc) - (w/w3)*(p3-cc);
-
-		    atom_pos_.push_back(p);
-		    atom_weight_.push_back(w);
-		    changed = true;
 		}
 	    }
 	    if(changed) {
@@ -195,7 +192,6 @@ namespace {
 
 		delaunay_ = new PeriodicDelaunay3d(false);
 		delaunay_->set_keeps_infinite(true);
-		delaunay_->set_abort_on_empty_cell(false);
 		delaunay_->set_vertices(atom_pos_.size(), atom_pos_[0].data());
 		delaunay_->set_weights(atom_weight_.data());
 		delaunay_->compute();
@@ -229,12 +225,52 @@ namespace {
 	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
 	}
 
+	vec3 mixed_vertex(index_t v, index_t t) {
+	    return mix(atom_pos_[v], tet_dual_[t], shrink_factor_);
+	}
+
+	void draw_shrunk_tet_facet(index_t t, index_t lf) {
+	    for(index_t lv=0; lv<3; ++lv) {
+		index_t v = delaunay_->cell_vertex(
+		    t, index_t(tet_facet_vertex_[lf][lv])
+		);
+		glupVertex(mixed_vertex(v, t));
+	    }
+	}
+
+	void draw_shrunk_voro_facet(index_t t, index_t le) {
+	}
+
 
 	void draw() {
 	    draw_atoms();
+	    draw_shrunk_tets();
 	    // draw_Voronoi_vertices();
-	    draw_additional_vertices();
+	    // draw_additional_vertices();
 	    // draw_Delaunay();
+	}
+
+	void draw_shrunk_tets() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_MESH_COLOR, 0.0, 0.0, 0.0);
+	    glupSetMeshWidth(1.0);
+	    glupEnable(GLUP_DRAW_MESH);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
+		if(
+		    is_atom(delaunay_->cell_vertex(t,0)) &&
+		    is_atom(delaunay_->cell_vertex(t,1)) &&
+		    is_atom(delaunay_->cell_vertex(t,2)) &&
+		    is_atom(delaunay_->cell_vertex(t,3))
+		) {
+		    draw_shrunk_tet_facet(t,0);
+		    draw_shrunk_tet_facet(t,1);
+		    draw_shrunk_tet_facet(t,2);
+		    draw_shrunk_tet_facet(t,3);
+		}
+	    }
+	    glupEnd();
 	}
 
 	void draw_Delaunay() {

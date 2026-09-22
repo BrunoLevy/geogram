@@ -3011,7 +3011,7 @@ namespace GEO {
         period_(period,period,period),
         weights_(nullptr),
         update_periodic_v_to_cell_(false),
-	abort_on_empty_cell_(true),
+	abort_on_empty_cell_(false),
         has_empty_cells_(false),
         nb_reallocations_(0),
         convex_cell_exact_predicates_(true)

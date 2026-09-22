@@ -267,9 +267,9 @@ namespace GEO {
 	 * \brief Sets whether computation should be stopped when an
 	 *  empty cell is encountered
 	 * \param[in] x if set, computation is aborted as soon as an
-	 *  empty cell is encountered. Default behavior is set.
+	 *  empty cell is encountered. Default behavior is off.
 	 */
-	void set_abort_on_empty_cell(bool x) {
+	void abort_if_empty_cell(bool x) {
 	    abort_on_empty_cell_ = x;
 	}
 
