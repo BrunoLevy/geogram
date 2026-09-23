@@ -48,33 +48,33 @@ namespace {
 
     /**
      * \brief A PowerDiagram encoded as a weighted Delaunay triangulation
+     * \details Under the hood, uses PeriodicDelaunay3d,
+     *   that does periodic-or-not (here not) weighted-or-not (here weighted)
+     *   triangulations.
+     *   PowerDiagram has functions to navigate the triangulation based on
+     *   halfedges.
+     *   Each tetrahedron has 12 halfedges. An halfedge is a triplet (T,t,e)
+     *   encoded in an index_t, where:
+     *      - T is a global tetrahedron index
+     *      - t in {0,1,2,3} is a local facet index in the tetrahedron
+     *      - e in {0,1,2} is a local edge index in the facet
+     *   PowerDiagram also has a function compute_skeleton() that computes
+     *   the Delaunauy skeleton, that is, for each vertex v, the list of
+     *   halfedges emanating from v. Once compute_skeleton() has been called,
+     *   the Delaunay skeleton can be traversed as follows:
+     *   \code
+     *      for(index_t h: incident_edges(v)) {
+     *         if(h != NO_INDEX) { // there can be empty slots in the list
+     *            do something with h
+     *         }
+     *      }
+     *   \endcode
      */
     class PowerDiagram : public PeriodicDelaunay3d {
     public:
 
 	/**
 	 * \brief PowerDiagram constructor
-	 * \details Under the hood, uses PeriodicDelaunay3d,
-	 *   that does periodic-or-not (here not) weighted-or-not (here weighted)
-	 *   triangulations.
-	 *   PowerDiagram has functions to navigate the triangulation based on
-	 *   halfedges.
-	 *   Each tetrahedron has 12 halfedges. An halfedge is a triplet (T,t,e)
-	 *   encoded in an index_t, where:
-	 *      - T is a global tetrahedron index
-	 *      - t in {0,1,2,3} is a local facet index in the tetrahedron
-	 *      - e in {0,1,2} is a local edge index in the facet
-	 *   PowerDiagram also has a function compute_skeleton() that computes
-	 *   the Delaunauy skeleton, that is, for each vertex v, the list of
-	 *   halfedges emanating from v. Once compute_skeleton() has been called,
-	 *   the Delaunay skeleton can be traversed as follows:
-	 *   \code
-	 *      for(index_t h: incident_edges(v)) {
-	 *         if(h != NO_INDEX) { // there can be empty slots in the list
-	 *            do something with h
-	 *         }
-	 *      }
-	 *   \endcode
 	 */
 	PowerDiagram() : PeriodicDelaunay3d(false) {
 	    set_keeps_infinite(true);
@@ -415,8 +415,7 @@ namespace {
 	}
 
 	/**
-	 * \short gets the first element of the list of halfedges incident
-	 *  to a vertex
+	 * \short gets the list of halfedges incident to a vertex
 	 * \param v a global vertex index, smaller than the parameter max_v
 	 *   passed compute_skeleton()
 	 * \return a sequence of halfedges
@@ -768,6 +767,131 @@ namespace {
 	    return mix(atom_pos_[v], tet_dual_[t], shrink_factor_);
 	}
 
+	/***********************************************************************/
+
+	void draw_shrunk_tets() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t t: diagram_->tets()) {
+		if(
+		    is_atom(diagram_->tet_vertex(t,0)) &&
+		    is_atom(diagram_->tet_vertex(t,1)) &&
+		    is_atom(diagram_->tet_vertex(t,2)) &&
+		    is_atom(diagram_->tet_vertex(t,3))
+		) {
+		    draw_shrunk_tet(t);
+		}
+	    }
+	    glupEnd();
+	}
+
+	void draw_shrunk_power_cells() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t v: atoms()) {
+		draw_shrunk_power_cell(v);
+	    }
+	    glupEnd();
+	}
+
+	void draw_H1_cells() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t v1: atoms()) {
+		for(index_t h: diagram_->incident_edges(v1)) {
+		    if(h == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h,1);
+		    if(!is_atom(v2) || v1 > v2) {
+			continue;
+		    }
+		    draw_H1_cell(h);
+		}
+	    }
+	    glupEnd();
+	}
+
+	void draw_H2_cells() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t t: diagram_->tets()) {
+		if(!diagram_->tet_is_finite(t)) {
+		    continue;
+		}
+		for(index_t lf=0; lf<4; ++lf) {
+		    index_t t2 = diagram_->tet_adjacent(t, lf);
+		    if(t2 < t) {
+			continue;
+		    }
+		    index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
+		    index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
+		    index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
+		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
+			continue;
+		    }
+		    draw_H2_cell(t, lf);
+		}
+	    }
+	    glupEnd();
+	}
+
+	/***********************************************************************/
+
+	void draw_shrunk_tet(index_t t) {
+	    draw_shrunk_tet_facet(t,0);
+	    draw_shrunk_tet_facet(t,1);
+	    draw_shrunk_tet_facet(t,2);
+	    draw_shrunk_tet_facet(t,3);
+	}
+
+	void draw_shrunk_power_cell(index_t v) {
+	    for(index_t h: diagram_->incident_edges(v)) {
+		if(h == NO_INDEX) {
+		    break;
+		}
+		index_t v2 = diagram_->halfedge_v(h,1);
+		draw_shrunk_power_facet(h,v,v2);
+	    }
+	}
+
+	void draw_H1_cell(index_t h0) {
+	    index_t v1 = diagram_->halfedge_v(h0,0);
+	    index_t v2 = diagram_->halfedge_v(h0,1);
+	    index_t h = h0;
+	    do {
+		draw_quad_facet(h);
+		h = diagram_->next_halfedge_around_edge(h,v1,v2);
+	    } while(h != h0);
+	    draw_shrunk_power_facet(h, v1, v2, true);
+	    h = diagram_->halfedge_flip(h);
+	    draw_shrunk_power_facet(h, v2, v1, true);
+	}
+
+	void draw_H2_cell(index_t t, index_t lf) {
+	    index_t lv1 = diagram_->tet_facet_lv(lf,0);
+	    index_t lv2 = diagram_->tet_facet_lv(lf,1);
+	    index_t lv3 = diagram_->tet_facet_lv(lf,2);
+	    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
+	    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
+	    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
+
+	    draw_quad_facet(h1,true);
+	    draw_quad_facet(h2,true);
+	    draw_quad_facet(h3,true);
+
+	    draw_shrunk_tet_facet(t,lf,true);
+	    index_t t2 = diagram_->tet_adjacent(t,lf);
+	    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
+	    draw_shrunk_tet_facet(t2,lf2,true);
+	}
+
+	/***********************************************************************/
+
 	void draw_shrunk_tet_facet(index_t t, index_t lf, bool flipped = false) {
 	    if(flipped) {
 		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
@@ -854,114 +978,6 @@ namespace {
 	    // draw_Delaunay();
 
 	    // std::cerr << nb_triangles_ << " triangles" << std::endl;
-	}
-
-	void draw_shrunk_tets() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t: diagram_->tets()) {
-		if(
-		    is_atom(diagram_->tet_vertex(t,0)) &&
-		    is_atom(diagram_->tet_vertex(t,1)) &&
-		    is_atom(diagram_->tet_vertex(t,2)) &&
-		    is_atom(diagram_->tet_vertex(t,3))
-		) {
-		    draw_shrunk_tet_facet(t,0);
-		    draw_shrunk_tet_facet(t,1);
-		    draw_shrunk_tet_facet(t,2);
-		    draw_shrunk_tet_facet(t,3);
-		}
-	    }
-	    glupEnd();
-	}
-
-	void draw_shrunk_power_cells() {
-
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
-
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t v1: atoms()) {
-		for(index_t h: diagram_->incident_edges(v1)) {
-		    if(h == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h,1);
-		    draw_shrunk_power_facet(h,v1,v2);
-		}
-	    }
-	    glupEnd();
-	}
-
-	void draw_H1_cells() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
-
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t v1: atoms()) {
-		for(index_t h0: diagram_->incident_edges(v1)) {
-		    if(h0 == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h0,1);
-		    if(!is_atom(v2) || v1 > v2) {
-			continue;
-		    }
-		    index_t h = h0;
-		    do {
-			draw_quad_facet(h);
-			h = diagram_->next_halfedge_around_edge(h,v1,v2);
-		    } while(h != h0);
-
-		    draw_shrunk_power_facet(h, v1, v2, true);
-		    h = diagram_->halfedge_flip(h);
-		    draw_shrunk_power_facet(h, v2, v1, true);
-		}
-	    }
-	    glupEnd();
-	}
-
-	void draw_H2_cells() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
-
-	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t: diagram_->tets()) {
-		if(!diagram_->tet_is_finite(t)) {
-		    continue;
-		}
-		for(index_t lf=0; lf<4; ++lf) {
-
-		    index_t lv1 = diagram_->tet_facet_lv(lf,0);
-		    index_t lv2 = diagram_->tet_facet_lv(lf,1);
-		    index_t lv3 = diagram_->tet_facet_lv(lf,2);
-		    index_t v1 = diagram_->tet_vertex(t, lv1);
-		    index_t v2 = diagram_->tet_vertex(t, lv2);
-		    index_t v3 = diagram_->tet_vertex(t, lv3);
-		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
-			continue;
-		    }
-
-		    index_t h1 =
-			diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
-		    index_t h2 =
-			diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
-		    index_t h3 =
-			diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
-
-		    draw_quad_facet(h1,true);
-		    draw_quad_facet(h2,true);
-		    draw_quad_facet(h3,true);
-
-		    draw_shrunk_tet_facet(t,lf,true);
-		    index_t t2 = diagram_->tet_adjacent(t,lf);
-		    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
-		    draw_shrunk_tet_facet(t2,lf2,true);
-		}
-	    }
-
-	    glupEnd();
 	}
 
 	void draw_Delaunay() {
