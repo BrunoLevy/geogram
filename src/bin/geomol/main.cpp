@@ -671,6 +671,9 @@ namespace {
 	    }
 	    Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 				    << std::endl;
+	    shrunk_tets_cache_.resize(0);
+	    H1_cells_cache_.resize(0);
+	    H2_cells_cache_.resize(0);
 	}
 
 	/**
@@ -765,29 +768,30 @@ namespace {
 
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
 
-	vec3 mixed_vertex(index_t v, index_t t) {
-	    return mix(atom_pos_[v], tet_dual_[t], shrink_factor_);
-	}
-
-	vec3 mixed_vertex(mixed_vertex_id id) {
-	    return mixed_vertex(id.first, id.second);
+	vec3 mixed_vertex(mixed_vertex_id V) {
+	    return mix(atom_pos_[V.first], tet_dual_[V.second], shrink_factor_);
 	}
 
 	/***********************************************************************/
 
 	void draw_shrunk_tets() {
+	    if(shrunk_tets_cache_.size() == 0) {
+		for(index_t t: diagram_->tets()) {
+		    if(
+			is_atom(diagram_->tet_vertex(t,0)) &&
+			is_atom(diagram_->tet_vertex(t,1)) &&
+			is_atom(diagram_->tet_vertex(t,2)) &&
+			is_atom(diagram_->tet_vertex(t,3))
+		    ) {
+			shrunk_tets_cache_.push_back(t);
+		    }
+		}
+	    }
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t: diagram_->tets()) {
-		if(
-		    is_atom(diagram_->tet_vertex(t,0)) &&
-		    is_atom(diagram_->tet_vertex(t,1)) &&
-		    is_atom(diagram_->tet_vertex(t,2)) &&
-		    is_atom(diagram_->tet_vertex(t,3))
-		) {
-		    draw_shrunk_tet(t);
-		}
+	    for(index_t t: shrunk_tets_cache_) {
+		draw_shrunk_tet(t);
 	    }
 	    glupEnd();
 	}
@@ -803,45 +807,59 @@ namespace {
 	}
 
 	void draw_H1_cells() {
+	    if(H1_cells_cache_.size() == 0) {
+		for(index_t v1: atoms()) {
+		    for(index_t h: diagram_->incident_edges(v1)) {
+			if(h == NO_INDEX) {
+			    break;
+			}
+			index_t v2 = diagram_->halfedge_v(h,1);
+			if(!is_atom(v2) || v1 > v2) {
+			    continue;
+			}
+			H1_cells_cache_.push_back(h);
+		    }
+		}
+	    }
+
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t v1: atoms()) {
-		for(index_t h: diagram_->incident_edges(v1)) {
-		    if(h == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h,1);
-		    if(!is_atom(v2) || v1 > v2) {
-			continue;
-		    }
-		    draw_H1_cell(h);
-		}
+	    for(index_t h: H1_cells_cache_) {
+		draw_H1_cell(h);
 	    }
 	    glupEnd();
 	}
 
 	void draw_H2_cells() {
+	    if(H2_cells_cache_.size() == 0) {
+		for(index_t t: diagram_->tets()) {
+		    if(!diagram_->tet_is_finite(t)) {
+			continue;
+		    }
+		    for(index_t lf=0; lf<4; ++lf) {
+			index_t t2 = diagram_->tet_adjacent(t, lf);
+			if(t2 < t) {
+			    continue;
+			}
+			index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
+			index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
+			index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
+			if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
+			    continue;
+			}
+			H2_cells_cache_.push_back(
+			    diagram_->make_halfedge_from_t_lf_le(t, lf, 0)
+			);
+		    }
+		}
+	    }
+
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t: diagram_->tets()) {
-		if(!diagram_->tet_is_finite(t)) {
-		    continue;
-		}
-		for(index_t lf=0; lf<4; ++lf) {
-		    index_t t2 = diagram_->tet_adjacent(t, lf);
-		    if(t2 < t) {
-			continue;
-		    }
-		    index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
-		    index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
-		    index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
-		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
-			continue;
-		    }
-		    draw_H2_cell(t, lf);
-		}
+	    for(index_t h: H2_cells_cache_) {
+		draw_H2_cell(diagram_->halfedge_t(h), diagram_->halfedge_lf(h));
 	    }
 	    glupEnd();
 	}
@@ -1145,8 +1163,11 @@ namespace {
 	vector<double> atom_weight_;
 	vector<vec3> tet_dual_;
 	SmartPointer<PowerDiagram> diagram_;
+	mutable vector<index_t> shrunk_tets_cache_; // tet ids
+	mutable vector<index_t> H1_cells_cache_; // halfedge ids
+	mutable vector<index_t> H2_cells_cache_; // halfedge ids
 
-	index_t nb_triangles_;
+	index_t nb_triangles_; // number of drawn triangles
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	int atom_size_ = 10;
