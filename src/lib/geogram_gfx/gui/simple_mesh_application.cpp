@@ -490,6 +490,9 @@ namespace GEO {
 		index_t(surface_borders_width_*10.0f)
 	    );
             mesh_gfx_.draw_surface_borders();
+
+            // restore it so later passes (edges, volume wireframe) use the mesh color.
+            mesh_gfx_.set_mesh_color(mesh_color_.x, mesh_color_.y, mesh_color_.z);
         }
     }
 
