@@ -763,8 +763,14 @@ namespace {
 	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
 	}
 
+	typedef std::pair<index_t, index_t> mixed_vertex_id;
+
 	vec3 mixed_vertex(index_t v, index_t t) {
 	    return mix(atom_pos_[v], tet_dual_[t], shrink_factor_);
+	}
+
+	vec3 mixed_vertex(mixed_vertex_id id) {
+	    return mixed_vertex(id.first, id.second);
 	}
 
 	/***********************************************************************/
@@ -893,16 +899,10 @@ namespace {
 	/***********************************************************************/
 
 	void draw_shrunk_tet_facet(index_t t, index_t lf, bool flipped = false) {
-	    if(flipped) {
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 1),t));
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 0),t));
-	    } else {
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 0),t));
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 1),t));
-		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
-	    }
-	    ++nb_triangles_;
+	    index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
+	    index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
+	    index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
+	    draw_triangle({v1,t},{v2,t},{v3,t},flipped);
 	}
 
 	void draw_shrunk_power_facet(
@@ -918,16 +918,7 @@ namespace {
 		} else if(t2 == NO_INDEX) {
 		    t2 = t;
 		} else {
-		    if(flipped) {
-			glupVertex(mixed_vertex(v1,t));
-			glupVertex(mixed_vertex(v1,t2));
-			glupVertex(mixed_vertex(v1,t1));
-		    } else {
-			glupVertex(mixed_vertex(v1,t1));
-			glupVertex(mixed_vertex(v1,t2));
-			glupVertex(mixed_vertex(v1,t));
-		    }
-		    ++nb_triangles_;
+		    draw_triangle({v1,t1}, {v1,t2}, {v1,t}, flipped);
 		    t2 = t;
 		}
 		h = diagram_->next_halfedge_around_edge(h, v1, v2);
@@ -939,27 +930,33 @@ namespace {
 	    index_t v2 = diagram_->halfedge_v(h,1);
 	    index_t t1 = diagram_->halfedge_t(h);
 	    index_t t2 = diagram_->tet_adjacent(t1,diagram_->halfedge_lf(h));
-	    vec3 p11 = mixed_vertex(v1,t1);
-	    vec3 p12 = mixed_vertex(v1,t2);
-	    vec3 p21 = mixed_vertex(v2,t1);
-	    vec3 p22 = mixed_vertex(v2,t2);
-	    if(flipped) {
-		glupVertex(p11);
-		glupVertex(p21);
-		glupVertex(p22);
-		glupVertex(p11);
-		glupVertex(p22);
-		glupVertex(p12);
-	    } else  {
-		glupVertex(p22);
-		glupVertex(p21);
-		glupVertex(p11);
-		glupVertex(p12);
-		glupVertex(p22);
-		glupVertex(p11);
-	    }
-	    nb_triangles_ += 2;
+	    mixed_vertex_id V11{v1,t1};
+	    mixed_vertex_id V12{v1,t2};
+	    mixed_vertex_id V21{v2,t1};
+	    mixed_vertex_id V22{v2,t2};
+	    draw_triangle(V22,V21,V11,flipped);
+	    draw_triangle(V12,V22,V11,flipped);
 	}
+
+	/***********************************************************************/
+
+	void draw_triangle(
+	    mixed_vertex_id V1, mixed_vertex_id V2, mixed_vertex_id V3,
+	    bool flipped=false
+	) {
+	    if(flipped) {
+		glupVertex(mixed_vertex(V3));
+		glupVertex(mixed_vertex(V2));
+		glupVertex(mixed_vertex(V1));
+	    } else {
+		glupVertex(mixed_vertex(V1));
+		glupVertex(mixed_vertex(V2));
+		glupVertex(mixed_vertex(V3));
+	    }
+	    ++nb_triangles_;
+	}
+
+	/***********************************************************************/
 
 	void draw() {
 	    nb_triangles_ = 0;
