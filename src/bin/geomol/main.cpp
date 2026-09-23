@@ -444,7 +444,7 @@ namespace {
 	 * \retval the weighted circumcenter of \p t
 	 */
 	vec3 tet_dual(index_t t) const {
-	    geo_debug_assert(t < nb_tets);
+	    geo_debug_assert(t < nb_tets());
 	    geo_debug_assert(tet_is_finite(t));
 	    index_t v0 = tet_vertex(t,0);
 	    index_t v1 = tet_vertex(t,1);
@@ -614,6 +614,12 @@ namespace {
 
 	enum AtomColoring {
 	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
+	};
+	static constexpr bool FLIPPED = true;
+
+	enum MixedCellType {
+	    CELL_TYPE_SHRUNK_TET, CELL_TYPE_SHRUNK_VORO,
+	    CELL_TYPE_H1, CELL_TYPE_H2
 	};
 
 	Molecule() : diagram_(new PowerDiagram()) {
@@ -892,6 +898,11 @@ namespace {
 	/***********************************************************************/
 
 	void draw_shrunk_tet(index_t t) const {
+	    // TODO
+	    double R2 = 0;
+	    vec3 c = {0,0,0};
+	    draw_sphere_parameters(c,R2);
+
 	    draw_shrunk_tet_facet(t,0);
 	    draw_shrunk_tet_facet(t,1);
 	    draw_shrunk_tet_facet(t,2);
@@ -899,6 +910,11 @@ namespace {
 	}
 
 	void draw_shrunk_power_cell(index_t v) const {
+	    // TODO
+	    double R2 = 0;
+	    vec3 c = {0,0,0};
+	    draw_sphere_parameters(c,R2);
+
 	    for(index_t h: diagram_->incident_edges(v)) {
 		if(h == NO_INDEX) { break; }
 		draw_shrunk_power_facet(h);
@@ -906,6 +922,12 @@ namespace {
 	}
 
 	void draw_H1_cell(index_t h0) const {
+	    // TODO
+	    double R2 = 0;
+	    vec3 c = {0,0,0};
+	    vec3 axis = {0,0,0};
+	    draw_H1_parameters(c,axis,R2);
+
 	    index_t v1 = diagram_->halfedge_v(h0,0);
 	    index_t v2 = diagram_->halfedge_v(h0,1);
 	    index_t h = h0;
@@ -913,12 +935,18 @@ namespace {
 		draw_quad_facet(h);
 		h = diagram_->next_halfedge_around_edge(h,v1,v2);
 	    } while(h != h0);
-	    draw_shrunk_power_facet(h,true);
+	    draw_shrunk_power_facet(h,FLIPPED);
 	    h = diagram_->halfedge_flip(h);
-	    draw_shrunk_power_facet(h,true);
+	    draw_shrunk_power_facet(h,FLIPPED);
 	}
 
 	void draw_H2_cell(index_t t, index_t lf) const {
+	    // TODO
+	    double R2 = 0;
+	    vec3 c = {0,0,0};
+	    vec3 axis = {0,0,0};
+	    draw_H2_parameters(c,axis,R2);
+
 	    index_t lv1 = diagram_->tet_facet_lv(lf,0);
 	    index_t lv2 = diagram_->tet_facet_lv(lf,1);
 	    index_t lv3 = diagram_->tet_facet_lv(lf,2);
@@ -926,14 +954,14 @@ namespace {
 	    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
 	    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
 
-	    draw_quad_facet(h1,true);
-	    draw_quad_facet(h2,true);
-	    draw_quad_facet(h3,true);
+	    draw_quad_facet(h1,FLIPPED);
+	    draw_quad_facet(h2,FLIPPED);
+	    draw_quad_facet(h3,FLIPPED);
 
-	    draw_shrunk_tet_facet(t,lf,true);
+	    draw_shrunk_tet_facet(t,lf,FLIPPED);
 	    index_t t2 = diagram_->tet_adjacent(t,lf);
 	    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
-	    draw_shrunk_tet_facet(t2,lf2,true);
+	    draw_shrunk_tet_facet(t2,lf2,FLIPPED);
 	}
 
 	/***********************************************************************/
@@ -992,6 +1020,20 @@ namespace {
 		glupVertex(mixed_vertex(V3));
 	    }
 	    ++nb_triangles_;
+	}
+
+	void draw_sphere_parameters(vec3 c, double R2) const {
+	    glupTexCoord({c,R2});
+	}
+
+	void draw_H1_parameters(vec3 c, vec3 axis, double R2) const {
+	    glupTexCoord({c,R2});
+	    glupNormal3dv(axis.data());
+	}
+
+	void draw_H2_parameters(vec3 c, vec3 axis, double R2) const {
+	    glupTexCoord({c,R2});
+	    glupNormal3dv(axis.data());
 	}
 
 	/***********************************************************************/
