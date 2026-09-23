@@ -684,7 +684,7 @@ namespace {
 	 *  cells
 	 * \see close_cells()
 	 */
-	bool is_atom(index_t v) {
+	bool is_atom(index_t v) const {
 	    return v < nb_atoms_;
 	}
 
@@ -766,15 +766,19 @@ namespace {
 	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
 	}
 
+	/**
+	 * \brief identifier for a vertex of the mixed complex
+	 * \details first index is a primal vertex, second index is a tet
+	 */
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
 
-	vec3 mixed_vertex(mixed_vertex_id V) {
+	vec3 mixed_vertex(mixed_vertex_id V) const {
 	    return mix(atom_pos_[V.first], tet_dual_[V.second], shrink_factor_);
 	}
 
 	/***********************************************************************/
 
-	void draw_shrunk_tets() {
+	void draw_shrunk_tets() const {
 	    if(shrunk_tets_cache_.size() == 0) {
 		for(index_t t: diagram_->tets()) {
 		    if(
@@ -796,7 +800,7 @@ namespace {
 	    glupEnd();
 	}
 
-	void draw_shrunk_power_cells() {
+	void draw_shrunk_power_cells() const {
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
 	    glupBegin(GLUP_TRIANGLES);
@@ -806,7 +810,7 @@ namespace {
 	    glupEnd();
 	}
 
-	void draw_H1_cells() {
+	void draw_H1_cells() const {
 	    if(H1_cells_cache_.size() == 0) {
 		for(index_t v1: atoms()) {
 		    for(index_t h: diagram_->incident_edges(v1)) {
@@ -831,7 +835,7 @@ namespace {
 	    glupEnd();
 	}
 
-	void draw_H2_cells() {
+	void draw_H2_cells() const {
 	    if(H2_cells_cache_.size() == 0) {
 		for(index_t t: diagram_->tets()) {
 		    if(!diagram_->tet_is_finite(t)) {
@@ -866,14 +870,14 @@ namespace {
 
 	/***********************************************************************/
 
-	void draw_shrunk_tet(index_t t) {
+	void draw_shrunk_tet(index_t t) const {
 	    draw_shrunk_tet_facet(t,0);
 	    draw_shrunk_tet_facet(t,1);
 	    draw_shrunk_tet_facet(t,2);
 	    draw_shrunk_tet_facet(t,3);
 	}
 
-	void draw_shrunk_power_cell(index_t v) {
+	void draw_shrunk_power_cell(index_t v) const {
 	    for(index_t h: diagram_->incident_edges(v)) {
 		if(h == NO_INDEX) {
 		    break;
@@ -883,7 +887,7 @@ namespace {
 	    }
 	}
 
-	void draw_H1_cell(index_t h0) {
+	void draw_H1_cell(index_t h0) const {
 	    index_t v1 = diagram_->halfedge_v(h0,0);
 	    index_t v2 = diagram_->halfedge_v(h0,1);
 	    index_t h = h0;
@@ -896,7 +900,7 @@ namespace {
 	    draw_shrunk_power_facet(h, v2, v1, true);
 	}
 
-	void draw_H2_cell(index_t t, index_t lf) {
+	void draw_H2_cell(index_t t, index_t lf) const {
 	    index_t lv1 = diagram_->tet_facet_lv(lf,0);
 	    index_t lv2 = diagram_->tet_facet_lv(lf,1);
 	    index_t lv3 = diagram_->tet_facet_lv(lf,2);
@@ -916,7 +920,9 @@ namespace {
 
 	/***********************************************************************/
 
-	void draw_shrunk_tet_facet(index_t t, index_t lf, bool flipped = false) {
+	void draw_shrunk_tet_facet(
+	    index_t t, index_t lf, bool flipped = false
+	) const {
 	    index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
 	    index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
 	    index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
@@ -925,7 +931,7 @@ namespace {
 
 	void draw_shrunk_power_facet(
 	    index_t h0, index_t v1, index_t v2, bool flipped = false
-	) {
+	) const {
 	    index_t h = h0;
 	    index_t t1 = NO_INDEX;
 	    index_t t2 = NO_INDEX;
@@ -943,7 +949,7 @@ namespace {
 	    } while(h != h0);
 	}
 
-	void draw_quad_facet(index_t h, bool flipped = false) {
+	void draw_quad_facet(index_t h, bool flipped = false) const {
 	    index_t v1 = diagram_->halfedge_v(h,0);
 	    index_t v2 = diagram_->halfedge_v(h,1);
 	    index_t t1 = diagram_->halfedge_t(h);
@@ -961,7 +967,7 @@ namespace {
 	void draw_triangle(
 	    mixed_vertex_id V1, mixed_vertex_id V2, mixed_vertex_id V3,
 	    bool flipped=false
-	) {
+	) const {
 	    if(flipped) {
 		glupVertex(mixed_vertex(V3));
 		glupVertex(mixed_vertex(V2));
@@ -1166,8 +1172,8 @@ namespace {
 	mutable vector<index_t> shrunk_tets_cache_; // tet ids
 	mutable vector<index_t> H1_cells_cache_; // halfedge ids
 	mutable vector<index_t> H2_cells_cache_; // halfedge ids
+	mutable index_t nb_triangles_; // number of drawn triangles
 
-	index_t nb_triangles_; // number of drawn triangles
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	int atom_size_ = 10;
