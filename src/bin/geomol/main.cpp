@@ -54,6 +54,27 @@ namespace {
 
 	/**
 	 * \brief PowerDiagram constructor
+	 * \details Under the hood, uses PeriodicDelaunay3d,
+	 *   that does periodic-or-not (here not) weighted-or-not (here weighted)
+	 *   triangulations.
+	 *   PowerDiagram has functions to navigate the triangulation based on
+	 *   halfedges.
+	 *   Each tetrahedron has 12 halfedges. An halfedge is a triplet (T,t,e)
+	 *   encoded in an index_t, where:
+	 *      - T is a global tetrahedron index
+	 *      - t in {0,1,2,3} is a local facet index in the tetrahedron
+	 *      - e in {0,1,2} is a local edge index in the facet
+	 *   PowerDiagram also has a function compute_skeleton() that computes
+	 *   the Delaunauy skeleton, that is, for each vertex v, the list of
+	 *   halfedges emanating from v. Once compute_skeleton() has been called,
+	 *   the Delaunay skeleton can be traversed as follows:
+	 *   \code
+	 *      for(index_t h: incident_edges(v)) {
+	 *         if(h != NO_INDEX) {
+	 *            do something with h
+	 *         }
+	 *      }
+	 *   \endcode
 	 */
 	PowerDiagram() : PeriodicDelaunay3d(false) {
 	    set_keeps_infinite(true);
@@ -338,7 +359,7 @@ namespace {
 	    if(max_v == NO_INDEX) {
 		max_v = nb_vertices();
 	    }
-	    skel_ptr_.assign(max_v+1, 0);
+	    skel_ptr_.assign(max_v+1, 0); // +1 because there is a "sentry"
 	    // Step 1: compute number of tets incident to each vertex
 	    for(index_t t=0; t<nb_tets(); ++t) {
 		for(index_t lv=0; lv<4; ++lv) {
@@ -390,66 +411,23 @@ namespace {
 	 *  to a vertex
 	 * \param v a global vertex index, smaller than the parameter max_v
 	 *   passed compute_skeleton()
-	 * \details the list of halfedges incident to vertex v is traversed as
-	 *  follows. Note the NO_INDEX test. It is because sometimes more
-	 *  elements may be allocated in the list than needed.
+	 * \return a sequence of halfedges
+	 * \details the list of incident edges can be traversed as follows:
 	 * \code
-	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
-	 *       h = skel_h(k);
-	 *       if(h != NO_INDEX) {
-	 *          do something with h
-	 *       }
-	 *    }
+	 *   for(index_t h: incident_edges(v)) {
+	 *      if(h != NO_INDEX) {
+	 *         do something with h
+	 *      }
+	 *   }
 	 * \endcode
-	 * \see skel_end(), skel_h()
 	 */
-	index_t skel_begin(index_t v) const {
-	    geo_debug_assert(v+1 < skel_ptr_.size());
-	    return skel_ptr_[v];
-	}
-
-	/**
-	 * \short gets one position past the last element of the list of
-	 *  halfedges incident to a vertex
-	 * \param v a global vertex index, smaller than the parameter max_v
-	 *   passed compute_skeleton()
-	 * \details the list of halfedges incident to vertex v is traversed as
-	 *  follows. Note the NO_INDEX test. It is because sometimes more
-	 *  elements may be allocated in the list than needed.
-	 * \code
-	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
-	 *       h = skel_h(k);
-	 *       if(h != NO_INDEX) {
-	 *          do something with h
-	 *       }
-	 *    }
-	 * \endcode
-	 * \see skel_begin(), skel_h()
-	 */
-	index_t skel_end(index_t v) const {
-	    geo_debug_assert(v+1 < skel_ptr_.size());
-	    return skel_ptr_[v+1];
-	}
-
-	/**
-	 * \short gets an element of the list of halfedges incident to a vertex
-	 * \param k the index of the element
-	 * \details the list of halfedges incident to vertex v is traversed as
-	 *  follows. Note the NO_INDEX test. It is because sometimes more
-	 *  elements may be allocated in the list than needed.
-	 * \code
-	 *    for(index_t k = skel_begin(v); k < skel_end(v); ++k) {
-	 *       h = skel_h(k);
-	 *       if(h != NO_INDEX) {
-	 *          do something with h
-	 *       }
-	 *    }
-	 * \endcode
-	 * \see skel_begin(), skel_end()
-	 */
-	index_t skel_h(index_t k) const {
-	    geo_debug_assert(k < skel_h_.size());
-	    return skel_h_[k];
+	auto incident_edges(index_t v) const {
+	    return transform_range(
+		index_range(skel_begin(v), skel_end(v)),
+		[this](index_t k)->index_t {
+		    return skel_h(k);
+		}
+	    );
 	}
 
     protected:
@@ -501,6 +479,39 @@ namespace {
 	    geo_assert_not_reached;
 	}
 
+	/**
+	 * \short gets the first element of the list of halfedges incident
+	 *  to a vertex
+	 * \param v a global vertex index, smaller than the parameter max_v
+	 *   passed compute_skeleton()
+	 * \see skel_end(), skel_h()
+	 */
+	index_t skel_begin(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v];
+	}
+
+	/**
+	 * \short gets one position past the last element of the list of
+	 *  halfedges incident to a vertex
+	 * \param v a global vertex index, smaller than the parameter max_v
+	 *   passed compute_skeleton()
+	 * \see skel_begin(), skel_h()
+	 */
+	index_t skel_end(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v+1];
+	}
+
+	/**
+	 * \short gets an element of the list of halfedges incident to a vertex
+	 * \param k the index of the element
+	 * \see skel_begin(), skel_end()
+	 */
+	index_t skel_h(index_t k) const {
+	    geo_debug_assert(k < skel_h_.size());
+	    return skel_h_[k];
+	}
 
     private:
 
@@ -862,6 +873,14 @@ namespace {
 
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+		for(index_t h: diagram_->incident_edges(v1)) {
+		    if(h == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h,1);
+		    draw_shrunk_power_facet(h,v1,v2);
+		}
+		/*
 		index_t k1 = diagram_->skel_begin(v1);
 		index_t k2 = diagram_->skel_end(v1);
 		for(index_t k = k1; k < k2; ++k) {
@@ -872,6 +891,7 @@ namespace {
 		    index_t v2 = diagram_->halfedge_v(h,1);
 		    draw_shrunk_power_facet(h,v1,v2);
 		}
+		*/
 	    }
 	    glupEnd();
 	}
@@ -883,6 +903,26 @@ namespace {
 
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+		for(index_t h0: diagram_->incident_edges(v1)) {
+		    if(h0 == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h0,1);
+		    if(!is_atom(v2) || v1 > v2) {
+			continue;
+		    }
+		    index_t h = h0;
+		    do {
+			draw_quad_facet(h);
+			h = diagram_->next_halfedge_around_edge(h,v1,v2);
+		    } while(h != h0);
+
+		    draw_shrunk_power_facet(h, v1, v2, true);
+		    h = diagram_->halfedge_flip(h);
+		    draw_shrunk_power_facet(h, v2, v1, true);
+		}
+
+		/*
 		index_t k1 = diagram_->skel_begin(v1);
 		index_t k2 = diagram_->skel_end(v1);
 		for(index_t k = k1; k < k2; ++k) {
@@ -904,6 +944,7 @@ namespace {
 		    h = diagram_->halfedge_flip(h);
 		    draw_shrunk_power_facet(h, v2, v1, true);
 		}
+		*/
 	    }
 	    glupEnd();
 	}
