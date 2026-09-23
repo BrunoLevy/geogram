@@ -106,7 +106,8 @@ namespace {
 		tet_vertex(t,0) == NO_INDEX ||
 		tet_vertex(t,1) == NO_INDEX ||
 		tet_vertex(t,2) == NO_INDEX ||
-		tet_vertex(t,3) == NO_INDEX );
+		tet_vertex(t,3) == NO_INDEX
+	    );
 	}
 
 	/**
@@ -179,7 +180,7 @@ namespace {
 	 * \param[in] lv a local vertex index in the facet, in 0 .. 2
 	 * \return the local vertex index in the tetrahedron, in 0 .. 3
 	 */
-	static index_t tet_facet_lv(index_t lf, index_t lv) {
+	static constexpr index_t tet_facet_lv(index_t lf, index_t lv) {
 	    geo_debug_assert(lf < 4);
 	    geo_debug_assert(lv < 3);
 	    return index_t(tet_facet_vertex_[lf][lv]);
@@ -361,7 +362,7 @@ namespace {
 	 * \param[in] max_v one position past the maximum vertex index
 	 *  for which the Delaunay skeleton should be stored, or NO_INDEX
 	 *  if it should be stored for all vertices
-	 * \see skel_begin(), skel_end(), skel_h()
+	 * \see incident_edges(), skel_begin(), skel_end(), skel_h()
 	 */
 	void compute_skeleton(index_t max_v = NO_INDEX) {
 	    if(max_v == NO_INDEX) {
@@ -631,8 +632,6 @@ namespace {
 		return false;
 	    }
 	    nb_atoms_ = M.vertices.nb();
-	    nb_atoms_reserve_ = 2*nb_atoms_;
-	    atom_pos_.reserve(nb_atoms_reserve_);
 	    atom_pos_.resize(nb_atoms_);
 	    atom_type_.resize(nb_atoms_);
 	    atom_chain_.resize(nb_atoms_);
@@ -669,7 +668,6 @@ namespace {
 	}
 
 	void update() {
-	    atom_weight_.reserve(nb_atoms_reserve_);
 	    atom_weight_.resize(nb_atoms());
 	    r_min_ =  Numeric::max_float64();
 	    r_max_ = -Numeric::max_float64();
@@ -737,6 +735,7 @@ namespace {
 	 */
 	bool close_cells() {
 	    bool changed = false;
+	    vector<vec3> new_points;
 	    for(index_t t: diagram_->tets()) {
 		if(diagram_->tet_is_finite(t)) {
 		    continue;
@@ -766,8 +765,12 @@ namespace {
 			    vec3 p = cc - (w/w1)*(p1-cc)
 				        - (w/w2)*(p2-cc)
 				        - (w/w3)*(p3-cc);
-			    atom_pos_.push_back(p);
-			    atom_weight_.push_back(w);
+			    // Do not add points directly, becase this may
+			    // cause atom_pos_ reallocation, and wreck
+			    // diagram_ (that keeps a pointer to it), so we
+			    // store the new points in a temporary vector
+			    // instead.
+			    new_points.push_back(p);
 			    changed = true;
 			}
 			break;
@@ -775,11 +778,17 @@ namespace {
 		}
 	    }
 	    if(changed) {
+		for(vec3 p: new_points) {
+		    double w = weight_factor_ * r_min_ / 5.0;
+		    atom_pos_.push_back(p);
+		    atom_weight_.push_back(w);
+		}
 		Logger::out("close") << "Adding "
 				     << atom_pos_.size() - nb_atoms()
 				     << " points" << std::endl;
 
 		diagram_ = new PowerDiagram();
+		geo_debug_assert(atom_weight_.size() == atom_pos_.size());
 		diagram_->set_vertices(atom_pos_.size(), atom_pos_[0].data());
 		diagram_->set_weights(atom_weight_.data());
 		diagram_->compute();
@@ -899,8 +908,8 @@ namespace {
 
 	void draw_shrunk_tet(index_t t) const {
 	    // TODO
-	    double R2 = 0;
-	    vec3 c = {0,0,0};
+	    vec3 c = tet_dual_[t];
+	    double R2 = 0.0;
 	    draw_sphere_parameters(c,R2);
 
 	    draw_shrunk_tet_facet(t,0);
@@ -947,9 +956,9 @@ namespace {
 	    vec3 axis = {0,0,0};
 	    draw_H2_parameters(c,axis,R2);
 
-	    index_t lv1 = diagram_->tet_facet_lv(lf,0);
-	    index_t lv2 = diagram_->tet_facet_lv(lf,1);
-	    index_t lv3 = diagram_->tet_facet_lv(lf,2);
+	    index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
+	    index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
+	    index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
 	    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
 	    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
 	    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
@@ -1157,7 +1166,6 @@ namespace {
 	}
 
     private:
-	index_t nb_atoms_reserve_;
 	index_t nb_atoms_;
 	vector<vec3> atom_pos_;
 	vector<char> atom_type_;
