@@ -437,6 +437,40 @@ namespace {
 	    );
 	}
 
+	/**
+	 * Computes the dual of a tetrahedron
+	 * \param[in] t a tetrahedron
+	 * \pre tet_is_finite(t)
+	 * \retval the weighted circumcenter of \p t
+	 */
+	vec3 tet_dual(index_t t) const {
+	    geo_debug_assert(t < nb_tets);
+	    geo_debug_assert(tet_is_finite(t));
+	    index_t v0 = tet_vertex(t,0);
+	    index_t v1 = tet_vertex(t,1);
+	    index_t v2 = tet_vertex(t,2);
+	    index_t v3 = tet_vertex(t,3);
+
+	    vec3 p0 = vertex(v0);
+	    vec3 p1 = vertex(v1);
+	    vec3 p2 = vertex(v2);
+	    vec3 p3 = vertex(v3);
+
+	    double h0 = length2(p0) - weight(v0);
+	    double h1 = length2(p1) - weight(v1);
+	    double h2 = length2(p2) - weight(v2);
+	    double h3 = length2(p3) - weight(v3);
+
+	    mat3 M = {
+		{p1.x-p0.x, p1.y-p0.y, p1.z-p0.z},
+		{p2.x-p0.x, p2.y-p0.y, p2.z-p0.z},
+		{p3.x-p0.x, p3.y-p0.y, p3.z-p0.z}
+	    };
+
+	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
+	}
+
+
     protected:
         /**
          * \brief Finds the index of an integer in an array of four integers.
@@ -664,7 +698,7 @@ namespace {
 		parallel_for(
 		    0, diagram_->nb_tets(), [this](index_t t) {
 			if(diagram_->tet_is_finite(t)) {
-			    tet_dual_[t] = dual(t);
+			    tet_dual_[t] = diagram_->tet_dual(t);
 			}
 		    }
 		);
@@ -688,6 +722,13 @@ namespace {
 	    return v < nb_atoms_;
 	}
 
+	/**
+	 * \brief Inserts additional points in the diagram to close all
+	 *  the cells incident to real atoms
+	 * \details One needs to call the function until it returns false
+	 * \retval true if the diagram was changed
+	 * \retval false if all the cells are closed already
+	 */
 	bool close_cells() {
 	    bool changed = false;
 	    for(index_t t: diagram_->tets()) {
@@ -740,32 +781,6 @@ namespace {
 	    return changed;
 	}
 
-	vec3 dual(index_t t) const {
-	    geo_debug_assert(diagram_->tet_is_finite(t));
-	    index_t v0 = diagram_->tet_vertex(t,0);
-	    index_t v1 = diagram_->tet_vertex(t,1);
-	    index_t v2 = diagram_->tet_vertex(t,2);
-	    index_t v3 = diagram_->tet_vertex(t,3);
-
-	    vec3 p0 = diagram_->vertex(v0);
-	    vec3 p1 = diagram_->vertex(v1);
-	    vec3 p2 = diagram_->vertex(v2);
-	    vec3 p3 = diagram_->vertex(v3);
-
-	    double h0 = length2(p0)-diagram_->weight(v0);
-	    double h1 = length2(p1)-diagram_->weight(v1);
-	    double h2 = length2(p2)-diagram_->weight(v2);
-	    double h3 = length2(p3)-diagram_->weight(v3);
-
-	    mat3 M = {
-		{p1.x-p0.x, p1.y-p0.y, p1.z-p0.z},
-		{p2.x-p0.x, p2.y-p0.y, p2.z-p0.z},
-		{p3.x-p0.x, p3.y-p0.y, p3.z-p0.z}
-	    };
-
-	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
-	}
-
 	/**
 	 * \brief identifier for a vertex of the mixed complex
 	 * \details first index is a primal vertex, second index is a tet
@@ -779,6 +794,7 @@ namespace {
 	/***********************************************************************/
 
 	void draw_shrunk_tets() const {
+	    // Select the tetrahedra incident to four real atoms
 	    if(shrunk_tets_cache_.size() == 0) {
 		for(index_t t: diagram_->tets()) {
 		    if(
@@ -791,6 +807,7 @@ namespace {
 		    }
 		}
 	    }
+
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
 	    glupBegin(GLUP_TRIANGLES);
@@ -811,6 +828,8 @@ namespace {
 	}
 
 	void draw_H1_cells() const {
+	    // Select the edges incident to two real atoms,
+	    // and keep only one halfedge per pair (v1 < v2)
 	    if(H1_cells_cache_.size() == 0) {
 		for(index_t v1: atoms()) {
 		    for(index_t h: diagram_->incident_edges(v1)) {
@@ -836,24 +855,26 @@ namespace {
 	}
 
 	void draw_H2_cells() const {
+	    // Select the faces incident to three real atoms,
+	    // and keep only one facet in each pair (t1 < t2)
 	    if(H2_cells_cache_.size() == 0) {
-		for(index_t t: diagram_->tets()) {
-		    if(!diagram_->tet_is_finite(t)) {
+		for(index_t t1: diagram_->tets()) {
+		    if(!diagram_->tet_is_finite(t1)) {
 			continue;
 		    }
 		    for(index_t lf=0; lf<4; ++lf) {
-			index_t t2 = diagram_->tet_adjacent(t, lf);
-			if(t2 < t) {
+			index_t t2 = diagram_->tet_adjacent(t1, lf);
+			if(t2 < t1) {
 			    continue;
 			}
-			index_t v1 = diagram_->tet_facet_vertex(t, lf, 0);
-			index_t v2 = diagram_->tet_facet_vertex(t, lf, 1);
-			index_t v3 = diagram_->tet_facet_vertex(t, lf, 2);
+			index_t v1 = diagram_->tet_facet_vertex(t1, lf, 0);
+			index_t v2 = diagram_->tet_facet_vertex(t1, lf, 1);
+			index_t v3 = diagram_->tet_facet_vertex(t1, lf, 2);
 			if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
 			    continue;
 			}
 			H2_cells_cache_.push_back(
-			    diagram_->make_halfedge_from_t_lf_le(t, lf, 0)
+			    diagram_->make_halfedge_from_t_lf_le(t1, lf, 0)
 			);
 		    }
 		}
@@ -879,11 +900,8 @@ namespace {
 
 	void draw_shrunk_power_cell(index_t v) const {
 	    for(index_t h: diagram_->incident_edges(v)) {
-		if(h == NO_INDEX) {
-		    break;
-		}
-		index_t v2 = diagram_->halfedge_v(h,1);
-		draw_shrunk_power_facet(h,v,v2);
+		if(h == NO_INDEX) { break; }
+		draw_shrunk_power_facet(h);
 	    }
 	}
 
@@ -895,9 +913,9 @@ namespace {
 		draw_quad_facet(h);
 		h = diagram_->next_halfedge_around_edge(h,v1,v2);
 	    } while(h != h0);
-	    draw_shrunk_power_facet(h, v1, v2, true);
+	    draw_shrunk_power_facet(h,true);
 	    h = diagram_->halfedge_flip(h);
-	    draw_shrunk_power_facet(h, v2, v1, true);
+	    draw_shrunk_power_facet(h,true);
 	}
 
 	void draw_H2_cell(index_t t, index_t lf) const {
@@ -929,9 +947,9 @@ namespace {
 	    draw_triangle({v1,t},{v2,t},{v3,t},flipped);
 	}
 
-	void draw_shrunk_power_facet(
-	    index_t h0, index_t v1, index_t v2, bool flipped = false
-	) const {
+	void draw_shrunk_power_facet(index_t h0, bool flipped = false) const {
+	    index_t v1 = diagram_->halfedge_v(h0,0);
+	    index_t v2 = diagram_->halfedge_v(h0,1);
 	    index_t h = h0;
 	    index_t t1 = NO_INDEX;
 	    index_t t2 = NO_INDEX;
@@ -954,12 +972,8 @@ namespace {
 	    index_t v2 = diagram_->halfedge_v(h,1);
 	    index_t t1 = diagram_->halfedge_t(h);
 	    index_t t2 = diagram_->tet_adjacent(t1,diagram_->halfedge_lf(h));
-	    mixed_vertex_id V11{v1,t1};
-	    mixed_vertex_id V12{v1,t2};
-	    mixed_vertex_id V21{v2,t1};
-	    mixed_vertex_id V22{v2,t2};
-	    draw_triangle(V22,V21,V11,flipped);
-	    draw_triangle(V12,V22,V11,flipped);
+	    draw_triangle( {v2,t2}, {v2,t1}, {v1,t1}, flipped);
+	    draw_triangle( {v1,t2}, {v2,t2}, {v1,t1}, flipped);
 	}
 
 	/***********************************************************************/
@@ -985,70 +999,15 @@ namespace {
 	void draw() {
 	    nb_triangles_ = 0;
 	    draw_atoms();
+
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
-
 	    draw_shrunk_tets();
 	    draw_shrunk_power_cells();
 	    draw_H1_cells();
 	    draw_H2_cells();
-
 	    glDisable(GL_CULL_FACE);
-	    // draw_power_vertices();
-	    // draw_additional_vertices();
-	    // draw_Delaunay();
-
 	    // std::cerr << nb_triangles_ << " triangles" << std::endl;
-	}
-
-	void draw_Delaunay() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetMeshWidth(2.0);
-	    glupSetColor3d(GLUP_MESH_COLOR, 0.5, 0.5, 0.5);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
-	    glupDisable(GLUP_LIGHTING);
-	    glupBegin(GLUP_LINES);
-	    for(index_t t: diagram_->tets()) {
-		for(index_t lv1=0; lv1<4; ++lv1) {
-		    index_t v1 = diagram_->tet_vertex(t,lv1);
-		    if(v1 == NO_INDEX) {
-			continue;
-		    }
-		    for(index_t lv2=lv1+1; lv2<4; ++lv2) {
-			index_t v2 = diagram_->tet_vertex(t,lv2);
-			if(v2 == NO_INDEX) {
-			    continue;
-			}
-			glupVertex3dv(atom_pos_[v1].data());
-			glupVertex3dv(atom_pos_[v2].data());
-		    }
-		}
-	    }
-	    glupEnd();
-	    glupEnable(GLUP_LIGHTING);
-	}
-
-	void draw_power_vertices() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
-	    glupBegin(GLUP_SPHERES);
-	    for(index_t t: diagram_->tets()) {
-		if(!diagram_->tet_is_finite(t)) {
-		    continue;
-		}
-		glupVertex(vec4(tet_dual_[t], 1.0));
-	    }
-	    glupEnd();
-	}
-
-	void draw_additional_vertices() {
-	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
-	    glupBegin(GLUP_SPHERES);
-	    for(index_t v=nb_atoms_; v<atom_pos_.size(); ++v) {
-		glupVertex(vec4(atom_pos_[v], 2.0));
-	    }
-	    glupEnd();
 	}
 
 
