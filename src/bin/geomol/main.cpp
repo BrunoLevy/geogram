@@ -68,12 +68,25 @@ namespace {
 	}
 
 	/**
+	 * \brief tests whether a tetrahedron is infinite
+	 * \retval true if one of the vertices is the vertex at infinity
+	 * \retval false if all the vertices are real vertices
+	 */
+	bool tet_is_infinite(index_t t) const {
+	    return (
+		tet_vertex(t,0) == NO_INDEX ||
+		tet_vertex(t,1) == NO_INDEX ||
+		tet_vertex(t,2) == NO_INDEX ||
+		tet_vertex(t,3) == NO_INDEX );
+	}
+
+	/**
 	 * \brief tests whether a tetrahedron is finite
 	 * \retval true if all the vertices of this tetrahedron are real vertices
 	 * \retval false if one of the vertices is the vertex at infinity
 	 */
 	bool tet_is_finite(index_t t) const {
-	    return cell_is_finite(t);
+	    return !tet_is_infinite(t);
 	}
 
 	/**
@@ -84,7 +97,11 @@ namespace {
 	 *  tetrahedron \p t, or NO_INDEX if it is the vertex at infinity
 	 */
 	index_t tet_vertex(index_t t, index_t lv) const {
-	    return cell_vertex(t,lv);
+	    // what follows is an optimized version of
+	    //   return cell_vertex(t,lv);
+	    geo_debug_assert(t < nb_tets());
+	    geo_debug_assert(lv < 4);
+	    return cell_to_v_[t*4+lv];
 	}
 
 	/**
@@ -94,7 +111,11 @@ namespace {
 	 * \return the tetrahedron adjacent to \p t accross facet \p lf
 	 */
 	index_t tet_adjacent(index_t t, index_t lf) const {
-	    return cell_adjacent(t,lf);
+	    // what follows is an optimized version of
+	    //   return cell_adjacent(t,lf);
+	    geo_debug_assert(t < nb_tets());
+	    geo_debug_assert(lf < 4);
+	    return cell_to_cell_[t*4+lf];
 	}
 
 	/**
@@ -105,29 +126,21 @@ namespace {
 	 * \return lv such that tet_vertex(t,lv) == v
 	 */
 	index_t find_tet_vertex(index_t t, index_t v) const {
-	    for(index_t lv=0; lv<4; ++lv) {
-		if(tet_vertex(t,lv) == v) {
-		    return lv;
-		}
-	    }
-	    geo_assert_not_reached;
+            const index_t* T = &(cell_to_v_[4 * t]);
+            return find_4(T,v);
 	}
 
 	/**
 	 * \brief Finds the local facet index accross which a tetrahedron
 	 *  is adjacent to another one
-	 * \pre \p t is adjacent to \p t2
-	 * \param[in] t a tetrahedron, in 0 .. nb_tets() - 1
+	 * \pre \p t1 is adjacent to \p t2
+	 * \param[in] t1 a tetrahedron, in 0 .. nb_tets() - 1
 	 * \param[in] t2 a tetrahedron, in 0 .. nb_tets() - 1
-	 * \return lf such that tet_adjacent(t,lf) == t2
+	 * \return lf such that tet_adjacent(t1,lf) == t2
 	 */
-	index_t find_tet_adjacent(index_t t, index_t t2) const {
-	    for(index_t lf=0; lf<4; ++lf) {
-		if(tet_adjacent(t,lf) == t2) {
-		    return lf;
-		}
-	    }
-	    geo_assert_not_reached;
+	index_t find_tet_adjacent(index_t t1, index_t t2) const {
+            const index_t* T = &(cell_to_cell_[4 * t1]);
+            return find_4(T,t2);
 	}
 
 	/**
@@ -440,6 +453,34 @@ namespace {
 	}
 
     protected:
+        /**
+         * \brief Finds the index of an integer in an array of four integers.
+         * \param[in] T a const pointer to an array of four integers
+         * \param[in] v the integer to retrieve in \p T
+         * \return the index (0,1,2 or 3) of \p v in \p T
+         * \pre The four entries of \p T are different and one of them is
+         *  equal to \p v.
+         */
+        static index_t find_4(const index_t* T, index_t v) {
+            // The following expression is 10% faster than using
+            // if() statements. This uses the C++ norm, that
+            // ensures that the 'true' boolean value converted to
+            // an int is always 1. With most compilers, this avoids
+            // generating branching instructions.
+            // Thank to Laurent Alonso for this idea.
+            // Note: Laurent also has this version:
+            //    (T[0] != v)+(T[2]==v)+2*(T[3]==v)
+            // that avoids a *3 multiply, but it is not faster in
+            // practice.
+            index_t result = index_t(
+                (T[1] == v) | ((T[2] == v) * 2) | ((T[3] == v) * 3)
+            );
+            // Sanity check, important if it was T[0], not explicitly
+            // tested (detects input that does not meet the precondition).
+            geo_debug_assert(T[result] == v);
+            return result;
+        }
+
 	/**
 	 * \brief Inserts a halfedge in the Delaunay skeleton, utility function
 	 *  for compute_skel()
