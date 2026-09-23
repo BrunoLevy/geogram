@@ -70,7 +70,7 @@ namespace {
 	 *   the Delaunay skeleton can be traversed as follows:
 	 *   \code
 	 *      for(index_t h: incident_edges(v)) {
-	 *         if(h != NO_INDEX) {
+	 *         if(h != NO_INDEX) { // there can be empty slots in the list
 	 *            do something with h
 	 *         }
 	 *      }
@@ -86,6 +86,14 @@ namespace {
 	 */
 	index_t nb_tets() const {
 	    return nb_cells();
+	}
+
+	index_range tets() const {
+	    return index_range(0, nb_tets());
+	}
+
+	index_range vertices() const {
+	    return index_range(0, nb_vertices());
 	}
 
 	/**
@@ -389,7 +397,7 @@ namespace {
 	    skel_h_.assign(skel_ptr_[max_v], NO_INDEX);
 	    // Step 4: insert all halfedges in skel_h_, keeping a single
 	    // halfedge per oriented edge (see insert_in_skel()).
-	    for(index_t t=0; t<nb_tets(); ++t) {
+	    for(index_t t: tets()) {
 		for(index_t lv1=0; lv1<4; ++lv1) {
 		    for(index_t lv2=0; lv2<4; ++lv2) {
 			if(lv1 == lv2) {
@@ -415,7 +423,7 @@ namespace {
 	 * \details the list of incident edges can be traversed as follows:
 	 * \code
 	 *   for(index_t h: incident_edges(v)) {
-	 *      if(h != NO_INDEX) {
+	 *      if(h != NO_INDEX) { // there can be empty slots in the list
 	 *         do something with h
 	 *      }
 	 *   }
@@ -617,6 +625,10 @@ namespace {
 	    return nb_atoms_;
 	}
 
+	index_range atoms() const {
+	    return index_range(0, nb_atoms());
+	}
+
 	void update() {
 	    atom_weight_.reserve(nb_atoms_reserve_);
 	    atom_weight_.resize(nb_atoms());
@@ -674,10 +686,9 @@ namespace {
 	    return v < nb_atoms_;
 	}
 
-
 	bool close_cells() {
 	    bool changed = false;
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+	    for(index_t t: diagram_->tets()) {
 		if(diagram_->tet_is_finite(t)) {
 		    continue;
 		}
@@ -826,7 +837,6 @@ namespace {
 	    nb_triangles_ += 2;
 	}
 
-
 	void draw() {
 	    nb_triangles_ = 0;
 	    draw_atoms();
@@ -850,7 +860,7 @@ namespace {
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+	    for(index_t t: diagram_->tets()) {
 		if(
 		    is_atom(diagram_->tet_vertex(t,0)) &&
 		    is_atom(diagram_->tet_vertex(t,1)) &&
@@ -872,7 +882,7 @@ namespace {
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+	    for(index_t v1: atoms()) {
 		for(index_t h: diagram_->incident_edges(v1)) {
 		    if(h == NO_INDEX) {
 			break;
@@ -880,29 +890,16 @@ namespace {
 		    index_t v2 = diagram_->halfedge_v(h,1);
 		    draw_shrunk_power_facet(h,v1,v2);
 		}
-		/*
-		index_t k1 = diagram_->skel_begin(v1);
-		index_t k2 = diagram_->skel_end(v1);
-		for(index_t k = k1; k < k2; ++k) {
-		    index_t h = diagram_->skel_h(k);
-		    if(h == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h,1);
-		    draw_shrunk_power_facet(h,v1,v2);
-		}
-		*/
 	    }
 	    glupEnd();
 	}
 
 	void draw_H1_cells() {
-
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+	    for(index_t v1: atoms()) {
 		for(index_t h0: diagram_->incident_edges(v1)) {
 		    if(h0 == NO_INDEX) {
 			break;
@@ -921,30 +918,6 @@ namespace {
 		    h = diagram_->halfedge_flip(h);
 		    draw_shrunk_power_facet(h, v2, v1, true);
 		}
-
-		/*
-		index_t k1 = diagram_->skel_begin(v1);
-		index_t k2 = diagram_->skel_end(v1);
-		for(index_t k = k1; k < k2; ++k) {
-		    index_t h0 = diagram_->skel_h(k);
-		    if(h0 == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h0,1);
-		    if(!is_atom(v2) || v1 > v2) {
-			continue;
-		    }
-		    index_t h = h0;
-		    do {
-			draw_quad_facet(h);
-			h = diagram_->next_halfedge_around_edge(h,v1,v2);
-		    } while(h != h0);
-
-		    draw_shrunk_power_facet(h, v1, v2, true);
-		    h = diagram_->halfedge_flip(h);
-		    draw_shrunk_power_facet(h, v2, v1, true);
-		}
-		*/
 	    }
 	    glupEnd();
 	}
@@ -954,7 +927,7 @@ namespace {
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+	    for(index_t t: diagram_->tets()) {
 		if(!diagram_->tet_is_finite(t)) {
 		    continue;
 		}
@@ -998,7 +971,7 @@ namespace {
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
 	    glupDisable(GLUP_LIGHTING);
 	    glupBegin(GLUP_LINES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+	    for(index_t t: diagram_->tets()) {
 		for(index_t lv1=0; lv1<4; ++lv1) {
 		    index_t v1 = diagram_->tet_vertex(t,lv1);
 		    if(v1 == NO_INDEX) {
@@ -1022,7 +995,7 @@ namespace {
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
 	    glupBegin(GLUP_SPHERES);
-	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+	    for(index_t t: diagram_->tets()) {
 		if(!diagram_->tet_is_finite(t)) {
 		    continue;
 		}
@@ -1055,7 +1028,7 @@ namespace {
 		glupEnable(GLUP_VERTEX_COLORS);
 	    }
 	    glupBegin(GLUP_SPHERES);
-	    for(index_t v=0; v<nb_atoms(); ++v) {
+	    for(index_t v: atoms()) {
 		char t = atom_type_[v];
 		double R = atom_radius(t);
 		vec3 color = atom_color(t);
