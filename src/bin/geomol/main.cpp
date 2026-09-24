@@ -805,7 +805,9 @@ namespace {
 			    vec3 g = (1.0/3.0)*(p1+p2+p3);
 			    vec3 N = normalize(cross(p3-p1,p2-p1));
 			    double Ag = distance2(g,p1);
-			    double Acc = 4.0 * r_max_ * r_max_ / shrink_factor_;
+			    double Acc = geo_sqr(
+				4.0 * r_max_ * r_max_ / shrink_factor_
+			    );
 			    while(Acc < Ag) {
 				Acc += 0.5;
 			    }
@@ -874,7 +876,7 @@ namespace {
 	    }
 
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_3_.data());
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t: shrunk_tets_cache_) {
 		draw_shrunk_tet(t);
@@ -884,7 +886,7 @@ namespace {
 
 	void draw_shrunk_power_cells() const {
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_0_.data());
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t v: atoms()) {
 		draw_shrunk_power_cell(v);
@@ -911,7 +913,7 @@ namespace {
 	    }
 
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H1_.data());
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H1_cells_cache_) {
 		draw_H1_cell(h);
@@ -946,7 +948,7 @@ namespace {
 	    }
 
 	    glupDisable(GLUP_VERTEX_COLORS);
-	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H2_.data());
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H2_cells_cache_) {
 		draw_H2_cell(diagram_->halfedge_t(h), diagram_->halfedge_lf(h));
@@ -1262,6 +1264,11 @@ namespace {
 
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
+
+	vec3 color_0_  = {0.0, 1.0, 0.0};
+	vec3 color_H1_ = {1.0, 1.0, 0.0};
+	vec3 color_H2_ = {1.0, 0.0, 1.0};
+	vec3 color_3_  = {1.0, 0.0, 0.0};
 
 	static constexpr double c2 = 0.5;
 	static constexpr double c3 = 1.0;
