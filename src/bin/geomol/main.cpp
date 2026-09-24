@@ -875,6 +875,7 @@ namespace {
 		}
 	    }
 
+	    glupEnable(GLUP_TEXTURING);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_3_.data());
 	    glupBegin(GLUP_TRIANGLES);
@@ -882,9 +883,11 @@ namespace {
 		draw_shrunk_tet(t);
 	    }
 	    glupEnd();
+	    glupDisable(GLUP_TEXTURING);
 	}
 
 	void draw_shrunk_power_cells() const {
+	    glupEnable(GLUP_TEXTURING);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_0_.data());
 	    glupBegin(GLUP_TRIANGLES);
@@ -892,6 +895,7 @@ namespace {
 		draw_shrunk_power_cell(v);
 	    }
 	    glupEnd();
+	    glupDisable(GLUP_TEXTURING);
 	}
 
 	void draw_H1_cells() const {
@@ -1119,17 +1123,17 @@ namespace {
 	    }
 
 	    nb_triangles_ = 0;
-	    draw_atoms();
+	    // draw_atoms();
 
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
 
 	    glupUseProgram(spheres_program_);
-	    draw_shrunk_tets();
+	    // draw_shrunk_tets();
 	    draw_shrunk_power_cells();
 	    glupUseProgram(hyperboloids_program_);
-	    draw_H1_cells();
-	    draw_H2_cells();
+	    // draw_H1_cells();
+	    // draw_H2_cells();
 	    glupUseProgram(0);
 
 	    glDisable(GL_CULL_FACE);
