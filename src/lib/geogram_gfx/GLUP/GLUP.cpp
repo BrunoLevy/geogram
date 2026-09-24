@@ -1613,6 +1613,40 @@ void glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     );
 }
 
+void glupNormal4fv(GLUPfloat* xyzw) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        xyzw[0],xyzw[1],xyzw[2],xyzw[3]
+    );
+}
+
+void glupNormal4f(GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        x,y,z,w
+    );
+}
+
+void glupNormal4dv(GLUPdouble* xyzw) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        GLfloat(xyzw[0]),
+        GLfloat(xyzw[1]),
+        GLfloat(xyzw[2]),
+	GLfloat(xyzw[3])
+    );
+}
+
+void glupNormal4d(GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        GLfloat(x),
+        GLfloat(y),
+        GLfloat(z),
+	GLfloat(w)
+    );
+}
+
 void glupUseProgram(GLUPuint program) {
     GEO_CHECK_GL();
     GLUP::current_context_->set_user_program(program);

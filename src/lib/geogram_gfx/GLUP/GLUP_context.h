@@ -1270,10 +1270,11 @@ namespace GLUP {
          * \brief Specifies the current normal vector for the
          *  immediate mode buffers.
          * \param[in] x , y , z the current normal vector coordinates.
+	 * \param[in] w an optional additional coordinate, used in some shaders.
          */
-        void immediate_normal(GLfloat x, GLfloat y, GLfloat z) {
+        void immediate_normal(GLfloat x, GLfloat y, GLfloat z, GLfloat w = 0.0) {
             immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].set_current(
-                x,y,z,0.0f
+                x,y,z,w
             );
         }
 

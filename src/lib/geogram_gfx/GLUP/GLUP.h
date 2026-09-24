@@ -569,6 +569,16 @@ extern "C" {
     void GLUP_API glupNormal3dv(GLUPdouble* xyz);
     void GLUP_API glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);
 
+    void GLUP_API glupNormal4fv(GLUPfloat* xyzw);
+    void GLUP_API glupNormal4f(
+	GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w
+    );
+
+    void GLUP_API glupNormal4dv(GLUPdouble* xyzw);
+    void GLUP_API glupNormal4d(
+	GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w
+    );
+
 
     /**
      * \brief Specifies a GLSL program to be used for drawing the primitives.

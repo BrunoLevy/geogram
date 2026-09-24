@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/delaunay/periodic_delaunay_3d.h>
 #include <geogram/basic/stopwatch.h>
+#include "geomol_shaders.h"
 
 namespace {
     using namespace GEO;
@@ -439,38 +440,74 @@ namespace {
 	}
 
 	/**
-	 * Computes the dual of a tetrahedron
-	 * \param[in] t a tetrahedron
-	 * \pre tet_is_finite(t)
-	 * \retval the weighted circumcenter of \p t
+	 * \brief Computes the radical point of four vertices
+	 * \param[in] v1 , v2 , v3 , v4 four vertex indices
+	 * \return the point equidistant to the four vertices
+	 *   relative to the additively weighted squared distance
 	 */
-	vec3 tet_dual(index_t t) const {
-	    geo_debug_assert(t < nb_tets());
-	    geo_debug_assert(tet_is_finite(t));
-	    index_t v0 = tet_vertex(t,0);
-	    index_t v1 = tet_vertex(t,1);
-	    index_t v2 = tet_vertex(t,2);
-	    index_t v3 = tet_vertex(t,3);
-
+	vec3 radical_point(
+	    index_t v0, index_t v1, index_t v2, index_t v3
+	) const {
 	    vec3 p0 = vertex(v0);
 	    vec3 p1 = vertex(v1);
 	    vec3 p2 = vertex(v2);
 	    vec3 p3 = vertex(v3);
-
 	    double h0 = length2(p0) - weight(v0);
 	    double h1 = length2(p1) - weight(v1);
 	    double h2 = length2(p2) - weight(v2);
 	    double h3 = length2(p3) - weight(v3);
-
 	    mat3 M = {
 		{p1.x-p0.x, p1.y-p0.y, p1.z-p0.z},
 		{p2.x-p0.x, p2.y-p0.y, p2.z-p0.z},
 		{p3.x-p0.x, p3.y-p0.y, p3.z-p0.z}
 	    };
-
 	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
 	}
 
+	/**
+	 * \brief Computes the radical point of three vertices
+	 * \param[in] v1 , v2 , v3 three vertex indices
+	 * \return the point in the supporting plane of the three vertices
+	 *   equidistant to them relative to the additively weighted
+	 *   squared distance
+	 */
+	vec3 radical_point(index_t v0, index_t v1, index_t v2) const {
+	    vec3 p0 = vertex(v0);
+	    vec3 p1 = vertex(v1);
+	    vec3 p2 = vertex(v2);
+	    double w0 = weight(v0);
+	    double w1 = weight(v1);
+	    double w2 = weight(v2);
+	    vec3 U = p1 - p0;
+	    vec3 V = p2 - p0;
+	    double UU = dot(U,U);
+	    double UV = dot(U,V);
+	    double VV = dot(V,V);
+	    mat2 M = {
+		{ UU, UV },
+		{ UV, VV }
+	    };
+	    vec2 uv = M.inverse() * (0.5*vec2{w0-w1+UU, w0-w2+VV});
+	    return p0 + uv.x*U + uv.y*V;
+	}
+
+	/**
+	 * \brief Computes the radical point of two vertices
+	 * \param[in] v1 , v2 two vertex indices
+	 * \return the point in the supporting line of the two vertices
+	 *   equidistant to them relative to the additively weighted
+	 *   squared distance
+	 */
+	vec3 radical_point(index_t v0, index_t v1) const {
+	    vec3 p0 = vertex(v0);
+	    vec3 p1 = vertex(v1);
+	    double w0 = weight(v0);
+	    double w1 = weight(v1);
+            vec3 U = p1 - p0;
+            double UU = length2(U);
+            double u = (UU + w0 - w1) / (2.0 * UU);
+            return p0 + u * U;
+	}
 
     protected:
         /**
@@ -626,6 +663,15 @@ namespace {
 	Molecule() : diagram_(new PowerDiagram()) {
 	}
 
+	~Molecule() {
+	    if(spheres_program_ != 0) {
+		glDeleteProgram(spheres_program_);
+	    }
+	    if(hyperboloids_program_ != 0) {
+		glDeleteProgram(hyperboloids_program_);
+	    }
+	}
+
 	bool load(const std::string& filename) {
 	    Mesh M;
 	    if(!mesh_load(filename, M)) {
@@ -702,7 +748,12 @@ namespace {
 		parallel_for(
 		    0, diagram_->nb_tets(), [this](index_t t) {
 			if(diagram_->tet_is_finite(t)) {
-			    tet_dual_[t] = diagram_->tet_dual(t);
+			    tet_dual_[t] = diagram_->radical_point(
+				diagram_->tet_vertex(t,0),
+				diagram_->tet_vertex(t,1),
+				diagram_->tet_vertex(t,2),
+				diagram_->tet_vertex(t,3)
+			    );
 			}
 		    }
 		);
@@ -734,7 +785,6 @@ namespace {
 	 * \retval false if all the cells are closed already
 	 */
 	bool close_cells() {
-	    bool changed = false;
 	    vector<vec3> new_points;
 	    for(index_t t: diagram_->tets()) {
 		if(diagram_->tet_is_finite(t)) {
@@ -754,7 +804,7 @@ namespace {
 			    double w3 = diagram_->weight(v3);
 			    vec3 g = (1.0/3.0)*(p1+p2+p3);
 			    vec3 N = normalize(cross(p3-p1,p2-p1));
-			    double Ag = length2(g-p1);
+			    double Ag = distance2(g,p1);
 			    double Acc = 4.0 * r_max_ * r_max_ / shrink_factor_;
 			    while(Acc < Ag) {
 				Acc += 0.5;
@@ -771,13 +821,12 @@ namespace {
 			    // store the new points in a temporary vector
 			    // instead.
 			    new_points.push_back(p);
-			    changed = true;
 			}
 			break;
 		    }
 		}
 	    }
-	    if(changed) {
+	    if(new_points.size() != 0) {
 		for(vec3 p: new_points) {
 		    double w = weight_factor_ * r_min_ / 5.0;
 		    atom_pos_.push_back(p);
@@ -792,8 +841,9 @@ namespace {
 		diagram_->set_vertices(atom_pos_.size(), atom_pos_[0].data());
 		diagram_->set_weights(atom_weight_.data());
 		diagram_->compute();
+		return true;
 	    }
-	    return changed;
+	    return false;
 	}
 
 	/**
@@ -907,11 +957,16 @@ namespace {
 	/***********************************************************************/
 
 	void draw_shrunk_tet(index_t t) const {
-	    // TODO
 	    vec3 c = tet_dual_[t];
-	    double R2 = 0.0;
-	    draw_sphere_parameters(c,R2);
-
+	    index_t v0 = diagram_->tet_vertex(t,0);
+	    vec3 p0 = diagram_->vertex(v0);
+	    double R2 = distance2(c,p0) - diagram_->weight(v0);
+	    // TODO: detect also sphere surface completely outside of shrunk tet
+	    if(R2 < 0.0) {
+		return;
+	    }
+	    double R = ::sqrt(R2)*(1.0-shrink_factor_);
+	    send_sphere_parameters(c,-R);
 	    draw_shrunk_tet_facet(t,0);
 	    draw_shrunk_tet_facet(t,1);
 	    draw_shrunk_tet_facet(t,2);
@@ -919,10 +974,9 @@ namespace {
 	}
 
 	void draw_shrunk_power_cell(index_t v) const {
-	    // TODO
-	    double R2 = 0;
-	    vec3 c = {0,0,0};
-	    draw_sphere_parameters(c,R2);
+	    vec3 c = atom_pos_[v];
+	    double R = atom_radius(atom_type_[v]);
+	    send_sphere_parameters(c,R);
 
 	    for(index_t h: diagram_->incident_edges(v)) {
 		if(h == NO_INDEX) { break; }
@@ -931,14 +985,16 @@ namespace {
 	}
 
 	void draw_H1_cell(index_t h0) const {
-	    // TODO
-	    double R2 = 0;
-	    vec3 c = {0,0,0};
-	    vec3 axis = {0,0,0};
-	    draw_H1_parameters(c,axis,R2);
-
 	    index_t v1 = diagram_->halfedge_v(h0,0);
 	    index_t v2 = diagram_->halfedge_v(h0,1);
+	    vec3 p1 = diagram_->vertex(v1);
+	    vec3 p2 = diagram_->vertex(v2);
+
+	    vec3 c = diagram_->radical_point(v1,v2);
+	    vec3 axis = p2 - p1;
+	    double R2 = distance2(c,p1) - diagram_->weight(v1);
+	    send_H_parameters(c,axis,R2);
+
 	    index_t h = h0;
 	    do {
 		draw_quad_facet(h);
@@ -950,15 +1006,21 @@ namespace {
 	}
 
 	void draw_H2_cell(index_t t, index_t lf) const {
-	    // TODO
-	    double R2 = 0;
-	    vec3 c = {0,0,0};
-	    vec3 axis = {0,0,0};
-	    draw_H2_parameters(c,axis,R2);
-
 	    index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
 	    index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
 	    index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
+	    index_t v1 = diagram_->tet_vertex(t,lv1);
+	    index_t v2 = diagram_->tet_vertex(t,lv2);
+	    index_t v3 = diagram_->tet_vertex(t,lv3);
+	    index_t t2 = diagram_->tet_adjacent(t,lf);
+	    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
+
+	    vec3 p1 = diagram_->vertex(v1);
+	    vec3 c = diagram_->radical_point(v1,v2,v3);
+	    double R2 = distance2(c,p1) - diagram_->weight(v1);
+	    vec3 axis = tet_dual_[t] - tet_dual_[t2];
+	    send_H_parameters(c,axis,R2);
+
 	    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
 	    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
 	    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
@@ -968,8 +1030,6 @@ namespace {
 	    draw_quad_facet(h3,FLIPPED);
 
 	    draw_shrunk_tet_facet(t,lf,FLIPPED);
-	    index_t t2 = diagram_->tet_adjacent(t,lf);
-	    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
 	    draw_shrunk_tet_facet(t2,lf2,FLIPPED);
 	}
 
@@ -1031,16 +1091,11 @@ namespace {
 	    ++nb_triangles_;
 	}
 
-	void draw_sphere_parameters(vec3 c, double R2) const {
-	    glupTexCoord({c,R2});
+	void send_sphere_parameters(vec3 c, double R) const {
+	    glupTexCoord({c,R});
 	}
 
-	void draw_H1_parameters(vec3 c, vec3 axis, double R2) const {
-	    glupTexCoord({c,R2});
-	    glupNormal3dv(axis.data());
-	}
-
-	void draw_H2_parameters(vec3 c, vec3 axis, double R2) const {
+	void send_H_parameters(vec3 c, vec3 axis, double R2) const {
 	    glupTexCoord({c,R2});
 	    glupNormal3dv(axis.data());
 	}
@@ -1048,15 +1103,33 @@ namespace {
 	/***********************************************************************/
 
 	void draw() {
+
+	    if(spheres_program_ == 0) {
+		spheres_program_ = glupCompileProgram(
+		    GLUPES_spheres_source
+		);
+	    }
+
+	    if(hyperboloids_program_ == 0) {
+		hyperboloids_program_ = glupCompileProgram(
+		    GLUPES_hyperboloids_source
+		);
+	    }
+
 	    nb_triangles_ = 0;
 	    draw_atoms();
 
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
+
+	    glupUseProgram(spheres_program_);
 	    draw_shrunk_tets();
 	    draw_shrunk_power_cells();
+	    glupUseProgram(hyperboloids_program_);
 	    draw_H1_cells();
 	    draw_H2_cells();
+	    glupUseProgram(0);
+
 	    glDisable(GL_CULL_FACE);
 	    // std::cerr << nb_triangles_ << " triangles" << std::endl;
 	}
@@ -1186,6 +1259,9 @@ namespace {
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	int atom_size_ = 10;
+
+	GLuint spheres_program_ = 0;
+	GLuint hyperboloids_program_ = 0;
 
 	static constexpr double c2 = 0.5;
 	static constexpr double c3 = 1.0;
