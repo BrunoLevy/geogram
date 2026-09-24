@@ -878,11 +878,13 @@ namespace {
 	    glupEnable(GLUP_TEXTURING);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_3_.data());
+	    glupUseProgram(spheres_program_);
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t: shrunk_tets_cache_) {
 		draw_shrunk_tet(t);
 	    }
 	    glupEnd();
+	    glupUseProgram(0);
 	    glupDisable(GLUP_TEXTURING);
 	}
 
@@ -890,11 +892,13 @@ namespace {
 	    glupEnable(GLUP_TEXTURING);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_0_.data());
+	    glupUseProgram(spheres_program_);
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t v: atoms()) {
 		draw_shrunk_power_cell(v);
 	    }
 	    glupEnd();
+	    glupUseProgram(0);
 	    glupDisable(GLUP_TEXTURING);
 	}
 
@@ -916,13 +920,23 @@ namespace {
 		}
 	    }
 
+	    glupEnable(GLUP_TEXTURING);
+	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H1_.data());
+	    glupUseProgram(hyperboloids_program_);
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "cAxisPerp",
+		float(-1.0/(1.0 - shrink_factor_)), float(1.0 / shrink_factor_)
+	    );
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H1_cells_cache_) {
 		draw_H1_cell(h);
 	    }
 	    glupEnd();
+	    glupUseProgram(0);
+	    glupDisable(GLUP_TEXTURING);
+	    glupDisable(GLUP_VERTEX_NORMALS);
 	}
 
 	void draw_H2_cells() const {
@@ -951,13 +965,23 @@ namespace {
 		}
 	    }
 
+	    glupEnable(GLUP_TEXTURING);
+	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H2_.data());
+	    glupUseProgram(hyperboloids_program_);
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "cAxisPerp",
+		float(1.0 / shrink_factor_), float(-1.0/(1.0 - shrink_factor_))
+	    );
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H2_cells_cache_) {
 		draw_H2_cell(diagram_->halfedge_t(h), diagram_->halfedge_lf(h));
 	    }
 	    glupEnd();
+	    glupUseProgram(0);
+	    glupDisable(GLUP_TEXTURING);
+	    glupDisable(GLUP_VERTEX_NORMALS);
 	}
 
 	/***********************************************************************/
@@ -997,7 +1021,7 @@ namespace {
 	    vec3 p2 = diagram_->vertex(v2);
 
 	    vec3 c = diagram_->radical_point(v1,v2);
-	    vec3 axis = p2 - p1;
+	    vec3 axis = normalize(p2 - p1); // normalize?
 	    double R2 = distance2(c,p1) - diagram_->weight(v1);
 	    send_H_parameters(c,axis,R2);
 
@@ -1102,6 +1126,10 @@ namespace {
 	}
 
 	void send_H_parameters(vec3 c, vec3 axis, double R2) const {
+	    /*
+	    std::cerr << "C=" << c << "  AXIS=" << axis << "  R2=" << R2
+		      << std::endl;
+	    */
 	    glupTexCoord({c,R2});
 	    glupNormal3dv(axis.data());
 	}
@@ -1128,13 +1156,10 @@ namespace {
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
 
-	    glupUseProgram(spheres_program_);
-	    // draw_shrunk_tets();
 	    draw_shrunk_power_cells();
-	    glupUseProgram(hyperboloids_program_);
-	    // draw_H1_cells();
+	    // draw_shrunk_tets();
+	    draw_H1_cells();
 	    // draw_H2_cells();
-	    glupUseProgram(0);
 
 	    glDisable(GL_CULL_FACE);
 	    // std::cerr << nb_triangles_ << " triangles" << std::endl;

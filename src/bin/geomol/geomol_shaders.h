@@ -116,11 +116,75 @@ namespace {
         //import <GLUP/current_profile/primitive.h>
         //import <GLUP/fragment_shader_utils.h>
         //import <GLUP/fragment_ray_tracing.h>
+
+        uniform vec2 cAxisPerp;
         glup_flat glup_in vec4 color;
         glup_flat glup_in vec4 focus_R;
+        glup_flat glup_in vec3 axis;
+
 	void main() {
-	    glup_FragColor = GLUP.front_color;
-	}
+
+            vec3 F = focus_R.xyz;
+            float R2 = -focus_R.w;
+            vec3 A = axis;
+            float u_cAxis = cAxisPerp.x;
+            float u_cPerp = cAxisPerp.y;
+            Ray R = glup_primary_ray();
+
+            //  F(O + tV) = a.t^2 + b.t + c, obtained by expanding
+            //  cdiff.u(t)^2 + cPerp.|d(t)|^2 - R2
+            // with d = (O-F) + tV and u = d.A.
+            //  |V| is NOT one here -- the ray comes from two
+            // clip-space points -- so
+            //  dot(V,V) is carried explicitly rather than assumed away.
+            vec3  dv = R.O - F;
+            float u0 = dot(dv, A);
+            float da = dot(R.V, A);
+            float cdiff = u_cAxis - u_cPerp;
+            float a = cdiff*da*da + u_cPerp*dot(R.V, R.V);
+            float b = 2.0*(cdiff*u0*da + u_cPerp*dot(dv, R.V));
+            float c = cdiff*u0*u0 + u_cPerp*dot(dv, dv) - R2;
+
+            float t0, t1;
+            if(abs(a) < 1e-12) {
+                //  The ray runs along an asymptotic direction: one root only.
+                if(abs(b) < 1e-20) {
+                    discard;
+                }
+                t0 = -c / b;
+                t1 = t0;
+            } else {
+                float delta = b*b - 4.0*a*c;
+                if(delta < 0.0) {
+                    discard;
+                }
+                float sq = sqrt(delta);
+                float ra = (-b - sq) / (2.0*a);
+                float rb = (-b + sq) / (2.0*a);
+                //  a may be negative, which swaps them --
+                // hence the explicit sort
+                //  instead of relying on the sign.
+                t0 = min(ra, rb);
+                t1 = max(ra, rb);
+            }
+
+            float t = (t0 > 0.0) ? t0 : t1;
+            if(t < 0.0) {
+               discard;
+            }
+            vec3 M = R.O + t * R.V;
+
+            glup_update_depth(M);
+            vec4 result = GLUP.front_color;
+            if(glupIsEnabled(GLUP_LIGHTING)) {
+               //  grad F = 2 . ( (cAxis - cPerp) . u . A  +  cPerp . d )
+               vec3 d = M - F;
+               vec3 N = cdiff * dot(d, A) * A + u_cPerp * d;
+               N = normalize(GLUP.normal_matrix*N);
+               result = glup_lighting(result, N);
+            }
+            glup_FragColor = result;
+        }
 	)";
 
 
