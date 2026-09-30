@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/delaunay/periodic_delaunay_3d.h>
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/command_line.h>
 #include "geomol_shaders.h"
 
 namespace {
@@ -875,10 +876,12 @@ namespace {
 		}
 	    }
 
-	    glupEnable(GLUP_TEXTURING);
-	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_3_.data());
-	    glupUseProgram(spheres_program_);
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    if(raytrace_) {
+		glupEnable(GLUP_TEXTURING);
+		glupUseProgram(spheres_program_);
+	    }
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t: shrunk_tets_cache_) {
 		draw_shrunk_tet(t);
@@ -889,10 +892,12 @@ namespace {
 	}
 
 	void draw_shrunk_power_cells() const {
-	    glupEnable(GLUP_TEXTURING);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_0_.data());
-	    glupUseProgram(spheres_program_);
+	    if(raytrace_) {
+		glupEnable(GLUP_TEXTURING);
+		glupUseProgram(spheres_program_);
+	    }
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t v: atoms()) {
 		draw_shrunk_power_cell(v);
@@ -920,15 +925,18 @@ namespace {
 		}
 	    }
 
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H1_.data());
-	    glupUseProgram(hyperboloids_program_);
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(-1.0/(1.0 - shrink_factor_)), float(1.0 / shrink_factor_)
-	    );
+	    if(raytrace_) {
+		glupEnable(GLUP_TEXTURING);
+		glupEnable(GLUP_VERTEX_NORMALS);
+		glupUseProgram(hyperboloids_program_);
+		GLSL::set_program_uniform_by_name(
+		    hyperboloids_program_, "cAxisPerp",
+		    float(-1.0/(1.0 - shrink_factor_)),
+		    float(1.0 / shrink_factor_)
+		);
+	    }
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H1_cells_cache_) {
 		draw_H1_cell(h);
@@ -965,15 +973,18 @@ namespace {
 		}
 	    }
 
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H2_.data());
-	    glupUseProgram(hyperboloids_program_);
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(1.0 / shrink_factor_), float(-1.0/(1.0 - shrink_factor_))
-	    );
+	    if(raytrace_) {
+		glupEnable(GLUP_TEXTURING);
+		glupEnable(GLUP_VERTEX_NORMALS);
+		glupUseProgram(hyperboloids_program_);
+		GLSL::set_program_uniform_by_name(
+		    hyperboloids_program_, "cAxisPerp",
+		    float(1.0 / shrink_factor_),
+		    float(-1.0/(1.0 - shrink_factor_))
+		);
+	    }
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t h: H2_cells_cache_) {
 		draw_H2_cell(diagram_->halfedge_t(h), diagram_->halfedge_lf(h));
@@ -1017,11 +1028,17 @@ namespace {
 	void draw_H1_cell(index_t h0) const {
 	    index_t v1 = diagram_->halfedge_v(h0,0);
 	    index_t v2 = diagram_->halfedge_v(h0,1);
-	    vec3 p1 = diagram_->vertex(v1);
-	    vec3 p2 = diagram_->vertex(v2);
+	    index_t t  = diagram_->halfedge_t(h0);
+
+	    vec3 p1 = mixed_vertex({v1,t}); // diagram_->vertex(v1);
+	    vec3 p2 = mixed_vertex({v2,t}); // diagram_->vertex(v2);
+
 
 	    vec3 c = diagram_->radical_point(v1,v2);
-	    vec3 axis = normalize(p2 - p1); // normalize?
+	    vec3 n = normalize(p2 - p1);
+	    n = dot(p2-c,n)*n;
+	    vec4 axis(n,-dot(n,p1));
+
 	    double R2 = distance2(c,p1) - diagram_->weight(v1);
 	    send_H_parameters(c,axis,R2);
 
@@ -1049,7 +1066,7 @@ namespace {
 	    vec3 c = diagram_->radical_point(v1,v2,v3);
 	    double R2 = distance2(c,p1) - diagram_->weight(v1);
 	    vec3 axis = tet_dual_[t] - tet_dual_[t2];
-	    send_H_parameters(c,axis,R2);
+	    send_H_parameters(c,vec4(axis,0.0),R2);
 
 	    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
 	    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
@@ -1125,18 +1142,19 @@ namespace {
 	    glupTexCoord({c,R});
 	}
 
-	void send_H_parameters(vec3 c, vec3 axis, double R2) const {
+	void send_H_parameters(vec3 c, vec4 axis, double R2) const {
 	    /*
 	    std::cerr << "C=" << c << "  AXIS=" << axis << "  R2=" << R2
 		      << std::endl;
 	    */
 	    glupTexCoord({c,R2});
-	    glupNormal3dv(axis.data());
+	    glupNormal4dv(axis.data());
 	}
 
 	/***********************************************************************/
 
 	void draw() {
+	    //draw_atoms(); return;
 
 	    if(spheres_program_ == 0) {
 		spheres_program_ = glupCompileProgram(
@@ -1157,9 +1175,9 @@ namespace {
 	    glEnable(GL_CULL_FACE);
 
 	    draw_shrunk_power_cells();
-	    // draw_shrunk_tets();
+	    draw_shrunk_tets();
 	    draw_H1_cells();
-	    // draw_H2_cells();
+	    draw_H2_cells();
 
 	    glDisable(GL_CULL_FACE);
 	    // std::cerr << nb_triangles_ << " triangles" << std::endl;
@@ -1215,6 +1233,10 @@ namespace {
 
 	vec3f& constant_color() {
 	    return constant_color_;
+	}
+
+	bool& raytrace() {
+	    return raytrace_;
 	}
 
 	static double atom_radius(char c) {
@@ -1291,6 +1313,7 @@ namespace {
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	int atom_size_ = 10;
 
+	bool raytrace_ = true;
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
 
@@ -1318,13 +1341,18 @@ namespace {
     public:
         GeoMolApplication() : SimpleApplication("GeoMol") {
             set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
-	    lighting_ = false;
-	    effect_ = 1;
-	    full_screen_effect_ = new AmbientOcclusionImpl();
+	    // lighting_ = false;
+	    // effect_ = 1;
+	    // full_screen_effect_ = new AmbientOcclusionImpl();
 	    clip_mode_ = GLUP_CLIP_SLICE_CELLS;
         }
 
     protected:
+
+	void declare_args() override {
+	    SimpleApplication::declare_args();
+	    CmdLine::set_arg("gfx:GLUP_profile","GLUP140");
+	}
 
         void draw_gui() override {
             SimpleApplication::draw_gui();
@@ -1342,6 +1370,7 @@ namespace {
 		    "constant color", molecule_.constant_color().data()
 		);
 	    }
+	    ImGui::Checkbox("raytrace", &molecule_.raytrace());
         }
 
         void draw_application_menus() override {

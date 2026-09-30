@@ -10,8 +10,8 @@ namespace {
         //stage GL_VERTEX_SHADER
         //import <GLUP/current_profile/vertex_shader_preamble.h>
 	//import <GLUP/stdglup.h>
+	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
-	//import <GLUPES/vertex_shader_state.h>
 	glup_in vec4 vertex_in;
         glup_in vec4 color_in;
         glup_in vec4 tex_coord_in;
@@ -23,15 +23,15 @@ namespace {
 	       color = color_in;
 	    }
 	    focus_R = tex_coord_in;
-            gl_Position = GLUP_VS.modelviewprojection_matrix * vertex_in;
+            gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 	}
 	)"
 
         R"(
         //stage GL_FRAGMENT_SHADER
         //import <GLUP/current_profile/fragment_shader_preamble.h>
-        //import <GLUPES/fragment_shader_state.h>
         //import <GLUP/stdglup.h>
+        //import <GLUPGLSL/state.h>
         //import <GLUP/current_profile/toggles.h>
         //import <GLUP/current_profile/primitive.h>
         //import <GLUP/fragment_shader_utils.h>
@@ -88,30 +88,36 @@ namespace {
         //stage GL_VERTEX_SHADER
         //import <GLUP/current_profile/vertex_shader_preamble.h>
 	//import <GLUP/stdglup.h>
+	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
-	//import <GLUPES/vertex_shader_state.h>
 	glup_in vec4 vertex_in;
         glup_in vec4 color_in;
         glup_in vec4 tex_coord_in;
         glup_in vec4 normal_in;
-        glup_flat glup_out vec4 color;
-        glup_flat glup_out vec4 focus_R;
-        glup_flat glup_out vec3 axis;
+        glup_flat glup_out vec4  color;
+        glup_flat glup_out vec3  C;  // focus
+        glup_flat glup_out vec3  n;  // axis
+        glup_flat glup_out float R2;
+        glup_flat glup_out vec4  Pi1;
+        glup_flat glup_out vec4  Pi2;
 	void main() {
 	    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
 	       color = color_in;
 	    }
-	    focus_R = tex_coord_in;
-            axis = normal_in.xyz;
-            gl_Position = GLUP_VS.modelviewprojection_matrix * vertex_in;
+            C = tex_coord_in.xyz;
+            R2 = -tex_coord_in.w;
+            n = normalize(normal_in.xyz);
+            Pi1 = -normal_in;
+            Pi2 = vec4(n,-dot(n,C+normal_in.xyz));
+            gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 	}
 	)"
 
         R"(
         //stage GL_FRAGMENT_SHADER
         //import <GLUP/current_profile/fragment_shader_preamble.h>
-        //import <GLUPES/fragment_shader_state.h>
         //import <GLUP/stdglup.h>
+        //import <GLUPGLSL/state.h>
         //import <GLUP/current_profile/toggles.h>
         //import <GLUP/current_profile/primitive.h>
         //import <GLUP/fragment_shader_utils.h>
@@ -119,67 +125,62 @@ namespace {
 
         uniform vec2 cAxisPerp;
         glup_flat glup_in vec4 color;
-        glup_flat glup_in vec4 focus_R;
-        glup_flat glup_in vec3 axis;
+        glup_flat glup_in vec3  C;  // focus
+        glup_flat glup_in vec3  n;  // axis
+        glup_flat glup_in float R2;
+        glup_flat glup_in vec4  Pi1;
+        glup_flat glup_in vec4  Pi2;
 
 	void main() {
+            float u = cAxisPerp.x;
+            float v = cAxisPerp.y;
 
-            vec3 F = focus_R.xyz;
-            float R2 = -focus_R.w;
-            vec3 A = axis;
-            float u_cAxis = cAxisPerp.x;
-            float u_cPerp = cAxisPerp.y;
+            u = 1.0; v = 0.0;
+            // u = -1.0/(1.0-0.5); v = 1.0/0.5;
+
             Ray R = glup_primary_ray();
 
-            //  F(O + tV) = a.t^2 + b.t + c, obtained by expanding
-            //  cdiff.u(t)^2 + cPerp.|d(t)|^2 - R2
-            // with d = (O-F) + tV and u = d.A.
-            //  |V| is NOT one here -- the ray comes from two
-            // clip-space points -- so
-            //  dot(V,V) is carried explicitly rather than assumed away.
-            vec3  dv = R.O - F;
-            float u0 = dot(dv, A);
-            float da = dot(R.V, A);
-            float cdiff = u_cAxis - u_cPerp;
-            float a = cdiff*da*da + u_cPerp*dot(R.V, R.V);
-            float b = 2.0*(cdiff*u0*da + u_cPerp*dot(dv, R.V));
-            float c = cdiff*u0*u0 + u_cPerp*dot(dv, dv) - R2;
+            vec3 co = R.O-C;
 
-            float t0, t1;
-            if(abs(a) < 1e-12) {
-                //  The ray runs along an asymptotic direction: one root only.
-                if(abs(b) < 1e-20) {
-                    discard;
-                }
-                t0 = -c / b;
-                t1 = t0;
-            } else {
-                float delta = b*b - 4.0*a*c;
-                if(delta < 0.0) {
-                    discard;
-                }
-                float sq = sqrt(delta);
-                float ra = (-b - sq) / (2.0*a);
-                float rb = (-b + sq) / (2.0*a);
-                //  a may be negative, which swaps them --
-                // hence the explicit sort
-                //  instead of relying on the sign.
-                t0 = min(ra, rb);
-                t1 = max(ra, rb);
-            }
+            vec3 coXn = cross(co,n);
+            vec3 vXn  = cross(R.V,n);
 
-            float t = (t0 > 0.0) ? t0 : t1;
-            if(t < 0.0) {
+            float coDn = dot(co,n);
+            float vDn  = dot(R.V,n);
+
+            float a = u*dot(vXn,vXn) + v*vDn;
+            float b = 2.0*(u*dot(coXn,vXn)+v*coDn*vDn);
+            float c = u*dot(coXn,coXn) + v*coDn*coDn - 4.0;
+            float delta = b*b - 4.0*a*c;
+            if(delta < 0.0) {
                discard;
             }
+            float sq = sqrt(delta);
+            float t1 = (-b - sq) / (2.0*a);
+            float t2 = (-b + sq) / (2.0*a);
+            float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
+            float s = 1;
+            if(
+               dot(M,Pi1.xyz)+Pi1.w > 0 ||
+               dot(M,Pi2.xyz)+Pi2.w > 0
+            ) {
+                t = max(t1,t2);
+                M = R.O + t * R.V;
+                s = -1;
+                if(
+                  dot(M,Pi1.xyz)+Pi1.w > 0 ||
+                  dot(M,Pi2.xyz)+Pi2.w > 0
+                ) {
+                   discard;
+                }
+            }
 
             glup_update_depth(M);
             vec4 result = GLUP.front_color;
             if(glupIsEnabled(GLUP_LIGHTING)) {
-               //  grad F = 2 . ( (cAxis - cPerp) . u . A  +  cPerp . d )
-               vec3 d = M - F;
-               vec3 N = cdiff * dot(d, A) * A + u_cPerp * d;
+               vec3 H = C+dot(M-C,n)*n;
+               vec3 N = s*(M-H);
                N = normalize(GLUP.normal_matrix*N);
                result = glup_lighting(result, N);
             }
