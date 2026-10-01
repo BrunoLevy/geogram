@@ -46,19 +46,63 @@
 
 namespace GEO {
 
-    template <class T> class TextureBufferObject {
+    /**
+     * \brief Easy to use wrapper around TextureBufferObject
+     * \details TextureBufferObject is a portable way of sending large arrays
+     *  of datas to shaders. It can be used when OpenGL 4.3's SSBOs (Shared
+     *  Storage Buffer Objects) are not available, as for instance in
+     *  OpenGL 4.1 which is the highest version of OpenGL supported by Macs.
+     *  A Texture Buffer Object corresponds to an OpenGL texture that refers
+     *  to some data stored in a Vertex Buffer Object.
+     *  The Texture Buffer Object is manipulated through an OpenGL texture ID,
+     *  returned by TBO(), that can be bound to a texture unit and accessed
+     *  through texelFetch() or itexelTetch() in shaders.
+     *  The TextureBufferObject class manages a Vertex Buffer Object / Texture
+     *  Buffer Object pair.
+     *
+     *  Creation:
+     *  \code
+     *    std::vector<vec3f> V = ...;
+     *    glActiveTexture(texture_unit);
+     *    tbo.create_or_update(V);
+     *  \endcode
+     *
+     *  Usage (CPU side):
+     *  \code
+     *    glActiveTexture(texture_unit);
+     *    glBindTexture(GL_TEXTURE_BUFFER, tbo.TBO());
+     *    GLSL::set_program_uniform_by_name(
+     *	      program_, "my_TBO", texture_unit // note: texture_unit, not TBO!
+     *	  );
+     *  \endcode
+     *
+     *  Usage (GPU shader size):
+     *  \code
+     *    uniform samplerBuffer  my_TBO;  // float,vec2,vec3,vec4
+     *    uniform isamplerBuffer my_iTBO; // int, uint, vec2i, vec3i, vec4i
+     *    ...
+     *    int index = ...;
+     *    vec3 p = texelFetch(my_TBO, index).xyz;
+     *    int i =  itexelFetch(my_iTBO, index).x;
+     *  \endcode
+     *
+     */
+    class TextureBufferObject {
     public:
-        TextureBufferObject(index_t size=0) : data_(size), VBO_(0), TBO_(0) {
+        TextureBufferObject() : VBO_(0), TBO_(0) {
+	    if(max_TBO_size_ == 0) {
+		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
+	    }
 	}
 
 	~TextureBufferObject() {
-	    if(VBO_ != 0) {
-		glDeleteBuffers(1,&VBO_);
-		VBO_ = 0;
-	    }
 	    if(TBO_ != 0) {
 		glDeleteTextures(1, &TBO_);
 		TBO_ = 0;
+	    }
+	    if(VBO_ != 0) {
+		glDeleteBuffers(1,&VBO_);
+		VBO_ = 0;
 	    }
 	}
 
@@ -70,20 +114,15 @@ namespace GEO {
 	    return TBO_;
 	}
 
-	const vector<T>& data() const {
-	    return data_;
-	}
-
-	vector<T>& data() {
-	    return data_;
-	}
-
-	// Note: there should be an active texture unit (which is the
-	// case when called from bind())
-	void update() {
+	// Note: there should be an active texture unit when calling this
+	// function the 1st time.
+	template <class T> void create_or_update(
+	    index_t nb, const T* data
+	) {
+	    geo_assert(nb < max_TBO_size_);
 	    update_or_check_buffer_object(
 		VBO_, GL_ARRAY_BUFFER,
-		data_.size() * sizeof(T), data_.data(),
+		nb * sizeof(T), data,
 		true
 	    );
 	    if(TBO_ == 0) {
@@ -93,17 +132,21 @@ namespace GEO {
 	    }
 	}
 
+	// Note: there should be an active texture unit when calling this
+	// function the 1st time.
+	template <class T> void create_or_update(const std::vector<T>& V) {
+	    create_or_update(V.size(), V.data());
+	}
+
 	void bind(GLuint texture_unit) {
+	    geo_debug_assert(VBO_ != 0 && TBO_ != 0);
 	    glActiveTexture(texture_unit);
-	    if(VBO_ == 0 || TBO_ == 0) {
-		update();
-	    }
 	    glBindTexture(GL_TEXTURE_BUFFER, TBO_);
 	}
 
     protected:
 	// Just to map geogram types to OpenGL storage
-	static GLuint format(uint32_t) { return GL_R32I;    }
+	static GLuint format(uint32_t) { return GL_R32UI;   }
 	static GLuint format(int32_t)  { return GL_R32I;    }
 	static GLuint format(vec2i)    { return GL_RG32I;   }
 	static GLuint format(vec3i)    { return GL_RGB32I;  }
@@ -114,9 +157,9 @@ namespace GEO {
 	static GLuint format(vec4f)    { return GL_RGBA32F; }
 
     private:
-	vector<T> data_;
 	GLuint VBO_;
 	GLuint TBO_;
+	static GLint max_TBO_size_; // in texels.
     };
 }
 

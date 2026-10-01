@@ -241,20 +241,20 @@ namespace GEO {
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 
-	if(draw_0_) {
-	    draw_shrunk_power_cells();
+	if(draw_S0()) {
+	    draw_S0_cells();
 	}
 
-	if(draw_H1_) {
+	if(draw_H1()) {
 	    draw_H1_cells();
 	}
 
-	if(draw_H2_) {
+	if(draw_H2()) {
 	    draw_H2_cells();
 	}
 
-	if(draw_3_) {
-	    draw_shrunk_tets();
+	if(draw_S3()) {
+	    draw_S3_cells();
 	}
 
 	glDisable(GL_CULL_FACE);
@@ -301,16 +301,18 @@ namespace GEO {
 	glupDisable(GLUP_VERTEX_COLORS);
     }
 
-    void Molecule::draw_shrunk_power_cells() const {
+    void Molecule::draw_S0_cells() const {
 	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_0_.data());
+	glupSetColor3dv(
+	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_S0].data()
+	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
 	    glupUseProgram(spheres_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t v: atoms()) {
-	    draw_shrunk_power_cell(v);
+	    draw_S0_cell(v);
 	}
 	glupEnd();
 	glupUseProgram(0);
@@ -339,7 +341,9 @@ namespace GEO {
 	//first_one_only:
 
 	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H1_.data());
+	glupSetColor3dv(
+	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H1].data()
+	);
 
 	// DEBUG display radical points and supporting edges
 	if(false && raytrace_) {
@@ -424,7 +428,9 @@ namespace GEO {
 	}
 
 	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_H2_.data());
+	glupSetColor3dv(
+	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H2].data()
+	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
 	    glupEnable(GLUP_VERTEX_NORMALS);
@@ -446,7 +452,7 @@ namespace GEO {
     }
 
 
-    void Molecule::draw_shrunk_tets() const {
+    void Molecule::draw_S3_cells() const {
 	// Select the tetrahedra incident to four real atoms
 	if(shrunk_tets_cache_.size() == 0) {
 	    for(index_t t: diagram_->tets()) {
@@ -461,7 +467,9 @@ namespace GEO {
 	    }
 	}
 
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color_3_.data());
+	glupSetColor3dv(
+	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_S3].data()
+	);
 	glupDisable(GLUP_VERTEX_COLORS);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
@@ -469,7 +477,7 @@ namespace GEO {
 	}
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t t: shrunk_tets_cache_) {
-	    draw_shrunk_tet(t);
+	    draw_S3_cell(t);
 	}
 	glupEnd();
 	glupUseProgram(0);
@@ -478,7 +486,7 @@ namespace GEO {
 
     /************************************************************************/
 
-    void Molecule::draw_shrunk_power_cell(index_t v) const {
+    void Molecule::draw_S0_cell(index_t v) const {
 	vec3 c = atom_pos_[v];
 	double R = atom_radius(atom_type_[v]);
 	send_sphere_parameters(c,R);
@@ -544,7 +552,7 @@ namespace GEO {
 	draw_shrunk_tet_facet(t2,lf2,FLIPPED);
     }
 
-    void Molecule::draw_shrunk_tet(index_t t) const {
+    void Molecule::draw_S3_cell(index_t t) const {
 	vec3 c = tet_dual_[t];
 	index_t v0 = diagram_->tet_vertex(t,0);
 	vec3 p0 = diagram_->vertex(v0);

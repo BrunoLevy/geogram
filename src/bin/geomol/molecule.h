@@ -58,8 +58,7 @@ namespace GEO {
 	static constexpr bool FLIPPED = true;
 
 	enum MixedCellType {
-	    CELL_TYPE_SHRUNK_TET, CELL_TYPE_SHRUNK_VORO,
-	    CELL_TYPE_H1, CELL_TYPE_H2
+	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3
 	};
 
 	Molecule() = default;
@@ -106,6 +105,8 @@ namespace GEO {
 	 * \details first index is a primal vertex, second index is a tet
 	 */
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
+	typedef std::tuple<mixed_vertex_id,mixed_vertex_id,mixed_vertex_id>
+	    mixed_trgl;
 
 	vec3 mixed_vertex(mixed_vertex_id V) const {
 	    double s = shrink_factor_;
@@ -140,20 +141,20 @@ namespace GEO {
 	    return raytrace_;
 	}
 
-	bool& draw_0() {
-	    return draw_0_;
+	bool& draw_S0() {
+	    return draw_cell_[CELL_TYPE_S0];
 	}
 
 	bool& draw_H1() {
-	    return draw_H1_;
+	    return draw_cell_[CELL_TYPE_H1];
 	}
 
 	bool& draw_H2() {
-	    return draw_H2_;
+	    return draw_cell_[CELL_TYPE_H2];
 	}
 
-	bool& draw_3() {
-	    return draw_3_;
+	bool& draw_S3() {
+	    return draw_cell_[CELL_TYPE_S3];
 	}
 
 	bool& verbose() {
@@ -169,17 +170,17 @@ namespace GEO {
 	/***********************************************************************/
 
 	void draw_atoms() const;
-	void draw_shrunk_power_cells() const;
+	void draw_S0_cells() const;
 	void draw_H1_cells() const;
 	void draw_H2_cells() const;
-	void draw_shrunk_tets() const;
+	void draw_S3_cells() const;
 
 	/***********************************************************************/
 
-	void draw_shrunk_power_cell(index_t v) const;
+	void draw_S0_cell(index_t v) const;
 	void draw_H1_cell(index_t h0) const;
 	void draw_H2_cell(index_t t, index_t lf) const;
-	void draw_shrunk_tet(index_t t) const;
+	void draw_S3_cell(index_t t) const;
 
 	/***********************************************************************/
 
@@ -238,6 +239,43 @@ namespace GEO {
 
 	/***********************************************************************/
 
+	struct CellsInfo {
+	    index_t nb_cells() const {
+		return triangles_ptr.size()-1;
+	    }
+
+	    index_range cells() {
+		return index_range(0, nb_cells());
+	    }
+
+	    auto cell_triangles(index_t c) const {
+		geo_debug_assert(c < nb_cells());
+		return transform_range(
+		    index_range(triangles_ptr[c], triangles_ptr[c+1]),
+		    [this](index_t t) -> mixed_trgl {
+			return triangles[t];
+		    }
+		);
+	    }
+
+	    auto cell_planes(index_t c) const {
+		geo_debug_assert(c < nb_cells());
+		return transform_range(
+		    index_range(planes_ptr[c], planes_ptr[c+1]),
+		    [this](index_t p) -> vec4f {
+			return planes[p];
+		    }
+		);
+	    }
+
+	    vector<index_t> triangles_ptr;
+	    vector<mixed_trgl> triangles;
+	    vector<index_t> planes_ptr;
+	    vector<vec4f> planes;
+	};
+
+	/***********************************************************************/
+
     private:
 	index_t nb_atoms_;
 	vector<vec3> atom_pos_;
@@ -262,18 +300,18 @@ namespace GEO {
 
 	bool draw_mss_ = false;
 	bool raytrace_ = false;
-	bool draw_0_ = true;
-	bool draw_H1_ = true;
-	bool draw_H2_ = true;
-	bool draw_3_ = true;
+	bool draw_cell_[4] = {
+	    true, true, true, true
+	};
+	vec3 cell_color_[4] = {
+	    {0.0, 1.0, 0.0},
+	    {1.0, 1.0, 0.0},
+	    {1.0, 0.0, 1.0},
+	    {1.0, 0.0, 0.0}
+	};
 	bool verbose_ = false;
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
-
-	vec3 color_0_  = {0.0, 1.0, 0.0};
-	vec3 color_H1_ = {1.0, 1.0, 0.0};
-	vec3 color_H2_ = {1.0, 0.0, 1.0};
-	vec3 color_3_  = {1.0, 0.0, 0.0};
 
 	static constexpr double c2 = 0.5;
 	static constexpr double c3 = 1.0;
