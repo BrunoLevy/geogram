@@ -134,11 +134,44 @@ namespace {
 	void main() {
             float u = cAxisPerp.x;
             float v = cAxisPerp.y;
+            float r = 0.25;
+            float sign = 1.0;
 
-            u = 1.0; v = 0.0;
-            // u = -1.0/(1.0-0.5); v = 1.0/0.5;
+            u = 0.0;
+            v = 1.0;
+
 
             Ray R = glup_primary_ray();
+
+           /*
+	   // High-precision ray-sphere intersection
+	   // See Ray Tracing Gems, Chapter 7,
+	   // Precision Improvements for Ray-Sphere Intersection,
+	   // E. Haines, J. Gunther, T. Akenine-Moller
+           vec3  D = R.O-C;
+           float a = dot(R.V,R.V);
+
+	   float b_prime = -dot(D,R.V);
+	   vec3  H = D + (b_prime/a) * R.V;
+	   float delta = r*r - dot(H,H);
+           if(delta < 0.0) {
+               discard;
+           }
+	   // Original article: q = b_prime + sign(b_prime)*sqrt(a*delta)
+	   // Don't know why they do that, here we know we want t1
+	   float q = b_prime - sqrt(a*delta);
+	   float t = q/a;
+
+           vec3 M = R.O + t*R.V;
+
+           glup_update_depth(M);
+           vec4 result = GLUP.front_color;
+           if(glupIsEnabled(GLUP_LIGHTING)) {
+               vec3 N = sign*normalize(GLUP.normal_matrix*(M-C));
+               result = glup_lighting(result, N);
+           }
+           glup_FragColor = result;
+           */
 
             vec3 co = R.O-C;
 
@@ -150,7 +183,7 @@ namespace {
 
             float a = u*dot(vXn,vXn) + v*vDn;
             float b = 2.0*(u*dot(coXn,vXn)+v*coDn*vDn);
-            float c = u*dot(coXn,coXn) + v*coDn*coDn - 4.0;
+            float c = u*dot(coXn,coXn) + v*coDn*coDn - 4.0; // HERE R2
             float delta = b*b - 4.0*a*c;
             if(delta < 0.0) {
                discard;
@@ -161,6 +194,7 @@ namespace {
             float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
             float s = 1;
+
             if(
                dot(M,Pi1.xyz)+Pi1.w > 0 ||
                dot(M,Pi2.xyz)+Pi2.w > 0
