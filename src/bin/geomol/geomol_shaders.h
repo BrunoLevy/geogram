@@ -58,7 +58,7 @@ namespace {
 
 	   float b_prime = -dot(D,R.V);
 	   vec3  H = D + (b_prime/a) * R.V;
-	   float delta = r*r - dot(H,H);
+	   float delta = r - dot(H,H);
            if(delta < 0.0) {
                discard;
            }
@@ -132,47 +132,15 @@ namespace {
         glup_flat glup_in vec4  Pi2;
 
 	void main() {
-            float u = cAxisPerp.x;
-            float v = cAxisPerp.y;
-            float r = 0.25;
+            float alpha = cAxisPerp.x;
+            float beta  = cAxisPerp.y;
             float sign = 1.0;
+            float RR2 = R2;
 
-            u = 0.0;
-            v = 1.0;
+            //alpha = 0; beta = 1; RR2 = 0.25; // HERE
 
 
             Ray R = glup_primary_ray();
-
-           /*
-	   // High-precision ray-sphere intersection
-	   // See Ray Tracing Gems, Chapter 7,
-	   // Precision Improvements for Ray-Sphere Intersection,
-	   // E. Haines, J. Gunther, T. Akenine-Moller
-           vec3  D = R.O-C;
-           float a = dot(R.V,R.V);
-
-	   float b_prime = -dot(D,R.V);
-	   vec3  H = D + (b_prime/a) * R.V;
-	   float delta = r*r - dot(H,H);
-           if(delta < 0.0) {
-               discard;
-           }
-	   // Original article: q = b_prime + sign(b_prime)*sqrt(a*delta)
-	   // Don't know why they do that, here we know we want t1
-	   float q = b_prime - sqrt(a*delta);
-	   float t = q/a;
-
-           vec3 M = R.O + t*R.V;
-
-           glup_update_depth(M);
-           vec4 result = GLUP.front_color;
-           if(glupIsEnabled(GLUP_LIGHTING)) {
-               vec3 N = sign*normalize(GLUP.normal_matrix*(M-C));
-               result = glup_lighting(result, N);
-           }
-           glup_FragColor = result;
-           */
-
             vec3 co = R.O-C;
 
             vec3 coXn = cross(co,n);
@@ -181,9 +149,10 @@ namespace {
             float coDn = dot(co,n);
             float vDn  = dot(R.V,n);
 
-            float a = u*dot(vXn,vXn) + v*vDn;
-            float b = 2.0*(u*dot(coXn,vXn)+v*coDn*vDn);
-            float c = u*dot(coXn,coXn) + v*coDn*coDn - 4.0; // HERE R2
+            float a = beta*dot(vXn,vXn) + alpha*vDn*vDn;
+            float b = 2.0*(beta*dot(coXn,vXn)+alpha*coDn*vDn);
+            float c = beta*dot(coXn,coXn) + alpha*coDn*coDn - RR2;
+
             float delta = b*b - 4.0*a*c;
             if(delta < 0.0) {
                discard;
@@ -193,7 +162,6 @@ namespace {
             float t2 = (-b + sq) / (2.0*a);
             float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
-            float s = 1;
 
             if(
                dot(M,Pi1.xyz)+Pi1.w > 0 ||
@@ -201,7 +169,7 @@ namespace {
             ) {
                 t = max(t1,t2);
                 M = R.O + t * R.V;
-                s = -1;
+                sign = -1.0;
                 if(
                   dot(M,Pi1.xyz)+Pi1.w > 0 ||
                   dot(M,Pi2.xyz)+Pi2.w > 0
@@ -213,9 +181,11 @@ namespace {
             glup_update_depth(M);
             vec4 result = GLUP.front_color;
             if(glupIsEnabled(GLUP_LIGHTING)) {
-               vec3 H = C+dot(M-C,n)*n;
-               vec3 N = s*(M-H);
-               N = normalize(GLUP.normal_matrix*N);
+               vec3 CM = M-C;
+               vec3 CMperp = dot(CM,n)*n;
+               vec3 CMpar  = CM - CMperp;
+               vec3 N = alpha * CMperp + beta * CMpar;
+               N = sign*normalize(GLUP.normal_matrix*N);
                result = glup_lighting(result, N);
             }
             glup_FragColor = result;

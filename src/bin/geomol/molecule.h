@@ -45,6 +45,7 @@
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
 #include "power_diagram.h"
+#include "TBO.h"
 
 namespace GEO {
 
