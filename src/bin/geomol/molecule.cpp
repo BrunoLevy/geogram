@@ -96,7 +96,7 @@ namespace GEO {
 	r_min_ =  Numeric::max_float64();
 	r_max_ = -Numeric::max_float64();
 	for(index_t v=0; v<nb_atoms(); ++v) {
-	    double r = atom_radius(atom_type_[v]);
+	    double r = atom_radius(v);
 	    r_min_ = std::min(r_min_,r);
 	    r_max_ = std::max(r_max_,r);
 	    atom_weight_[v] = (r*r)/shrink_factor_;
@@ -276,9 +276,8 @@ namespace GEO {
 	}
 	glupBegin(GLUP_SPHERES);
 	for(index_t v: atoms()) {
-	    char t = atom_type_[v];
-	    double R = atom_radius(t);
-	    vec3 color = atom_color(t);
+	    double R = atom_radius(v);
+	    vec3 color = atom_color(v);
 	    if(atom_coloring_ == ATOM_COLORING_ATOM) {
 		glupColor3dv(color.data());
 	    } else if(atom_coloring_ == ATOM_COLORING_CHAIN) {
@@ -485,7 +484,7 @@ namespace GEO {
 
     void Molecule::draw_S0_cell(index_t v) const {
 	vec3 c = atom_pos_[v];
-	double R = atom_radius(atom_type_[v]);
+	double R = atom_radius(v);
 	send_sphere_parameters(c,R);
 
 	for(index_t h: diagram_->incident_edges(v)) {
@@ -616,7 +615,7 @@ namespace GEO {
 
     /************************************************************************/
 
-    double Molecule::atom_radius(char c) {
+    double Molecule::atom_radius_from_type(char c) {
 	double result = 1.7;
 	switch(c) {
 	case 'C':
@@ -644,7 +643,7 @@ namespace GEO {
 	return result;
     }
 
-    vec3 Molecule::atom_color(char c) {
+    vec3 Molecule::atom_color_from_type(char c) {
 	vec3 result{0.5, 0.5, 0.5};
 	switch(c) {
 	case 'C':

@@ -241,8 +241,16 @@ namespace GEO {
 
 	/***********************************************************************/
 
-	static double atom_radius(char c);
-	static vec3 atom_color(char c);
+	double atom_radius(index_t v) const {
+	    return atom_size_*atom_radius_from_type(atom_type_[v]);
+	}
+
+	vec3 atom_color(index_t v) const {
+	    return atom_color_from_type(atom_type_[v]);
+	}
+
+	static double atom_radius_from_type(char c);
+	static vec3 atom_color_from_type(char c);
 
 	/***********************************************************************/
 
