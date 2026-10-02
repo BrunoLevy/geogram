@@ -177,6 +177,13 @@ namespace GEO {
 
 	/***********************************************************************/
 
+
+	// traverse_S0_cell(index_t v,
+	//      std::function<void()> begin_facet,
+	//      std::function<void(mixed_vertex_id)> vertex,
+	//      std::function<void()> end_facet
+	// )
+
 	void draw_S0_cell(index_t v) const;
 	void draw_H1_cell(index_t h0) const;
 	void draw_H2_cell(index_t t, index_t lf) const;
@@ -301,7 +308,7 @@ namespace GEO {
 	bool draw_mss_ = false;
 	bool raytrace_ = false;
 	bool draw_cell_[4] = {
-	    true, true, true, true
+	    true, true, false, false
 	};
 	vec3 cell_color_[4] = {
 	    {0.0, 1.0, 0.0},

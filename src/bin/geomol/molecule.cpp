@@ -333,12 +333,9 @@ namespace GEO {
 			continue;
 		    }
 		    H1_cells_cache_.push_back(h);
-		    // goto first_one_only;
 		}
 	    }
 	}
-
-	//first_one_only:
 
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
@@ -370,12 +367,12 @@ namespace GEO {
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
 	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(hyperboloids_program_);
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "cAxisPerp",
 		float(-1.0/(1.0 - shrink_factor_)),
 		float(1.0 / shrink_factor_)
 	    );
+	    glupUseProgram(hyperboloids_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t h: H1_cells_cache_) {
@@ -386,8 +383,8 @@ namespace GEO {
 	glupDisable(GLUP_TEXTURING);
 	glupDisable(GLUP_VERTEX_NORMALS);
 
-
-	if(raytrace_) {
+	// DEBUG: draw mixed complex triangles in wireframe
+	if(false && raytrace_) {
 	    wireframe_ = true;
 	    glupSetColor3dv(
 		GLUP_FRONT_AND_BACK_COLOR, vec3(0.0, 0.0, 0.0).data()
@@ -434,12 +431,12 @@ namespace GEO {
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
 	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(hyperboloids_program_);
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "cAxisPerp",
 		float(1.0 / shrink_factor_),
 		float(-1.0/(1.0 - shrink_factor_))
 	    );
+	    glupUseProgram(hyperboloids_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t h: H2_cells_cache_) {
@@ -511,7 +508,9 @@ namespace GEO {
 	n = dot(p2-c,n)*n;
 	vec4 axis(n,-dot(n,p1));
 
-	double R2 = distance2(c,p1) - diagram_->weight(v1);
+	// Note: here, vertex(v1)-------.   and not p1 = mixed_vertex({v1,t}) !!!
+	//                              v
+	double R2 = distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
 	send_H_parameters(c,axis,R2);
 
 	index_t h = h0;
@@ -534,11 +533,17 @@ namespace GEO {
 	index_t t2 = diagram_->tet_adjacent(t,lf);
 	index_t lf2 = diagram_->find_tet_adjacent(t2,t);
 
-	vec3 p1 = diagram_->vertex(v1);
+
 	vec3 c = diagram_->radical_point(v1,v2,v3);
-	double R2 = distance2(c,p1) - diagram_->weight(v1);
-	vec3 axis = tet_dual_[t] - tet_dual_[t2];
-	send_H_parameters(c,vec4(axis,0.0),R2);
+	// Note: here, vertex(v1)-------.   and not p1 = mixed_vertex({v1,t}) !!!
+	//                              v
+	double R2 = distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
+	vec3 n = normalize(tet_dual_[t] - tet_dual_[t2]);
+	vec3 p1 = mixed_vertex({v1,t});
+	vec3 p2 = mixed_vertex({v1,t2});
+	n = dot(p2-c,n)*n;
+	vec4 axis(n,-dot(n,p1));
+	send_H_parameters(c,axis,R2);
 
 	index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
 	index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);

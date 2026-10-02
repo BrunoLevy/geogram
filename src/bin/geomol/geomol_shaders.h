@@ -58,7 +58,7 @@ namespace {
 
 	   float b_prime = -dot(D,R.V);
 	   vec3  H = D + (b_prime/a) * R.V;
-	   float delta = r - dot(H,H);
+	   float delta = r*r - dot(H,H);
            if(delta < 0.0) {
                discard;
            }
@@ -134,11 +134,11 @@ namespace {
 	void main() {
             float alpha = cAxisPerp.x;
             float beta  = cAxisPerp.y;
-            float sign = 1.0;
+
+            //float alpha = -2.0;
+            //float beta = 2.0;
+
             float RR2 = R2;
-
-            //alpha = 0; beta = 1; RR2 = 0.25; // HERE
-
 
             Ray R = glup_primary_ray();
             vec3 co = R.O-C;
@@ -149,9 +149,23 @@ namespace {
             float coDn = dot(co,n);
             float vDn  = dot(R.V,n);
 
-            float a = beta*dot(vXn,vXn) + alpha*vDn*vDn;
-            float b = 2.0*(beta*dot(coXn,vXn)+alpha*coDn*vDn);
-            float c = beta*dot(coXn,coXn) + alpha*coDn*coDn - RR2;
+            float a =      beta*dot(vXn,vXn)   + alpha*vDn*vDn;
+            float b = 2.0*(beta*dot(coXn,vXn)  + alpha*coDn*vDn);
+            float c =      beta*dot(coXn,coXn) + alpha*coDn*coDn - RR2;
+
+/*
+    // From Matthieu's shader, gives same result
+    float u_cAxis = cAxisPerp.x;
+    float u_cPerp = cAxisPerp.y;
+    vec3  A = n;
+    vec3  dv = R.O - C;
+    float u0 = dot(dv, A);
+    float da = dot(R.V, A);
+    float cdiff = u_cAxis - u_cPerp;
+    float a = cdiff*da*da + u_cPerp*dot(R.V, R.V);
+    float b = 2.0*(cdiff*u0*da + u_cPerp*dot(dv, R.V));
+    float c = cdiff*u0*u0 + u_cPerp*dot(dv, dv) - R2;
+ */
 
             float delta = b*b - 4.0*a*c;
             if(delta < 0.0) {
@@ -160,8 +174,10 @@ namespace {
             float sq = sqrt(delta);
             float t1 = (-b - sq) / (2.0*a);
             float t2 = (-b + sq) / (2.0*a);
+            float sign = 1;
             float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
+            if(t1 > t2) { sign = -1; }
 
             if(
                dot(M,Pi1.xyz)+Pi1.w > 0 ||
@@ -169,7 +185,7 @@ namespace {
             ) {
                 t = max(t1,t2);
                 M = R.O + t * R.V;
-                sign = -1.0;
+                sign = sign * -1.0;
                 if(
                   dot(M,Pi1.xyz)+Pi1.w > 0 ||
                   dot(M,Pi2.xyz)+Pi2.w > 0
