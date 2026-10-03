@@ -69,61 +69,6 @@ public:
                 return s;
         }
 
-
-        /** This method rolls back the allocator so that it makes all of the memory previously
-          * allocated available for re-allocation. Note that it does it not call the constructor
-          * again, so after this method has been called, assumptions about the state of the values
-          * in memory are no longer valid. */
-        void rollBack(void)
-        {
-                if( memory.size() )
-                {
-                        for( size_t i=0 ; i<memory.size() ; i++ )
-                        {
-                                for( int j=0 ; j<blockSize ; j++ )
-                                {
-                                        memory[i][j].~T();
-                                        new(&memory[i][j]) T();
-                                }
-                        }
-                        index=0;
-                        remains=blockSize;
-                }
-        }
-        /** This method rolls back the allocator to the previous memory state and makes all of the memory previously
-          * allocated available for re-allocation. Note that it does it not call the constructor
-          * again, so after this method has been called, assumptions about the state of the values
-          * in memory are no longer valid. */
-        void rollBack(const AllocatorState& state){
-                if(state.index<index || (state.index==index && state.remains<remains)){
-                        if(state.index<index){
-                                for(int j=state.remains;j<blockSize;j++){
-                                        memory[state.index][j].~T();
-                                        new(&memory[state.index][j]) T();
-                                }
-                                for(int i=state.index+1;i<index-1;i++){
-                                        for(int j=0;j<blockSize;j++){
-                                                memory[i][j].~T();
-                                                new(&memory[i][j]) T();
-                                        }
-                                }
-                                for(int j=0;j<remains;j++){
-                                        memory[index][j].~T();
-                                        new(&memory[index][j]) T();
-                                }
-                                index=state.index;
-                                remains=state.remains;
-                        }
-                        else{
-                                for(int j=0;j<state.remains;j<remains){
-                                        memory[index][j].~T();
-                                        new(&memory[index][j]) T();
-                                }
-                                remains=state.remains;
-                        }
-                }
-        }
-
         /** This method initiallizes the constructor and the blockSize variable specifies the
           * the number of objects that should be pre-allocated at a time. */
         void set( int blockSize)
