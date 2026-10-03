@@ -563,18 +563,18 @@ extern "C" {
     );
 
 
-    void GLUP_API glupNormal3fv(GLUPfloat* xyz);
+    void GLUP_API glupNormal3fv(const GLUPfloat* xyz);
     void GLUP_API glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);
 
-    void GLUP_API glupNormal3dv(GLUPdouble* xyz);
+    void GLUP_API glupNormal3dv(const GLUPdouble* xyz);
     void GLUP_API glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);
 
-    void GLUP_API glupNormal4fv(GLUPfloat* xyzw);
+    void GLUP_API glupNormal4fv(const GLUPfloat* xyzw);
     void GLUP_API glupNormal4f(
 	GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w
     );
 
-    void GLUP_API glupNormal4dv(GLUPdouble* xyzw);
+    void GLUP_API glupNormal4dv(const GLUPdouble* xyzw);
     void GLUP_API glupNormal4d(
 	GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w
     );

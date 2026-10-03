@@ -270,39 +270,35 @@ namespace GEO {
 		cell_facet_vertex_ptr.push_back(0);
 		cell_facet_vertex.resize(0);
 		cell_facet_plane.resize(0);
-
-		cell_handle.resize(0);
-		cell_cR.resize(0);
-		cell_nId.resize(0);
+		cell_eqn.resize(0);
 	    }
 
-	    void begin_cell(
-		index_t handle, vec3 center, double radius
-	    ) {
-		index_t cell_id = cell_handle.size();
-		cell_handle.push_back(handle);
-		cell_cR.push_back({
-		   float(center.x), float(center.y), float(center.z),
-		   float(radius)
-		});
-		cell_nId.push_back({0.0f, 0.0f, 0.0f, float(cell_id)});
+	    /*************************************************/
+
+	    void begin_cell(vec3 center, double radius) {
+		index_t cell_id = cell_eqn.size();
+		cell_eqn.emplace_back(
+		    vec4f{
+			float(center.x), float(center.y), float(center.z),
+			float(radius)
+		    },
+		    vec4f{0.0f, 0.0f, 0.0f, float(cell_id)}
+		);
 	    }
 
-	    void begin_cell(
-		index_t handle, vec3 center, vec3 axis, double R2
-	    ) {
-		index_t cell_id = cell_handle.size();
-		cell_handle.push_back(handle);
-		cell_cR.push_back({
-		   float(center.x), float(center.y), float(center.z),
-		   float(R2)
-		});
-		cell_nId.push_back({
-		   float(axis.x), float(axis.y), float(axis.z),
-		   float(cell_id)
-		});
+	    void begin_cell(vec3 center, vec3 axis, double R2) {
+		index_t cell_id = cell_eqn.size();
+		cell_eqn.emplace_back(
+		    vec4f{
+			float(center.x), float(center.y), float(center.z),
+			float(R2)
+		    },
+		    vec4f{
+			float(axis.x), float(axis.y), float(axis.z),
+			float(cell_id)
+		    }
+		);
 	    }
-
 
 	    void end_cell() {
 		cell_facet_ptr.push_back(cell_facet_vertex_ptr.size()-1);
@@ -328,17 +324,17 @@ namespace GEO {
 		cell_facet_vertex.push_back(V);
 	    }
 
-	    index_t nb_cells() const {
-		return cell_handle.size();
+	    /*************************************************/
+
+	    typedef index_as_iterator iterator;
+	    typedef index_as_iterator const_iterator;
+
+	    index_as_iterator begin() const {
+		return 0;
 	    }
 
-	    index_t cell_nb_facets(index_t c) const {
-		geo_debug_assert(c < nb_cells());
-		return (cell_facet_ptr[c+1] - cell_facet_ptr[c]);
-	    }
-
-	    index_range cells() const {
-		return index_range(0, nb_cells());
+	    index_as_iterator end() const {
+		return cell_eqn.size();
 	    }
 
 	    auto cell_facets(index_t c) const {
@@ -368,6 +364,88 @@ namespace GEO {
 		);
 	    }
 
+	    /*************************************************/
+
+	    void draw() const {
+		for(index_t c: *this) {
+		    draw_cell(c);
+		}
+	    }
+
+	    void draw_cell(index_t c) const {
+		glupTexCoord4fv(cell_eqn[c].first.data());
+		glupNormal4fv(cell_eqn[c].second.data());
+		for(index_t f: cell_facets(c)) {
+		    draw_facet(f);
+		}
+	    }
+
+	    void draw_facet(index_t f) const {
+		bool has_v1 = false;
+		bool has_v2 = false;
+		mixed_vertex_id v1;
+		mixed_vertex_id v2;
+		for(mixed_vertex_id v: cell_facet_vertices(f)) {
+		    if(!has_v1) {
+			has_v1 = true;
+			v1 = v;
+		    } else if(!has_v2) {
+			has_v2 = true;
+			v2 = v;
+		    } else {
+			molecule_.draw_triangle(v1,v2,v);
+			v2 = v;
+		    }
+		}
+	    }
+
+	    /*************************************************/
+
+	    /** \brief symbolic constant, parameter for add_XXX() */
+	    static constexpr bool FLIPPED = true;
+
+	    void add_shrunk_power_facet(index_t h0, bool flipped = false) {
+		if(flipped) {
+		    h0 = diagram().halfedge_flip(h0);
+		}
+		index_t v1 = diagram().halfedge_v(h0,0);
+		index_t v2 = diagram().halfedge_v(h0,1);
+		index_t h = h0;
+		begin_facet();
+		do {
+		    index_t t = diagram().halfedge_t(h);
+		    add_vertex({flipped ? v2 : v1,t});
+		    h = diagram().next_halfedge_around_edge(h, v1, v2);
+		} while(h != h0);
+		end_facet();
+	    }
+
+	    void add_quad_facet(index_t h, bool flipped = false) {
+		index_t v1 = diagram().halfedge_v(h,0);
+		index_t v2 = diagram().halfedge_v(h,1);
+		index_t t1 = diagram().halfedge_t(h);
+		index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
+		begin_facet();
+		if(flipped) {
+		    add_vertex({v2,t1});
+		    add_vertex({v2,t2});
+		    add_vertex({v1,t2});
+		    add_vertex({v1,t1});
+		} else {
+		    add_vertex({v1,t1});
+		    add_vertex({v1,t2});
+		    add_vertex({v2,t2});
+		    add_vertex({v2,t1});
+		}
+		end_facet();
+	    }
+
+	    /*************************************************/
+
+	    const PowerDiagram& diagram() const {
+		return *(molecule_.diagram_);
+	    }
+
 	private:
 	    Molecule& molecule_;
 
@@ -381,9 +459,8 @@ namespace GEO {
 	    vector<index_t> cell_facet_vertex_ptr;
 	    vector<mixed_vertex_id> cell_facet_vertex;
 
-	    vector<index_t> cell_handle;
-	    vector<vec4f>   cell_cR;
-	    vector<vec4f>   cell_nId;
+	    // TODOC: format
+	    vector<std::pair<vec4f, vec4f>> cell_eqn;
 
 	    // For sending to the GPU
 	    TextureBufferObject cell_facet_ptr_tbo;

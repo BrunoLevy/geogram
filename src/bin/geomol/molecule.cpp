@@ -231,25 +231,56 @@ namespace GEO {
 	    for(index_t v: atoms()) {
 		vec3 c = atom_pos_[v];
 		double R = atom_radius(v);
-		cells.begin_cell(v,c,R);
+		cells.begin_cell(c,R);
 		for(index_t h0: diagram_->incident_edges(v)) {
 		    if(h0 == NO_INDEX) { break; }
-		    cells.begin_facet();
-		    index_t v1 = diagram_->halfedge_v(h0,0);
-		    index_t v2 = diagram_->halfedge_v(h0,1);
-		    index_t h = h0;
-		    do {
-			index_t t = diagram_->halfedge_t(h);
-			cells.add_vertex({v1,t});
-			h = diagram_->next_halfedge_around_edge(h, v1, v2);
-		    } while(h != h0);
-		    cells.end_facet();
+		    cells.add_shrunk_power_facet(h0);
 		}
 		cells.end_cell();
 	    }
 	}
 
-	cells_[CELL_TYPE_H1].clear();
+	{
+	    CellsInfo& cells = cells_[CELL_TYPE_H1];
+	    cells.clear();
+	    // Select the edges incident to two real atoms,
+	    // and keep only one halfedge per pair (v1 < v2)
+	    for(index_t v1: atoms()) {
+		for(index_t h0: diagram_->incident_edges(v1)) {
+		    if(h0 == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h0,1);
+		    if(!is_atom(v2) || v1 > v2) {
+			continue;
+		    }
+		    index_t t  = diagram_->halfedge_t(h0);
+
+		    vec3 p1 = mixed_vertex({v1,t});
+		    vec3 p2 = mixed_vertex({v2,t});
+
+		    vec3 c = diagram_->radical_point(v1,v2);
+		    vec3 axis = normalize(p2 - p1);
+
+		    double R2 = distance2(
+			c, diagram_->vertex(v1)
+		    ) - diagram_->weight(v1);
+
+		    cells.begin_cell(c,axis,R2);
+
+		    index_t h = h0;
+		    do {
+			cells.add_quad_facet(h);
+			h = diagram_->next_halfedge_around_edge(h,v1,v2);
+		    } while(h != h0);
+		    cells.add_shrunk_power_facet(h, FLIPPED);
+		    h = diagram_->halfedge_flip(h);
+		    cells.add_shrunk_power_facet(h, FLIPPED);
+
+		    cells.end_cell();
+		}
+	    }
+	}
 
 	cells_[CELL_TYPE_H2].clear();
 
@@ -350,86 +381,17 @@ namespace GEO {
 	    glupUseProgram(spheres_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
-
-
-	const CellsInfo& cells = cells_[CELL_TYPE_S0];
-	for(index_t c: cells.cells()) {
-	    for(index_t f: cells.cell_facets(c)) {
-		bool has_v1 = false;
-		bool has_v2 = false;
-		mixed_vertex_id v1;
-		mixed_vertex_id v2;
-		for(mixed_vertex_id v: cells.cell_facet_vertices(f)) {
-		    if(!has_v1) {
-			has_v1 = true;
-			v1 = v;
-		    } else if(!has_v2) {
-			has_v2 = true;
-			v2 = v;
-		    } else {
-			draw_triangle(v1,v2,v);
-			v2 = v;
-		    }
-		}
-	    }
-	}
-
-	/*
-	for(index_t v: atoms()) {
-	    draw_S0_cell(v);
-	}
-	*/
-
+	cells_[CELL_TYPE_S0].draw();
 	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
     }
 
     void Molecule::draw_H1_cells() const {
-	// Select the edges incident to two real atoms,
-	// and keep only one halfedge per pair (v1 < v2)
-	if(H1_cells_cache_.size() == 0) {
-	    for(index_t v1: atoms()) {
-		for(index_t h: diagram_->incident_edges(v1)) {
-		    if(h == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h,1);
-		    if(!is_atom(v2) || v1 > v2) {
-			continue;
-		    }
-		    H1_cells_cache_.push_back(h);
-		}
-	    }
-	}
-
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
 	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H1].data()
 	);
-
-	// DEBUG display radical points and supporting edges
-	if(false && raytrace_) {
-	    glupBegin(GLUP_SPHERES);
-	    for(index_t h: H1_cells_cache_) {
-		index_t v1 = diagram_->halfedge_v(h,0);
-		index_t v2 = diagram_->halfedge_v(h,1);
-		vec3 p = diagram_->radical_point(v1,v2);
-		glupVertex(vec4{p,0.5});
-	    }
-	    glupEnd();
-
-	    glupBegin(GLUP_LINES);
-	    for(index_t h: H1_cells_cache_) {
-		index_t v1 = diagram_->halfedge_v(h,0);
-		index_t v2 = diagram_->halfedge_v(h,1);
-		glupVertex(diagram_->vertex(v1));
-		glupVertex(diagram_->vertex(v2));
-	    }
-	    glupEnd();
-	    return;
-	}
-
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
 	    glupEnable(GLUP_VERTEX_NORMALS);
@@ -441,27 +403,11 @@ namespace GEO {
 	    glupUseProgram(hyperboloids_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
-	for(index_t h: H1_cells_cache_) {
-	    draw_H1_cell(h);
-	}
+	cells_[CELL_TYPE_H1].draw();
 	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
 	glupDisable(GLUP_VERTEX_NORMALS);
-
-	// DEBUG: draw mixed complex triangles in wireframe
-	if(false && raytrace_) {
-	    wireframe_ = true;
-	    glupSetColor3dv(
-		GLUP_FRONT_AND_BACK_COLOR, vec3(0.0, 0.0, 0.0).data()
-	    );
-	    glupBegin(GLUP_LINES);
-	    for(index_t h: H1_cells_cache_) {
-		draw_H1_cell(h);
-	    }
-	    glupEnd();
-	    wireframe_ = false;
-	}
     }
 
     void Molecule::draw_H2_cells() const {
