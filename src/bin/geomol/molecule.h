@@ -180,30 +180,6 @@ namespace GEO {
 
 	/***********************************************************************/
 
-
-	// traverse_S0_cell(index_t v,
-	//      std::function<void()> begin_facet,
-	//      std::function<void(mixed_vertex_id)> vertex,
-	//      std::function<void()> end_facet
-	// )
-
-	void draw_S0_cell(index_t v) const;
-	void draw_H1_cell(index_t h0) const;
-	void draw_H2_cell(index_t t, index_t lf) const;
-	void draw_S3_cell(index_t t) const;
-
-	/***********************************************************************/
-
-	void draw_shrunk_tet_facet(
-	    index_t t, index_t lf, bool flipped = false
-	) const;
-
-	void draw_shrunk_power_facet(index_t h0, bool flipped = false) const;
-
-	void draw_quad_facet(index_t h, bool flipped = false) const;
-
-	/***********************************************************************/
-
 	void draw_triangle(
 	    mixed_vertex_id V1, mixed_vertex_id V2, mixed_vertex_id V3,
 	    bool flipped=false
@@ -227,19 +203,6 @@ namespace GEO {
 		glupVertex(mixed_vertex(V3));
 	    }
 	    ++nb_triangles_;
-	}
-
-	void send_sphere_parameters(vec3 c, double R) const {
-	    glupTexCoord({c,R});
-	}
-
-	void send_H_parameters(vec3 c, vec4 axis, double R2) const {
-	    /*
-	    std::cerr << "C=" << c << "  AXIS=" << axis << "  R2=" << R2
-		      << std::endl;
-	    */
-	    glupTexCoord({c,R2});
-	    glupNormal4dv(axis.data());
 	}
 
 	/***********************************************************************/
