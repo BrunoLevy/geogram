@@ -300,12 +300,16 @@ namespace GEO {
 	    typedef index_as_iterator iterator;
 	    typedef index_as_iterator const_iterator;
 
+	    index_t nb_cells() const {
+		return cell_eqn.size();
+	    }
+
 	    index_as_iterator begin() const {
 		return 0;
 	    }
 
 	    index_as_iterator end() const {
-		return cell_eqn.size();
+		return nb_cells();
 	    }
 
 	    auto cell_facets(index_t c) const {
