@@ -57,6 +57,11 @@ set(FULL_WARNINGS
     -Wno-reserved-identifier
     -Wno-c++98-compat-pedantic
     -Wno-unused-but-set-variable
+    # Clang's C++ Safe Buffers model (-Wunsafe-buffer-usage, clang 16+): flags
+    # every raw pointer subscript / arithmetic. Geogram's numerics, predicates
+    # and mesh code are built on raw arrays by design, so this opt-in
+    # hardening model does not apply.
+    -Wno-unsafe-buffer-usage
 )
 
 # Additional C++ flags
