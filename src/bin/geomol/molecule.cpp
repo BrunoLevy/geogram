@@ -382,11 +382,11 @@ namespace GEO {
 	    );
 	    GLSL::set_program_uniform_by_name(
 		spheres_program_, "facet_ptr_TBO",
-		CellsInfo::FACET_PTR_TEXTURE_UNIT
+		int(CellsInfo::FACET_PTR_TEXTURE_UNIT)
 	    );
 	    GLSL::set_program_uniform_by_name(
 		spheres_program_, "facet_plane_TBO",
-		CellsInfo::FACET_PLANE_TEXTURE_UNIT
+		int(CellsInfo::FACET_PLANE_TEXTURE_UNIT)
 	    );
 	}
 
@@ -396,11 +396,11 @@ namespace GEO {
 	    );
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "facet_ptr_TBO",
-		CellsInfo::FACET_PTR_TEXTURE_UNIT
+		int(CellsInfo::FACET_PTR_TEXTURE_UNIT)
 	    );
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "facet_plane_TBO",
-		CellsInfo::FACET_PLANE_TEXTURE_UNIT
+		int(CellsInfo::FACET_PLANE_TEXTURE_UNIT)
 	    );
 	}
 

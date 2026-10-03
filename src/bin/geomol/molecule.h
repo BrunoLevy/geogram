@@ -270,9 +270,10 @@ namespace GEO {
 	    }
 
 	    void end_cell() {
-		// TODO: understand why -1 is needed here ------------.
-		//                                                    v
-		cell_facet_ptr.push_back(cell_facet_vertex_ptr.size()-1);
+		// -1 because count intervals instead of count bounds-------.
+		//                                                          v
+		index_t total_nb_cell_facets = cell_facet_vertex_ptr.size()-1;
+		cell_facet_ptr.push_back(total_nb_cell_facets);
 	    }
 
 	    void begin_facet() {
@@ -358,6 +359,8 @@ namespace GEO {
 		    );
 		}
 		glActiveTexture(GL_TEXTURE0);
+		cell_facet_ptr_tbo.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
+		cell_facet_plane_tbo.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
 	    }
 
 	    void draw() const {

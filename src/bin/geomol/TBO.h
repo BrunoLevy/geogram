@@ -43,6 +43,7 @@
 #include <geogram/basic/geometry.h>
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
+#include <typeinfo>
 
 namespace GEO {
 
@@ -83,7 +84,7 @@ namespace GEO {
      *    ...
      *    int index = ...;
      *    vec3 p = texelFetch(my_TBO, index).xyz;
-     *    int i =  itexelFetch(my_iTBO, index).x;
+     *    int  i = texelFetch(my_iTBO, index).x;
      *  \endcode
      *
      */
