@@ -52,8 +52,8 @@ namespace {
            int e = texelFetch(facet_ptr_TBO, i_cell_id+1).x;
            for(int k=b; k<e; ++k) {
               vec4 P = texelFetch(facet_plane_TBO, k);
-              if(dot(vec4(p,1),P) > 0.0) {
-                 return false;;
+              if(dot(vec4(p,1.0),P) > 0.0) {
+                 return false;
               }
            }
            return true;
@@ -104,6 +104,8 @@ namespace {
 	}
 	)";
 
+   /***************************************************************************/
+
     const char* GLUPES_hyperboloids_source =
         R"(
         //primitive GLUP_TRIANGLES
@@ -130,7 +132,7 @@ namespace {
 	    }
             C = tex_coord_in.xyz;
             R2 = -tex_coord_in.w;
-            n = normalize(normal_in.xyz);
+            n = normal_in.xyz;
             cell_id = normal_in.w;
             gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 	}
@@ -173,11 +175,6 @@ namespace {
             float alpha = cAxisPerp.x;
             float beta  = cAxisPerp.y;
 
-            //float alpha = -2.0;
-            //float beta = 2.0;
-
-            float RR2 = R2;
-
             Ray R = glup_primary_ray();
             vec3 co = R.O-C;
 
@@ -189,7 +186,7 @@ namespace {
 
             float a =      beta*dot(vXn,vXn)   + alpha*vDn*vDn;
             float b = 2.0*(beta*dot(coXn,vXn)  + alpha*coDn*vDn);
-            float c =      beta*dot(coXn,coXn) + alpha*coDn*coDn - RR2;
+            float c =      beta*dot(coXn,coXn) + alpha*coDn*coDn - R2;
 
 /*
     // From Matthieu's shader, gives same result

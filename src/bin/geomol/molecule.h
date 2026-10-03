@@ -270,6 +270,8 @@ namespace GEO {
 	    }
 
 	    void end_cell() {
+		// TODO: understand why -1 is needed here ------------.
+		//                                                    v
 		cell_facet_ptr.push_back(cell_facet_vertex_ptr.size()-1);
 	    }
 
