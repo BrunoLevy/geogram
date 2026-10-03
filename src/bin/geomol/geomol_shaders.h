@@ -18,11 +18,14 @@ namespace {
         glup_in vec4 normal_in;
         glup_flat glup_out vec4 color;
         glup_flat glup_out vec4 focus_R;
+        glup_flat glup_out float cell_id;
+
 	void main() {
 	    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
 	       color = color_in;
 	    }
 	    focus_R = tex_coord_in;
+            cell_id = normal_in.w;
             gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 	}
 	)"
@@ -38,6 +41,24 @@ namespace {
         //import <GLUP/fragment_ray_tracing.h>
         glup_flat glup_in vec4 color;
         glup_flat glup_in vec4 focus_R;
+        glup_flat glup_in float cell_id;
+
+        uniform isamplerBuffer facet_ptr_TBO;
+        uniform samplerBuffer facet_plane_TBO;
+
+        bool in_cell(in vec3 p) {
+           int i_cell_id = int(cell_id);
+           int b = texelFetch(facet_ptr_TBO, i_cell_id).x;
+           int e = texelFetch(facet_ptr_TBO, i_cell_id+1).x;
+           for(int k=b; k<e; ++k) {
+              vec4 P = texelFetch(facet_plane_TBO, k);
+              if(dot(vec4(p,1),P) > 0.0) {
+                 return false;;
+              }
+           }
+           return true;
+        }
+
 	void main() {
            vec3 C = focus_R.xyz;
            float r = focus_R.w;
@@ -69,6 +90,10 @@ namespace {
 
            vec3 M = R.O + t*R.V;
 
+           if(!in_cell(M)) {
+              discard;
+           }
+
            glup_update_depth(M);
            vec4 result = GLUP.front_color;
            if(glupIsEnabled(GLUP_LIGHTING)) {
@@ -98,8 +123,7 @@ namespace {
         glup_flat glup_out vec3  C;  // focus
         glup_flat glup_out vec3  n;  // axis
         glup_flat glup_out float R2;
-        glup_flat glup_out vec4  Pi1;
-        glup_flat glup_out vec4  Pi2;
+        glup_flat glup_out float cell_id;
 	void main() {
 	    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
 	       color = color_in;
@@ -107,8 +131,7 @@ namespace {
             C = tex_coord_in.xyz;
             R2 = -tex_coord_in.w;
             n = normalize(normal_in.xyz);
-            Pi1 = -normal_in;
-            Pi2 = vec4(n,-dot(n,C+normal_in.xyz));
+            cell_id = normal_in.w;
             gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 	}
 	)"
@@ -128,8 +151,23 @@ namespace {
         glup_flat glup_in vec3  C;  // focus
         glup_flat glup_in vec3  n;  // axis
         glup_flat glup_in float R2;
-        glup_flat glup_in vec4  Pi1;
-        glup_flat glup_in vec4  Pi2;
+        glup_flat glup_in float cell_id;
+
+        uniform isamplerBuffer facet_ptr_TBO;
+        uniform samplerBuffer facet_plane_TBO;
+
+        bool in_cell(in vec3 p) {
+           int i_cell_id = int(cell_id);
+           int b = texelFetch(facet_ptr_TBO, i_cell_id).x;
+           int e = texelFetch(facet_ptr_TBO, i_cell_id+1).x;
+           for(int k=b; k<e; ++k) {
+              vec4 P = texelFetch(facet_plane_TBO, k);
+              if(dot(vec4(p,1),P) > 0.0) {
+                 return false;;
+              }
+           }
+           return true;
+        }
 
 	void main() {
             float alpha = cAxisPerp.x;
@@ -179,17 +217,11 @@ namespace {
             vec3 M = R.O + t * R.V;
             if(t1 > t2) { sign = -1; }
 
-            if(
-               dot(M,Pi1.xyz)+Pi1.w > 0 ||
-               dot(M,Pi2.xyz)+Pi2.w > 0
-            ) {
+            if(!in_cell(M)) {
                 t = max(t1,t2);
                 M = R.O + t * R.V;
                 sign = sign * -1.0;
-                if(
-                  dot(M,Pi1.xyz)+Pi1.w > 0 ||
-                  dot(M,Pi2.xyz)+Pi2.w > 0
-                ) {
+                if(!in_cell(M)) {
                    discard;
                 }
             }

@@ -335,10 +335,32 @@ namespace GEO {
 
 	    /*************************************************/
 
+	    static constexpr GLuint FACET_PTR_TEXTURE_UNIT = 4;
+	    static constexpr GLuint FACET_PLANE_TEXTURE_UNIT = 5;
+
+	    void bind_tbos() const {
+		glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
+		if(cell_facet_ptr_tbo.TBO() == 0) {
+		    cell_facet_ptr_tbo.create_or_update(
+			cell_facet_ptr.size(), cell_facet_ptr.data()
+		    );
+		}
+		glActiveTexture(GL_TEXTURE0 + FACET_PLANE_TEXTURE_UNIT);
+		if(cell_facet_plane_tbo.TBO() == 0) {
+		    cell_facet_plane_tbo.create_or_update(
+			cell_facet_plane.size(), cell_facet_plane.data()
+		    );
+		}
+		glActiveTexture(GL_TEXTURE0);
+	    }
+
 	    void draw() const {
+		bind_tbos();
+		glupBegin(GLUP_TRIANGLES);
 		for(index_t c: *this) {
 		    draw_cell(c);
 		}
+		glupEnd();
 	    }
 
 	    void draw_cell(index_t c) const {
@@ -451,8 +473,8 @@ namespace GEO {
 	    vector<std::pair<vec4f, vec4f>> cell_eqn;
 
 	    // For sending to the GPU
-	    TextureBufferObject cell_facet_ptr_tbo;
-	    TextureBufferObject cell_facet_plane_tbo;
+	    mutable TextureBufferObject cell_facet_ptr_tbo;
+	    mutable TextureBufferObject cell_facet_plane_tbo;
 	};
 
 	/***********************************************************************/
@@ -469,9 +491,6 @@ namespace GEO {
 	vector<double> atom_weight_;
 	vector<vec3> tet_dual_;
 	SmartPointer<PowerDiagram> diagram_;
-	mutable vector<index_t> shrunk_tets_cache_; // tet ids
-	mutable vector<index_t> H1_cells_cache_; // halfedge ids
-	mutable vector<index_t> H2_cells_cache_; // halfedge ids
 	mutable index_t nb_triangles_; // number of drawn triangles
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};

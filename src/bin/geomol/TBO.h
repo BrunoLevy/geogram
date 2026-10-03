@@ -123,7 +123,7 @@ namespace GEO {
 	    if(max_TBO_size_ == 0) {
 		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
 	    }
-	    geo_assert(nb < max_TBO_size_);
+	    geo_assert(GLint(nb) < max_TBO_size_);
 	    update_or_check_buffer_object(
 		VBO_, GL_ARRAY_BUFFER,
 		nb * sizeof(T), data,
@@ -134,12 +134,6 @@ namespace GEO {
 		glBindTexture(GL_TEXTURE_BUFFER, TBO_);
 		glTexBuffer(GL_TEXTURE_BUFFER, format(T()), VBO_);
 	    }
-	}
-
-	// Note: there should be an active texture unit when calling this
-	// function the 1st time.
-	template <class T> void create_or_update(const std::vector<T>& V) {
-	    create_or_update(V.size(), V.data());
 	}
 
 	void bind(GLuint texture_unit) {

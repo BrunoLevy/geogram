@@ -152,9 +152,6 @@ namespace GEO {
 	    Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 				    << std::endl;
 	}
-	shrunk_tets_cache_.resize(0);
-	H1_cells_cache_.resize(0);
-	H2_cells_cache_.resize(0);
 	update_cells();
     }
 
@@ -383,11 +380,27 @@ namespace GEO {
 	    spheres_program_ = glupCompileProgram(
 		GLUPES_spheres_source
 	    );
+	    GLSL::set_program_uniform_by_name(
+		spheres_program_, "facet_ptr_TBO",
+		CellsInfo::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		spheres_program_, "facet_plane_TBO",
+		CellsInfo::FACET_PLANE_TEXTURE_UNIT
+	    );
 	}
 
 	if(hyperboloids_program_ == 0) {
 	    hyperboloids_program_ = glupCompileProgram(
 		GLUPES_hyperboloids_source
+	    );
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "facet_ptr_TBO",
+		CellsInfo::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "facet_plane_TBO",
+		CellsInfo::FACET_PLANE_TEXTURE_UNIT
 	    );
 	}
 
@@ -462,13 +475,13 @@ namespace GEO {
 	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
+	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupUseProgram(spheres_program_);
 	}
-	glupBegin(GLUP_TRIANGLES);
 	cells_[CELL_TYPE_S0].draw();
-	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
+	glupDisable(GLUP_VERTEX_NORMALS);
     }
 
     void Molecule::draw_H1_cells() const {
@@ -486,9 +499,7 @@ namespace GEO {
 	    );
 	    glupUseProgram(hyperboloids_program_);
 	}
-	glupBegin(GLUP_TRIANGLES);
 	cells_[CELL_TYPE_H1].draw();
-	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
 	glupDisable(GLUP_VERTEX_NORMALS);
@@ -509,9 +520,7 @@ namespace GEO {
 	    );
 	    glupUseProgram(hyperboloids_program_);
 	}
-	glupBegin(GLUP_TRIANGLES);
 	cells_[CELL_TYPE_H2].draw();
-	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
 	glupDisable(GLUP_VERTEX_NORMALS);
@@ -525,13 +534,13 @@ namespace GEO {
 	glupDisable(GLUP_VERTEX_COLORS);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
+	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupUseProgram(spheres_program_);
 	}
-	glupBegin(GLUP_TRIANGLES);
 	cells_[CELL_TYPE_S3].draw();
-	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
+	glupDisable(GLUP_VERTEX_NORMALS);
     }
 
     /************************************************************************/
