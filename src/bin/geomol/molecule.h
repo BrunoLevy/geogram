@@ -61,8 +61,7 @@ namespace GEO {
 	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3
 	};
 
-	Molecule() = default;
-
+	Molecule();
 	~Molecule();
 
 	bool load(const std::string& filename);
@@ -101,13 +100,17 @@ namespace GEO {
 	bool close_cells();
 
 	/**
+	 * \brief Copies the cells from the power diagram to the CellInfo
+	 *   array (that represents all the cells in compressed row storage
+	 *   format).
+	 */
+	void update_cells();
+
+	/**
 	 * \brief identifier for a vertex of the mixed complex
 	 * \details first index is a primal vertex, second index is a tet
 	 */
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
-	typedef std::tuple<mixed_vertex_id,mixed_vertex_id,mixed_vertex_id>
-	    mixed_trgl;
-
 	vec3 mixed_vertex(mixed_vertex_id V) const {
 	    double s = shrink_factor_;
 	    return mix(atom_pos_[V.first], tet_dual_[V.second], s);
@@ -254,21 +257,103 @@ namespace GEO {
 
 	/***********************************************************************/
 
-	struct CellsInfo {
-	    index_t nb_cells() const {
-		return triangles_ptr.size()-1;
+	class CellsInfo {
+	public:
+	    explicit CellsInfo(Molecule& mol): molecule_(mol) {
+		clear();
 	    }
 
-	    index_range cells() {
+	    void clear() {
+		cell_facet_ptr.resize(0);
+		cell_facet_ptr.push_back(0);
+		cell_facet_vertex_ptr.resize(0);
+		cell_facet_vertex_ptr.push_back(0);
+		cell_facet_vertex.resize(0);
+		cell_facet_plane.resize(0);
+
+		cell_handle.resize(0);
+		cell_cR.resize(0);
+		cell_nId.resize(0);
+	    }
+
+	    void begin_cell(
+		index_t handle, vec3 center, double radius
+	    ) {
+		index_t cell_id = cell_handle.size();
+		cell_handle.push_back(handle);
+		cell_cR.push_back({
+		   float(center.x), float(center.y), float(center.z),
+		   float(radius)
+		});
+		cell_nId.push_back({0.0f, 0.0f, 0.0f, float(cell_id)});
+	    }
+
+	    void begin_cell(
+		index_t handle, vec3 center, vec3 axis, double R2
+	    ) {
+		index_t cell_id = cell_handle.size();
+		cell_handle.push_back(handle);
+		cell_cR.push_back({
+		   float(center.x), float(center.y), float(center.z),
+		   float(R2)
+		});
+		cell_nId.push_back({
+		   float(axis.x), float(axis.y), float(axis.z),
+		   float(cell_id)
+		});
+	    }
+
+
+	    void end_cell() {
+		cell_facet_ptr.push_back(cell_facet_vertex_ptr.size()-1);
+	    }
+
+	    void begin_facet() {
+	    }
+
+	    void end_facet() {
+		cell_facet_vertex_ptr.push_back(cell_facet_vertex.size());
+		auto it = cell_facet_vertex.rbegin();
+		vec3 p3 = molecule_.mixed_vertex(*it);
+		vec3 p2 = molecule_.mixed_vertex(*(it+1));
+		vec3 p1 = molecule_.mixed_vertex(*(it+2));
+		vec3 n = cross(p2-p1,p3-p1);
+		vec4 P{n,-dot(n,p1)};
+		cell_facet_plane.push_back(
+		    {float(P.x),float(P.y),float(P.z),float(P.w)}
+		);
+	    }
+
+	    void add_vertex(mixed_vertex_id V) {
+		cell_facet_vertex.push_back(V);
+	    }
+
+	    index_t nb_cells() const {
+		return cell_handle.size();
+	    }
+
+	    index_t cell_nb_facets(index_t c) const {
+		geo_debug_assert(c < nb_cells());
+		return (cell_facet_ptr[c+1] - cell_facet_ptr[c]);
+	    }
+
+	    index_range cells() const {
 		return index_range(0, nb_cells());
 	    }
 
-	    auto cell_triangles(index_t c) const {
+	    auto cell_facets(index_t c) const {
 		geo_debug_assert(c < nb_cells());
+		return index_range(cell_facet_ptr[c], cell_facet_ptr[c+1]);
+	    }
+
+	    auto cell_facet_vertices(index_t f) const {
+		geo_debug_assert(f+1 < cell_facet_vertex_ptr.size());
 		return transform_range(
-		    index_range(triangles_ptr[c], triangles_ptr[c+1]),
-		    [this](index_t t) -> mixed_trgl {
-			return triangles[t];
+		    index_range(
+			cell_facet_vertex_ptr[f],
+			cell_facet_vertex_ptr[f+1]
+		    ), [this](index_t v) -> mixed_vertex_id {
+			return cell_facet_vertex[v];
 		    }
 		);
 	    }
@@ -276,17 +361,33 @@ namespace GEO {
 	    auto cell_planes(index_t c) const {
 		geo_debug_assert(c < nb_cells());
 		return transform_range(
-		    index_range(planes_ptr[c], planes_ptr[c+1]),
+		    index_range(cell_facet_ptr[c], cell_facet_ptr[c+1]),
 		    [this](index_t p) -> vec4f {
-			return planes[p];
+			return cell_facet_plane[p];
 		    }
 		);
 	    }
 
-	    vector<index_t> triangles_ptr;
-	    vector<mixed_trgl> triangles;
-	    vector<index_t> planes_ptr;
-	    vector<vec4f> planes;
+	private:
+	    Molecule& molecule_;
+
+	    // Dual-level compressed row storage
+	    // Groumf, I should only store n-sided facets like that, and
+	    // do something smarter to speed-up display... Let us think a little
+	    // bit more about it...
+	    // Well, let us keep moving forward for now!
+	    vector<index_t> cell_facet_ptr;
+	    vector<vec4f>   cell_facet_plane;
+	    vector<index_t> cell_facet_vertex_ptr;
+	    vector<mixed_vertex_id> cell_facet_vertex;
+
+	    vector<index_t> cell_handle;
+	    vector<vec4f>   cell_cR;
+	    vector<vec4f>   cell_nId;
+
+	    // For sending to the GPU
+	    TextureBufferObject cell_facet_ptr_tbo;
+	    TextureBufferObject cell_facet_plane_tbo;
 	};
 
 	/***********************************************************************/
@@ -327,6 +428,8 @@ namespace GEO {
 	bool verbose_ = false;
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
+
+	CellsInfo cells_[4];
 
 	static constexpr double c2 = 0.5;
 	static constexpr double c3 = 1.0;

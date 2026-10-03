@@ -46,6 +46,12 @@
 
 namespace GEO {
 
+    Molecule::Molecule() : cells_{
+	    CellsInfo(*this), CellsInfo(*this),
+	    CellsInfo(*this), CellsInfo(*this)
+    } {
+    }
+
     Molecule::~Molecule() {
 	if(spheres_program_ != 0) {
 	    glDeleteProgram(spheres_program_);
@@ -83,8 +89,8 @@ namespace GEO {
     Box3d Molecule::bbox() const {
 	Box3d B;
 	B.clear();
-	for(vec3 p: atom_pos_) {
-	    B.add(p);
+	for(index_t v: atoms()) {
+	    B.add(atom_pos_[v]);
 	}
 	return B;
     }
@@ -149,6 +155,7 @@ namespace GEO {
 	shrunk_tets_cache_.resize(0);
 	H1_cells_cache_.resize(0);
 	H2_cells_cache_.resize(0);
+	update_cells();
     }
 
     bool Molecule::close_cells() {
@@ -214,6 +221,39 @@ namespace GEO {
 	    return true;
 	}
 	return false;
+    }
+
+
+    void Molecule::update_cells() {
+	{
+	    CellsInfo& cells = cells_[CELL_TYPE_S0];
+	    cells.clear();
+	    for(index_t v: atoms()) {
+		vec3 c = atom_pos_[v];
+		double R = atom_radius(v);
+		cells.begin_cell(v,c,R);
+		for(index_t h0: diagram_->incident_edges(v)) {
+		    if(h0 == NO_INDEX) { break; }
+		    cells.begin_facet();
+		    index_t v1 = diagram_->halfedge_v(h0,0);
+		    index_t v2 = diagram_->halfedge_v(h0,1);
+		    index_t h = h0;
+		    do {
+			index_t t = diagram_->halfedge_t(h);
+			cells.add_vertex({v1,t});
+			h = diagram_->next_halfedge_around_edge(h, v1, v2);
+		    } while(h != h0);
+		    cells.end_facet();
+		}
+		cells.end_cell();
+	    }
+	}
+
+	cells_[CELL_TYPE_H1].clear();
+
+	cells_[CELL_TYPE_H2].clear();
+
+	cells_[CELL_TYPE_S3].clear();
     }
 
     /************************************************************************/
@@ -310,9 +350,36 @@ namespace GEO {
 	    glupUseProgram(spheres_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
+
+
+	const CellsInfo& cells = cells_[CELL_TYPE_S0];
+	for(index_t c: cells.cells()) {
+	    for(index_t f: cells.cell_facets(c)) {
+		bool has_v1 = false;
+		bool has_v2 = false;
+		mixed_vertex_id v1;
+		mixed_vertex_id v2;
+		for(mixed_vertex_id v: cells.cell_facet_vertices(f)) {
+		    if(!has_v1) {
+			has_v1 = true;
+			v1 = v;
+		    } else if(!has_v2) {
+			has_v2 = true;
+			v2 = v;
+		    } else {
+			draw_triangle(v1,v2,v);
+			v2 = v;
+		    }
+		}
+	    }
+	}
+
+	/*
 	for(index_t v: atoms()) {
 	    draw_S0_cell(v);
 	}
+	*/
+
 	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);

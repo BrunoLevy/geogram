@@ -90,9 +90,6 @@ namespace GEO {
     class TextureBufferObject {
     public:
         TextureBufferObject() : VBO_(0), TBO_(0) {
-	    if(max_TBO_size_ == 0) {
-		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
-	    }
 	}
 
 	~TextureBufferObject() {
@@ -119,6 +116,9 @@ namespace GEO {
 	template <class T> void create_or_update(
 	    index_t nb, const T* data
 	) {
+	    if(max_TBO_size_ == 0) {
+		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
+	    }
 	    geo_assert(nb < max_TBO_size_);
 	    update_or_check_buffer_object(
 		VBO_, GL_ARRAY_BUFFER,
