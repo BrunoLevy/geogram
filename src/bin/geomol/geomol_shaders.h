@@ -63,10 +63,6 @@ namespace {
            vec3 C = focus_R.xyz;
            float r = focus_R.w;
            float sign = 1.0;
-           if(r < 0.0) {
-              r = -r;
-              sign = -1.0;
-           }
 
            Ray R = glup_primary_ray();
 
@@ -91,7 +87,13 @@ namespace {
            vec3 M = R.O + t*R.V;
 
            if(!in_cell(M)) {
-              discard;
+              float c = dot(D,D)-r*r;
+              t = c/q;
+              M = R.O + t*R.V;
+              sign = sign * -1;
+              if(!in_cell(M)) {
+                  discard;
+              }
            }
 
            glup_update_depth(M);

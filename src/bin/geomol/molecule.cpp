@@ -358,8 +358,8 @@ namespace GEO {
 		continue;
 	    }
 
-	    double R = ::sqrt(R2)*(1.0-shrink_factor_);
-	    cells.begin_S_cell(c,-R);
+	    double R = ::sqrt(R2*(1.0-shrink_factor_));
+	    cells.begin_S_cell(c,R);
 	    cells.add_shrunk_tet_facet(t,0);
 	    cells.add_shrunk_tet_facet(t,1);
 	    cells.add_shrunk_tet_facet(t,2);
