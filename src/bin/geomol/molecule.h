@@ -238,13 +238,13 @@ namespace GEO {
 		cell_facet_vertex.resize(0);
 		cell_facet_plane.resize(0);
 		cell_eqn.resize(0);
-		cell_facet_ptr_tbo.clear();
-		cell_facet_plane_tbo.clear();
+		cell_facet_ptr_tbo.reset();
+		cell_facet_plane_tbo.reset();
 	    }
 
 	    /*************************************************/
 
-	    void begin_cell(vec3 center, double radius) {
+	    void begin_S_cell(vec3 center, double radius) {
 		index_t cell_id = cell_eqn.size();
 		cell_eqn.emplace_back(
 		    vec4f{
@@ -255,7 +255,7 @@ namespace GEO {
 		);
 	    }
 
-	    void begin_cell(vec3 center, vec3 axis, double R2) {
+	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
 		index_t cell_id = cell_eqn.size();
 		cell_eqn.emplace_back(
 		    vec4f{

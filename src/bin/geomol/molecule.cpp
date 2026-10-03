@@ -236,7 +236,7 @@ namespace GEO {
 	for(index_t v: atoms()) {
 	    vec3 c = atom_pos_[v];
 	    double R = atom_radius(v);
-	    cells.begin_cell(c,R);
+	    cells.begin_S_cell(c,R);
 	    for(index_t h0: diagram_->incident_edges(v)) {
 		if(h0 == NO_INDEX) { break; }
 		cells.add_shrunk_power_facet(h0);
@@ -270,7 +270,7 @@ namespace GEO {
 		double R2 = distance2(c, diagram_->vertex(v1)) -
 		    diagram_->weight(v1);
 
-		cells.begin_cell(c,axis,R2);
+		cells.begin_H_cell(c,axis,R2);
 
 		index_t h = h0;
 		do {
@@ -318,7 +318,7 @@ namespace GEO {
 		    distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
 		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 
-		cells.begin_cell(c,axis,R2);
+		cells.begin_H_cell(c,axis,R2);
 
 		index_t h1 =
 		    diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
@@ -362,7 +362,7 @@ namespace GEO {
 	    }
 
 	    double R = ::sqrt(R2)*(1.0-shrink_factor_);
-	    cells.begin_cell(c,-R);
+	    cells.begin_S_cell(c,-R);
 	    cells.add_shrunk_tet_facet(t,0);
 	    cells.add_shrunk_tet_facet(t,1);
 	    cells.add_shrunk_tet_facet(t,2);
