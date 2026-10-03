@@ -238,6 +238,8 @@ namespace GEO {
 		cell_facet_vertex.resize(0);
 		cell_facet_plane.resize(0);
 		cell_eqn.resize(0);
+		cell_facet_ptr_tbo.clear();
+		cell_facet_plane_tbo.clear();
 	    }
 
 	    /*************************************************/

@@ -93,14 +93,7 @@ namespace GEO {
 	}
 
 	~TextureBufferObject() {
-	    if(TBO_ != 0) {
-		glDeleteTextures(1, &TBO_);
-		TBO_ = 0;
-	    }
-	    if(VBO_ != 0) {
-		glDeleteBuffers(1,&VBO_);
-		VBO_ = 0;
-	    }
+	    reset();
 	}
 
 	GLuint VBO() const {
@@ -109,6 +102,17 @@ namespace GEO {
 
 	GLuint TBO() const {
 	    return TBO_;
+	}
+
+	void reset() {
+	    if(TBO_ != 0) {
+		glDeleteTextures(1, &TBO_);
+		TBO_ = 0;
+	    }
+	    if(VBO_ != 0) {
+		glDeleteBuffers(1,&VBO_);
+		VBO_ = 0;
+	    }
 	}
 
 	// Note: there should be an active texture unit when calling this
