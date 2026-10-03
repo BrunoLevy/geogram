@@ -223,150 +223,152 @@ namespace GEO {
 	return false;
     }
 
-
     void Molecule::update_cells() {
-	/***********************************************/
-	{
-	    CellsInfo& cells = cells_[CELL_TYPE_S0];
-	    cells.clear();
-	    for(index_t v: atoms()) {
-		vec3 c = atom_pos_[v];
-		double R = atom_radius(v);
-		cells.begin_cell(c,R);
-		for(index_t h0: diagram_->incident_edges(v)) {
-		    if(h0 == NO_INDEX) { break; }
-		    cells.add_shrunk_power_facet(h0);
+	update_S0_cells();
+	update_H1_cells();
+	update_H2_cells();
+	update_S3_cells();
+    }
+
+    void Molecule::update_S0_cells() {
+	CellsInfo& cells = cells_[CELL_TYPE_S0];
+	cells.clear();
+	for(index_t v: atoms()) {
+	    vec3 c = atom_pos_[v];
+	    double R = atom_radius(v);
+	    cells.begin_cell(c,R);
+	    for(index_t h0: diagram_->incident_edges(v)) {
+		if(h0 == NO_INDEX) { break; }
+		cells.add_shrunk_power_facet(h0);
+	    }
+	    cells.end_cell();
+	}
+    }
+
+    void Molecule::update_H1_cells() {
+	CellsInfo& cells = cells_[CELL_TYPE_H1];
+	cells.clear();
+	// Select the edges incident to two real atoms,
+	// and keep only one halfedge per pair (v1 < v2)
+	for(index_t v1: atoms()) {
+	    for(index_t h0: diagram_->incident_edges(v1)) {
+		if(h0 == NO_INDEX) {
+		    break;
 		}
+		index_t v2 = diagram_->halfedge_v(h0,1);
+		if(!is_atom(v2) || v1 > v2) {
+		    continue;
+		}
+		index_t t  = diagram_->halfedge_t(h0);
+
+		vec3 p1 = mixed_vertex({v1,t});
+		vec3 p2 = mixed_vertex({v2,t});
+
+		vec3 c = diagram_->radical_point(v1,v2);
+		vec3 axis = normalize(p2 - p1);
+
+		double R2 = distance2(c, diagram_->vertex(v1)) -
+		    diagram_->weight(v1);
+
+		cells.begin_cell(c,axis,R2);
+
+		index_t h = h0;
+		do {
+		    cells.add_quad_facet(h);
+		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
+		} while(h != h0);
+		cells.add_shrunk_power_facet(h, FLIPPED);
+		h = diagram_->halfedge_flip(h);
+		cells.add_shrunk_power_facet(h, FLIPPED);
+
 		cells.end_cell();
 	    }
 	}
-	/***********************************************/
-	{
-	    CellsInfo& cells = cells_[CELL_TYPE_H1];
-	    cells.clear();
-	    // Select the edges incident to two real atoms,
-	    // and keep only one halfedge per pair (v1 < v2)
-	    for(index_t v1: atoms()) {
-		for(index_t h0: diagram_->incident_edges(v1)) {
-		    if(h0 == NO_INDEX) {
-			break;
-		    }
-		    index_t v2 = diagram_->halfedge_v(h0,1);
-		    if(!is_atom(v2) || v1 > v2) {
-			continue;
-		    }
-		    index_t t  = diagram_->halfedge_t(h0);
+    }
 
-		    vec3 p1 = mixed_vertex({v1,t});
-		    vec3 p2 = mixed_vertex({v2,t});
+    void Molecule::update_H2_cells() {
 
-		    vec3 c = diagram_->radical_point(v1,v2);
-		    vec3 axis = normalize(p2 - p1);
-
-		    double R2 = distance2(c, diagram_->vertex(v1)) -
-			diagram_->weight(v1);
-
-		    cells.begin_cell(c,axis,R2);
-
-		    index_t h = h0;
-		    do {
-			cells.add_quad_facet(h);
-			h = diagram_->next_halfedge_around_edge(h,v1,v2);
-		    } while(h != h0);
-		    cells.add_shrunk_power_facet(h, FLIPPED);
-		    h = diagram_->halfedge_flip(h);
-		    cells.add_shrunk_power_facet(h, FLIPPED);
-
-		    cells.end_cell();
-		}
+	CellsInfo& cells = cells_[CELL_TYPE_H2];
+	cells.clear();
+	for(index_t t1: diagram_->tets()) {
+	    if(!diagram_->tet_is_finite(t1)) {
+		continue;
 	    }
-	}
-	/***********************************************/
-	{
-	    CellsInfo& cells = cells_[CELL_TYPE_H2];
-	    cells.clear();
-	    for(index_t t1: diagram_->tets()) {
-		if(!diagram_->tet_is_finite(t1)) {
-		    continue;
-		}
-		for(index_t lf=0; lf<4; ++lf) {
-		    index_t t2 = diagram_->tet_adjacent(t1, lf);
-		    if(t2 < t1) {
-			continue;
-		    }
-
-		    index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
-		    index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
-		    index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
-		    index_t v1 = diagram_->tet_vertex(t1,lv1);
-		    index_t v2 = diagram_->tet_vertex(t1,lv2);
-		    index_t v3 = diagram_->tet_vertex(t1,lv3);
-
-		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
-			continue;
-		    }
-
-
-		    index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-
-		    vec3 c = diagram_->radical_point(v1,v2,v3);
-		    double R2 =
-			distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
-		    vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
-
-		    cells.begin_cell(c,axis,R2);
-
-		    index_t h1 =
-			diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
-		    index_t h2 =
-			diagram_->make_halfedge_from_t_lv_lv(t1, lv2, lv3);
-		    index_t h3 =
-			diagram_->make_halfedge_from_t_lv_lv(t1, lv3, lv1);
-
-		    cells.add_quad_facet(h1,FLIPPED);
-		    cells.add_quad_facet(h2,FLIPPED);
-		    cells.add_quad_facet(h3,FLIPPED);
-		    cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
-		    cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
-
-		    cells.end_cell();
-		}
-	    }
-	}
-	/***********************************************/
-	{
-	    CellsInfo& cells = cells_[CELL_TYPE_S3];
-	    cells.clear();
-	    for(index_t t: diagram_->tets()) {
-		if(
-		    !is_atom(diagram_->tet_vertex(t,0)) ||
-		    !is_atom(diagram_->tet_vertex(t,1)) ||
-		    !is_atom(diagram_->tet_vertex(t,2)) ||
-		    !is_atom(diagram_->tet_vertex(t,3))
-		) {
+	    for(index_t lf=0; lf<4; ++lf) {
+		index_t t2 = diagram_->tet_adjacent(t1, lf);
+		if(t2 < t1) {
 		    continue;
 		}
 
-		vec3 c = tet_dual_[t];
-		index_t v0 = diagram_->tet_vertex(t,0);
-		vec3 p0 = diagram_->vertex(v0);
-		double R2 = distance2(c,p0) - diagram_->weight(v0);
-		// TODO: detect also sphere surface completely outside
-		// of shrunk tet
-		if(R2 < 0.0) {
+		index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
+		index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
+		index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
+		index_t v1 = diagram_->tet_vertex(t1,lv1);
+		index_t v2 = diagram_->tet_vertex(t1,lv2);
+		index_t v3 = diagram_->tet_vertex(t1,lv3);
+
+		if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
 		    continue;
 		}
 
-		double R = ::sqrt(R2)*(1.0-shrink_factor_);
-		cells.begin_cell(c,-R);
-		cells.add_shrunk_tet_facet(t,0);
-		cells.add_shrunk_tet_facet(t,1);
-		cells.add_shrunk_tet_facet(t,2);
-		cells.add_shrunk_tet_facet(t,3);
+		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
+
+		vec3 c = diagram_->radical_point(v1,v2,v3);
+		double R2 =
+		    distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
+		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
+
+		cells.begin_cell(c,axis,R2);
+
+		index_t h1 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
+		index_t h2 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv2, lv3);
+		index_t h3 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv3, lv1);
+
+		cells.add_quad_facet(h1,FLIPPED);
+		cells.add_quad_facet(h2,FLIPPED);
+		cells.add_quad_facet(h3,FLIPPED);
+		cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
+		cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+
 		cells.end_cell();
 	    }
 	}
-	/***********************************************/
+    }
+
+    void Molecule::update_S3_cells() {
+	CellsInfo& cells = cells_[CELL_TYPE_S3];
+	cells.clear();
+	for(index_t t: diagram_->tets()) {
+	    if(
+		!is_atom(diagram_->tet_vertex(t,0)) ||
+		!is_atom(diagram_->tet_vertex(t,1)) ||
+		!is_atom(diagram_->tet_vertex(t,2)) ||
+		!is_atom(diagram_->tet_vertex(t,3))
+	    ) {
+		continue;
+	    }
+
+	    vec3 c = tet_dual_[t];
+	    index_t v0 = diagram_->tet_vertex(t,0);
+	    vec3 p0 = diagram_->vertex(v0);
+	    double R2 = distance2(c,p0) - diagram_->weight(v0);
+	    // TODO: detect also sphere surface completely outside
+	    // of shrunk tet
+	    if(R2 < 0.0) {
+		continue;
+	    }
+
+	    double R = ::sqrt(R2)*(1.0-shrink_factor_);
+	    cells.begin_cell(c,-R);
+	    cells.add_shrunk_tet_facet(t,0);
+	    cells.add_shrunk_tet_facet(t,1);
+	    cells.add_shrunk_tet_facet(t,2);
+	    cells.add_shrunk_tet_facet(t,3);
+	    cells.end_cell();
+	}
     }
 
     /************************************************************************/

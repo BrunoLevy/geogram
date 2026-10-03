@@ -105,6 +105,10 @@ namespace GEO {
 	 *   format).
 	 */
 	void update_cells();
+	void update_S0_cells();
+	void update_H1_cells();
+	void update_H2_cells();
+	void update_S3_cells();
 
 	/**
 	 * \brief identifier for a vertex of the mixed complex
