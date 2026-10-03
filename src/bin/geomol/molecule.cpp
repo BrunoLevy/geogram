@@ -225,6 +225,7 @@ namespace GEO {
 
 
     void Molecule::update_cells() {
+	/***********************************************/
 	{
 	    CellsInfo& cells = cells_[CELL_TYPE_S0];
 	    cells.clear();
@@ -239,7 +240,7 @@ namespace GEO {
 		cells.end_cell();
 	    }
 	}
-
+	/***********************************************/
 	{
 	    CellsInfo& cells = cells_[CELL_TYPE_H1];
 	    cells.clear();
@@ -262,9 +263,8 @@ namespace GEO {
 		    vec3 c = diagram_->radical_point(v1,v2);
 		    vec3 axis = normalize(p2 - p1);
 
-		    double R2 = distance2(
-			c, diagram_->vertex(v1)
-		    ) - diagram_->weight(v1);
+		    double R2 = distance2(c, diagram_->vertex(v1)) -
+			diagram_->weight(v1);
 
 		    cells.begin_cell(c,axis,R2);
 
@@ -281,10 +281,92 @@ namespace GEO {
 		}
 	    }
 	}
+	/***********************************************/
+	{
+	    CellsInfo& cells = cells_[CELL_TYPE_H2];
+	    cells.clear();
+	    for(index_t t1: diagram_->tets()) {
+		if(!diagram_->tet_is_finite(t1)) {
+		    continue;
+		}
+		for(index_t lf=0; lf<4; ++lf) {
+		    index_t t2 = diagram_->tet_adjacent(t1, lf);
+		    if(t2 < t1) {
+			continue;
+		    }
 
-	cells_[CELL_TYPE_H2].clear();
+		    index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
+		    index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
+		    index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
+		    index_t v1 = diagram_->tet_vertex(t1,lv1);
+		    index_t v2 = diagram_->tet_vertex(t1,lv2);
+		    index_t v3 = diagram_->tet_vertex(t1,lv3);
 
-	cells_[CELL_TYPE_S3].clear();
+		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
+			continue;
+		    }
+
+
+		    index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
+
+		    vec3 c = diagram_->radical_point(v1,v2,v3);
+		    double R2 =
+			distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
+		    vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
+
+		    cells.begin_cell(c,axis,R2);
+
+		    index_t h1 =
+			diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
+		    index_t h2 =
+			diagram_->make_halfedge_from_t_lv_lv(t1, lv2, lv3);
+		    index_t h3 =
+			diagram_->make_halfedge_from_t_lv_lv(t1, lv3, lv1);
+
+		    cells.add_quad_facet(h1,FLIPPED);
+		    cells.add_quad_facet(h2,FLIPPED);
+		    cells.add_quad_facet(h3,FLIPPED);
+		    cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
+		    cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+
+		    cells.end_cell();
+		}
+	    }
+	}
+	/***********************************************/
+	{
+	    CellsInfo& cells = cells_[CELL_TYPE_S3];
+	    cells.clear();
+	    for(index_t t: diagram_->tets()) {
+		if(
+		    !is_atom(diagram_->tet_vertex(t,0)) ||
+		    !is_atom(diagram_->tet_vertex(t,1)) ||
+		    !is_atom(diagram_->tet_vertex(t,2)) ||
+		    !is_atom(diagram_->tet_vertex(t,3))
+		) {
+		    continue;
+		}
+
+		vec3 c = tet_dual_[t];
+		index_t v0 = diagram_->tet_vertex(t,0);
+		vec3 p0 = diagram_->vertex(v0);
+		double R2 = distance2(c,p0) - diagram_->weight(v0);
+		// TODO: detect also sphere surface completely outside
+		// of shrunk tet
+		if(R2 < 0.0) {
+		    continue;
+		}
+
+		double R = ::sqrt(R2)*(1.0-shrink_factor_);
+		cells.begin_cell(c,-R);
+		cells.add_shrunk_tet_facet(t,0);
+		cells.add_shrunk_tet_facet(t,1);
+		cells.add_shrunk_tet_facet(t,2);
+		cells.add_shrunk_tet_facet(t,3);
+		cells.end_cell();
+	    }
+	}
+	/***********************************************/
     }
 
     /************************************************************************/
@@ -411,31 +493,6 @@ namespace GEO {
     }
 
     void Molecule::draw_H2_cells() const {
-	// Select the faces incident to three real atoms,
-	// and keep only one facet in each pair (t1 < t2)
-	if(H2_cells_cache_.size() == 0) {
-	    for(index_t t1: diagram_->tets()) {
-		if(!diagram_->tet_is_finite(t1)) {
-		    continue;
-		}
-		for(index_t lf=0; lf<4; ++lf) {
-		    index_t t2 = diagram_->tet_adjacent(t1, lf);
-		    if(t2 < t1) {
-			continue;
-		    }
-		    index_t v1 = diagram_->tet_facet_vertex(t1, lf, 0);
-		    index_t v2 = diagram_->tet_facet_vertex(t1, lf, 1);
-		    index_t v3 = diagram_->tet_facet_vertex(t1, lf, 2);
-		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
-			continue;
-		    }
-		    H2_cells_cache_.push_back(
-			diagram_->make_halfedge_from_t_lf_le(t1, lf, 0)
-		    );
-		}
-	    }
-	}
-
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
 	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H2].data()
@@ -451,9 +508,7 @@ namespace GEO {
 	    glupUseProgram(hyperboloids_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
-	for(index_t h: H2_cells_cache_) {
-	    draw_H2_cell(diagram_->halfedge_t(h), diagram_->halfedge_lf(h));
-	}
+	cells_[CELL_TYPE_H2].draw();
 	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
@@ -462,20 +517,6 @@ namespace GEO {
 
 
     void Molecule::draw_S3_cells() const {
-	// Select the tetrahedra incident to four real atoms
-	if(shrunk_tets_cache_.size() == 0) {
-	    for(index_t t: diagram_->tets()) {
-		if(
-		    is_atom(diagram_->tet_vertex(t,0)) &&
-		    is_atom(diagram_->tet_vertex(t,1)) &&
-		    is_atom(diagram_->tet_vertex(t,2)) &&
-		    is_atom(diagram_->tet_vertex(t,3))
-		) {
-		    shrunk_tets_cache_.push_back(t);
-		}
-	    }
-	}
-
 	glupSetColor3dv(
 	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_S3].data()
 	);
@@ -485,9 +526,7 @@ namespace GEO {
 	    glupUseProgram(spheres_program_);
 	}
 	glupBegin(GLUP_TRIANGLES);
-	for(index_t t: shrunk_tets_cache_) {
-	    draw_S3_cell(t);
-	}
+	cells_[CELL_TYPE_S3].draw();
 	glupEnd();
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);

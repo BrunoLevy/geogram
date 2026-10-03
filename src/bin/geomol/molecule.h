@@ -440,6 +440,25 @@ namespace GEO {
 		end_facet();
 	    }
 
+	    void add_shrunk_tet_facet(
+		index_t t, index_t lf, bool flipped=false
+	    ) {
+		index_t v1 = diagram().tet_facet_vertex(t, lf, 0);
+		index_t v2 = diagram().tet_facet_vertex(t, lf, 1);
+		index_t v3 = diagram().tet_facet_vertex(t, lf, 2);
+		begin_facet();
+		if(flipped) {
+		    add_vertex({v3,t});
+		    add_vertex({v2,t});
+		    add_vertex({v1,t});
+		} else {
+		    add_vertex({v1,t});
+		    add_vertex({v2,t});
+		    add_vertex({v3,t});
+		}
+		end_facet();
+	    }
+
 	    /*************************************************/
 
 	    const PowerDiagram& diagram() const {
