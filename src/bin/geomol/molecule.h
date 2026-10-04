@@ -508,9 +508,9 @@ namespace GEO {
 	mutable bool wireframe_ = 0.0;
 
 	bool draw_mss_ = false;
-	bool raytrace_ = false;
+	bool raytrace_ = true;
 	bool draw_cell_[4] = {
-	    true, true, false, false
+	    true, true, true, true
 	};
 	vec3 cell_color_[4] = {
 	    {0.0, 1.0, 0.0},
