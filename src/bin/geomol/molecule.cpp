@@ -42,7 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram_gfx/basic/GLSL.h>
-#include "geomol_shaders.h"
+#include "molecule_shaders.h"
 
 namespace GEO {
 
@@ -415,6 +415,10 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::create_shaders_if_needed() {
+	if(S_program_ == 0 && H_program_ == 0) {
+	    register_geomol_shader_utilities();
+	}
+
 	if(S_program_ == 0) {
 	    S_program_ = glupCompileProgram(spheres_source);
 	    GLSL::set_program_uniform_by_name(
