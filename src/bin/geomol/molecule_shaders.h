@@ -178,30 +178,25 @@ namespace {
 
             Ray R = glup_primary_ray();
             vec3 co = R.O-C;
-
-            vec3 coXn = cross(co,n);
-            vec3 vXn  = cross(R.V,n);
-
             float coDn = dot(co,n);
             float vDn  = dot(R.V,n);
 
-            float a =      beta*dot(vXn,vXn)   + alpha*vDn*vDn;
-            float b = 2.0*(beta*dot(coXn,vXn)  + alpha*coDn*vDn);
-            float c =      beta*dot(coXn,coXn) + alpha*coDn*coDn - R2;
+            // my old version using length of cross product for YZ axis
+            /*
+            vec3 coXn = cross(co,n);
+            vec3 vXn  = cross(R.V,n);
+            float a =      alpha*vDn*vDn   + beta*dot(vXn,vXn)  ;
+            float b = 2.0*(alpha*coDn*vDn  + beta*dot(coXn,vXn));
+            float c =      alpha*coDn*coDn + beta*dot(coXn,coXn) - R2;
+            */
 
-/*
-    // From Matthieu's shader, gives same result
-    float u_cAxis = cAxisPerp.x;
-    float u_cPerp = cAxisPerp.y;
-    vec3  A = n;
-    vec3  dv = R.O - C;
-    float u0 = dot(dv, A);
-    float da = dot(R.V, A);
-    float cdiff = u_cAxis - u_cPerp;
-    float a = cdiff*da*da + u_cPerp*dot(R.V, R.V);
-    float b = 2.0*(cdiff*u0*da + u_cPerp*dot(dv, R.V));
-    float c = cdiff*u0*u0 + u_cPerp*dot(dv, dv) - R2;
- */
+            // This version for Matthieu's shader, more efficient I think
+            // Probably computes YZ components by subtracging X component
+            // (to be understood)
+            float gamma = alpha - beta;
+            float a =      gamma*vDn*vDn   + beta*dot(R.V, R.V);
+            float b = 2.0*(gamma*coDn*vDn  + beta*dot(R.V, co));
+            float c =      gamma*coDn*coDn + beta*dot(co,co) - R2;
 
             float delta = b*b - 4.0*a*c;
             if(delta < 0.0) {
