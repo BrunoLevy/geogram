@@ -284,7 +284,7 @@ namespace GEO {
 	    }
 
 	    auto cell_facet_vertices(index_t f) const {
-		geo_debug_assert(f+1 < cell_facet_vertex_ptr.size());
+		geo_debug_assert(f+1 < cell_facet_vertex_ptr_.size());
 		return transform_range(
 		    index_range(
 			cell_facet_vertex_ptr_[f],
