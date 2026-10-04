@@ -180,33 +180,6 @@ namespace GEO {
 
 	/***********************************************************************/
 
-	void draw_triangle(
-	    mixed_vertex_id V1, mixed_vertex_id V2, mixed_vertex_id V3,
-	    bool flipped=false
-	) const {
-	    if(wireframe_) {
-		glupVertex(mixed_vertex(V1));
-		glupVertex(mixed_vertex(V2));
-		glupVertex(mixed_vertex(V2));
-		glupVertex(mixed_vertex(V3));
-		glupVertex(mixed_vertex(V3));
-		glupVertex(mixed_vertex(V1));
-	    }
-
-	    if(flipped) {
-		glupVertex(mixed_vertex(V3));
-		glupVertex(mixed_vertex(V2));
-		glupVertex(mixed_vertex(V1));
-	    } else {
-		glupVertex(mixed_vertex(V1));
-		glupVertex(mixed_vertex(V2));
-		glupVertex(mixed_vertex(V3));
-	    }
-	    ++nb_triangles_;
-	}
-
-	/***********************************************************************/
-
 	double atom_radius(index_t v) const {
 	    return atom_size_*atom_radius_from_type(atom_type_[v]);
 	}
@@ -278,18 +251,21 @@ namespace GEO {
 	    void end_facet() {
 		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
 		auto it = cell_facet_vertex_.rbegin();
-		vec3 p3 = molecule_.mixed_vertex(*it);
-		vec3 p2 = molecule_.mixed_vertex(*(it+1));
-		vec3 p1 = molecule_.mixed_vertex(*(it+2));
-		vec3 n = cross(p2-p1,p3-p1);
-		vec4 P{n,-dot(n,p1)};
+		vec3f p3 = *it;
+		vec3f p2 = *(it+1);
+		vec3f p1 = *(it+2);
+		vec3f n = cross(p2-p1,p3-p1);
+		vec4f P{n,-dot(n,p1)};
 		cell_facet_plane_.push_back(
 		    {float(P.x),float(P.y),float(P.z),float(P.w)}
 		);
 	    }
 
 	    void add_vertex(mixed_vertex_id V) {
-		cell_facet_vertex_.push_back(V);
+		vec3 p = molecule_.mixed_vertex(V);
+		cell_facet_vertex_.push_back(
+		    {float(p.x), float(p.y), float(p.z)}
+		);
 	    }
 
 	    /*************************************************/
@@ -320,7 +296,7 @@ namespace GEO {
 		    index_range(
 			cell_facet_vertex_ptr_[f],
 			cell_facet_vertex_ptr_[f+1]
-		    ), [this](index_t v) -> mixed_vertex_id {
+		    ), [this](index_t v) -> vec3f {
 			return cell_facet_vertex_[v];
 		    }
 		);
@@ -410,9 +386,9 @@ namespace GEO {
 	    void draw_facet(index_t f) const {
 		bool has_v1 = false;
 		bool has_v2 = false;
-		mixed_vertex_id v1;
-		mixed_vertex_id v2;
-		for(mixed_vertex_id v: cell_facet_vertices(f)) {
+		vec3f v1;
+		vec3f v2;
+		for(vec3f v: cell_facet_vertices(f)) {
 		    if(!has_v1) {
 			has_v1 = true;
 			v1 = v;
@@ -420,7 +396,10 @@ namespace GEO {
 			has_v2 = true;
 			v2 = v;
 		    } else {
-			molecule_.draw_triangle(v1,v2,v);
+			glupVertex3fv(v1.data());
+			glupVertex3fv(v2.data());
+			glupVertex3fv(v.data());
+			++molecule_.nb_triangles_;
 			v2 = v;
 		    }
 		}
@@ -503,7 +482,8 @@ namespace GEO {
 	    vector<index_t> cell_facet_ptr_;
 	    vector<vec4f>   cell_facet_plane_;
 	    vector<index_t> cell_facet_vertex_ptr_;
-	    vector<mixed_vertex_id> cell_facet_vertex_;
+	    // vector<mixed_vertex_id> cell_facet_vertex_;
+	    vector<vec3f> cell_facet_vertex_;
 
 	    // TODOC: format
 	    vector<std::pair<vec4f, vec4f>> cell_eqn_;
