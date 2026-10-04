@@ -177,10 +177,6 @@ namespace GEO {
 	/***********************************************************************/
 
 	void draw_atoms() const;
-	void draw_S0_cells() const;
-	void draw_H1_cells() const;
-	void draw_H2_cells() const;
-	void draw_S3_cells() const;
 
 	/***********************************************************************/
 

@@ -380,6 +380,8 @@ namespace GEO {
 	    return;
 	}
 
+	/******************************************/
+
 	if(spheres_program_ == 0) {
 	    spheres_program_ = glupCompileProgram(
 		GLUPES_spheres_source
@@ -412,25 +414,41 @@ namespace GEO {
 	    cells_[CELL_TYPE_H2].set_program(hyperboloids_program_);
 	}
 
+	/******************************************/
+
 	nb_triangles_ = 0;
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 
+	MixedComplexCells::DrawMode mode =
+	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
+        	      : MixedComplexCells::DRAW_MODE_CELLS;
+
 	if(draw_S0()) {
-	    draw_S0_cells();
+	    cells_[CELL_TYPE_S0].draw(mode);
 	}
 
 	if(draw_H1()) {
-	    draw_H1_cells();
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "cAxisPerp",
+		float(-1.0/(1.0 - shrink_factor_)),
+		float(1.0 / shrink_factor_)
+	    );
+	    cells_[CELL_TYPE_H1].draw(mode);
 	}
 
 	if(draw_H2()) {
-	    draw_H2_cells();
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "cAxisPerp",
+		float(1.0 / shrink_factor_),
+		float(-1.0/(1.0 - shrink_factor_))
+	    );
+	    cells_[CELL_TYPE_H2].draw(mode);
 	}
 
 	if(draw_S3()) {
-	    draw_S3_cells();
+	    cells_[CELL_TYPE_S3].draw(mode);
 	}
 
 	glDisable(GL_CULL_FACE);
@@ -474,45 +492,6 @@ namespace GEO {
 	}
 	glupEnd();
 	glupDisable(GLUP_VERTEX_COLORS);
-    }
-
-    void Molecule::draw_S0_cells() const {
-	cells_[CELL_TYPE_S0].draw(
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-	              : MixedComplexCells::DRAW_MODE_CELLS
-	);
-    }
-
-    void Molecule::draw_H1_cells() const {
-	GLSL::set_program_uniform_by_name(
-	    hyperboloids_program_, "cAxisPerp",
-	    float(-1.0/(1.0 - shrink_factor_)),
-	    float(1.0 / shrink_factor_)
-	);
-	cells_[CELL_TYPE_H1].draw(
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-	              : MixedComplexCells::DRAW_MODE_CELLS
-	);
-    }
-
-    void Molecule::draw_H2_cells() const {
-	GLSL::set_program_uniform_by_name(
-	    hyperboloids_program_, "cAxisPerp",
-	    float(1.0 / shrink_factor_),
-	    float(-1.0/(1.0 - shrink_factor_))
-	);
-	cells_[CELL_TYPE_H2].draw(
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-	              : MixedComplexCells::DRAW_MODE_CELLS
-	);
-    }
-
-
-    void Molecule::draw_S3_cells() const {
-	cells_[CELL_TYPE_S3].draw(
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-	              : MixedComplexCells::DRAW_MODE_CELLS
-	);
     }
 
     /************************************************************************/
