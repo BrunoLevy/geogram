@@ -224,9 +224,9 @@ namespace GEO {
 
 	/***********************************************************************/
 
-	class CellsInfo {
+	class MixedComplexCells {
 	public:
-	    explicit CellsInfo(Molecule& mol): molecule_(mol) {
+	    explicit MixedComplexCells(Molecule& mol): molecule_(mol) {
 		clear();
 	    }
 
@@ -342,8 +342,11 @@ namespace GEO {
 
 	    /*************************************************/
 
-	    static constexpr GLuint FACET_PTR_TEXTURE_UNIT = 4;
-	    static constexpr GLuint FACET_PLANE_TEXTURE_UNIT = 5;
+	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
+	    // does not seem to work to set a texture unit, that seems to be
+	    // expected to be a *signed* integer (no idea why).
+	    static constexpr GLint FACET_PTR_TEXTURE_UNIT = 4;
+	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT = 5;
 
 	    void bind_tbos() const {
 		glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
@@ -530,7 +533,7 @@ namespace GEO {
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
 
-	CellsInfo cells_[4];
+	MixedComplexCells cells_[4];
 
 	static constexpr double c2 = 0.5;
 	static constexpr double c3 = 1.0;

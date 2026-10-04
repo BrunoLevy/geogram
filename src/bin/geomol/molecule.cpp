@@ -47,8 +47,8 @@
 namespace GEO {
 
     Molecule::Molecule() : cells_{
-	    CellsInfo(*this), CellsInfo(*this),
-	    CellsInfo(*this), CellsInfo(*this)
+	    MixedComplexCells(*this), MixedComplexCells(*this),
+	    MixedComplexCells(*this), MixedComplexCells(*this)
     } {
 	cells_[CELL_TYPE_S0].set_color({0.0, 1.0, 0.0});
 	cells_[CELL_TYPE_H1].set_color({1.0, 1.0, 0.0});
@@ -232,7 +232,7 @@ namespace GEO {
     }
 
     void Molecule::update_S0_cells() {
-	CellsInfo& cells = cells_[CELL_TYPE_S0];
+	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	cells.clear();
 	for(index_t v: atoms()) {
 	    vec3 c = atom_pos_[v];
@@ -247,7 +247,7 @@ namespace GEO {
     }
 
     void Molecule::update_H1_cells() {
-	CellsInfo& cells = cells_[CELL_TYPE_H1];
+	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
 	cells.clear();
 	// Select the edges incident to two real atoms,
 	// and keep only one halfedge per pair (v1 < v2)
@@ -289,7 +289,7 @@ namespace GEO {
 
     void Molecule::update_H2_cells() {
 
-	CellsInfo& cells = cells_[CELL_TYPE_H2];
+	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
 	cells.clear();
 	for(index_t t1: diagram_->tets()) {
 	    if(!diagram_->tet_is_finite(t1)) {
@@ -340,7 +340,7 @@ namespace GEO {
     }
 
     void Molecule::update_S3_cells() {
-	CellsInfo& cells = cells_[CELL_TYPE_S3];
+	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
 	cells.clear();
 	for(index_t t: diagram_->tets()) {
 	    if(
@@ -386,11 +386,11 @@ namespace GEO {
 	    );
 	    GLSL::set_program_uniform_by_name(
 		spheres_program_, "facet_ptr_TBO",
-		int(CellsInfo::FACET_PTR_TEXTURE_UNIT)
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
 	    );
 	    GLSL::set_program_uniform_by_name(
 		spheres_program_, "facet_plane_TBO",
-		int(CellsInfo::FACET_PLANE_TEXTURE_UNIT)
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
 	}
 
@@ -400,11 +400,11 @@ namespace GEO {
 	    );
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "facet_ptr_TBO",
-		int(CellsInfo::FACET_PTR_TEXTURE_UNIT)
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
 	    );
 	    GLSL::set_program_uniform_by_name(
 		hyperboloids_program_, "facet_plane_TBO",
-		int(CellsInfo::FACET_PLANE_TEXTURE_UNIT)
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
 	}
 
