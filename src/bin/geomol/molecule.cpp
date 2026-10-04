@@ -382,37 +382,7 @@ namespace GEO {
 
 	/******************************************/
 
-	if(spheres_program_ == 0) {
-	    spheres_program_ = glupCompileProgram(
-		GLUPES_spheres_source
-	    );
-	    GLSL::set_program_uniform_by_name(
-		spheres_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		spheres_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
-	    );
-	    cells_[CELL_TYPE_S0].set_program(spheres_program_);
-	    cells_[CELL_TYPE_S3].set_program(spheres_program_);
-	}
-
-	if(hyperboloids_program_ == 0) {
-	    hyperboloids_program_ = glupCompileProgram(
-		GLUPES_hyperboloids_source
-	    );
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
-	    );
-	    cells_[CELL_TYPE_H1].set_program(hyperboloids_program_);
-	    cells_[CELL_TYPE_H2].set_program(hyperboloids_program_);
-	}
+	create_shaders_if_needed();
 
 	/******************************************/
 
@@ -455,6 +425,40 @@ namespace GEO {
     }
 
     /************************************************************************/
+
+    void Molecule::create_shaders_if_needed() {
+	if(spheres_program_ == 0) {
+	    spheres_program_ = glupCompileProgram(
+		GLUPES_spheres_source
+	    );
+	    GLSL::set_program_uniform_by_name(
+		spheres_program_, "facet_ptr_TBO",
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		spheres_program_, "facet_plane_TBO",
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
+	    );
+	    cells_[CELL_TYPE_S0].set_program(spheres_program_);
+	    cells_[CELL_TYPE_S3].set_program(spheres_program_);
+	}
+
+	if(hyperboloids_program_ == 0) {
+	    hyperboloids_program_ = glupCompileProgram(
+		GLUPES_hyperboloids_source
+	    );
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "facet_ptr_TBO",
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		hyperboloids_program_, "facet_plane_TBO",
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
+	    );
+	    cells_[CELL_TYPE_H1].set_program(hyperboloids_program_);
+	    cells_[CELL_TYPE_H2].set_program(hyperboloids_program_);
+	}
+    }
 
     void Molecule::draw_atoms() const {
 	bool slicing_mode =

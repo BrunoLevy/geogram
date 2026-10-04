@@ -149,19 +149,19 @@ namespace GEO {
 	}
 
 	bool& draw_S0() {
-	    return draw_cell_[CELL_TYPE_S0];
+	    return cells_[CELL_TYPE_S0].visible();
 	}
 
 	bool& draw_H1() {
-	    return draw_cell_[CELL_TYPE_H1];
+	    return cells_[CELL_TYPE_H1].visible();
 	}
 
 	bool& draw_H2() {
-	    return draw_cell_[CELL_TYPE_H2];
+	    return cells_[CELL_TYPE_H2].visible();
 	}
 
 	bool& draw_S3() {
-	    return draw_cell_[CELL_TYPE_S3];
+	    return cells_[CELL_TYPE_S3].visible();
 	}
 
 	bool& verbose() {
@@ -173,6 +173,8 @@ namespace GEO {
 	}
 
     protected:
+
+	void create_shaders_if_needed();
 
 	/***********************************************************************/
 
@@ -354,6 +356,10 @@ namespace GEO {
 		program_ = program;
 	    }
 
+	    bool& visible() {
+		return visible_;
+	    }
+
 	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
 
 	    void draw(DrawMode mode = DRAW_MODE_CELLS) const {
@@ -494,6 +500,7 @@ namespace GEO {
 
 	    vec3 color_ = {1.0, 1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
+	    bool visible_ = true;
 	};
 
 	/***********************************************************************/
@@ -519,9 +526,6 @@ namespace GEO {
 
 	bool draw_mss_ = false;
 	bool raytrace_ = true;
-	bool draw_cell_[4] = {
-	    true, true, true, true
-	};
 	bool verbose_ = false;
 	GLuint spheres_program_ = 0;
 	GLuint hyperboloids_program_ = 0;
