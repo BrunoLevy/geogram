@@ -1,7 +1,7 @@
 
 namespace {
 
-    const char* GLUPES_spheres_source =
+    const char* spheres_source =
         R"(
         //primitive GLUP_TRIANGLES
 	)"
@@ -108,7 +108,7 @@ namespace {
 
    /***************************************************************************/
 
-    const char* GLUPES_hyperboloids_source =
+    const char* hyperboloids_source =
         R"(
         //primitive GLUP_TRIANGLES
 	)"

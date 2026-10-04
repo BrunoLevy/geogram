@@ -57,11 +57,11 @@ namespace GEO {
     }
 
     Molecule::~Molecule() {
-	if(spheres_program_ != 0) {
-	    glDeleteProgram(spheres_program_);
+	if(S_program_ != 0) {
+	    glDeleteProgram(S_program_);
 	}
-	if(hyperboloids_program_ != 0) {
-	    glDeleteProgram(hyperboloids_program_);
+	if(H_program_ != 0) {
+	    glDeleteProgram(H_program_);
 	}
     }
 
@@ -395,31 +395,19 @@ namespace GEO {
 	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
         	      : MixedComplexCells::DRAW_MODE_CELLS;
 
-	if(draw_S0()) {
-	    cells_[CELL_TYPE_S0].draw(mode);
-	}
+	// Hyperboloid axis factors
+	float t1 = float(-1.0/(1.0 - shrink_factor_));
+	float t2 = float(1.0 / shrink_factor_);
 
-	if(draw_H1()) {
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(-1.0/(1.0 - shrink_factor_)),
-		float(1.0 / shrink_factor_)
-	    );
-	    cells_[CELL_TYPE_H1].draw(mode);
-	}
+	cells_[CELL_TYPE_S0].draw(mode);
 
-	if(draw_H2()) {
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(1.0 / shrink_factor_),
-		float(-1.0/(1.0 - shrink_factor_))
-	    );
-	    cells_[CELL_TYPE_H2].draw(mode);
-	}
+	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
+	cells_[CELL_TYPE_H1].draw(mode);
 
-	if(draw_S3()) {
-	    cells_[CELL_TYPE_S3].draw(mode);
-	}
+	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
+	cells_[CELL_TYPE_H2].draw(mode);
+
+	cells_[CELL_TYPE_S3].draw(mode);
 
 	glDisable(GL_CULL_FACE);
     }
@@ -427,36 +415,32 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::create_shaders_if_needed() {
-	if(spheres_program_ == 0) {
-	    spheres_program_ = glupCompileProgram(
-		GLUPES_spheres_source
-	    );
+	if(S_program_ == 0) {
+	    S_program_ = glupCompileProgram(spheres_source);
 	    GLSL::set_program_uniform_by_name(
-		spheres_program_, "facet_ptr_TBO",
+		S_program_, "facet_ptr_TBO",
 		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
 	    );
 	    GLSL::set_program_uniform_by_name(
-		spheres_program_, "facet_plane_TBO",
+		S_program_, "facet_plane_TBO",
 		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
-	    cells_[CELL_TYPE_S0].set_program(spheres_program_);
-	    cells_[CELL_TYPE_S3].set_program(spheres_program_);
+	    cells_[CELL_TYPE_S0].set_program(S_program_);
+	    cells_[CELL_TYPE_S3].set_program(S_program_);
 	}
 
-	if(hyperboloids_program_ == 0) {
-	    hyperboloids_program_ = glupCompileProgram(
-		GLUPES_hyperboloids_source
-	    );
+	if(H_program_ == 0) {
+	    H_program_ = glupCompileProgram(hyperboloids_source);
 	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "facet_ptr_TBO",
+		H_program_, "facet_ptr_TBO",
 		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
 	    );
 	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "facet_plane_TBO",
+		H_program_, "facet_plane_TBO",
 		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
-	    cells_[CELL_TYPE_H1].set_program(hyperboloids_program_);
-	    cells_[CELL_TYPE_H2].set_program(hyperboloids_program_);
+	    cells_[CELL_TYPE_H1].set_program(H_program_);
+	    cells_[CELL_TYPE_H2].set_program(H_program_);
 	}
     }
 

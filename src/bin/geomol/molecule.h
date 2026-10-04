@@ -55,6 +55,8 @@ namespace GEO {
 	enum AtomColoring {
 	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
 	};
+
+	/** \brief symbolic constant for MixedCells::add_XXX() */
 	static constexpr bool FLIPPED = true;
 
 	enum MixedCellType {
@@ -363,6 +365,9 @@ namespace GEO {
 	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
 
 	    void draw(DrawMode mode = DRAW_MODE_CELLS) const {
+		if(!visible_) {
+		    return;
+		}
 		glupDisable(GLUP_VERTEX_COLORS);
 		glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
 		if(mode == DRAW_MODE_MSS) {
@@ -412,9 +417,6 @@ namespace GEO {
 	    }
 
 	    /*************************************************/
-
-	    /** \brief symbolic constant, parameter for add_XXX() */
-	    static constexpr bool FLIPPED = true;
 
 	    void add_shrunk_power_facet(index_t h0, bool flipped = false) {
 		if(flipped) {
@@ -527,8 +529,8 @@ namespace GEO {
 	bool draw_mss_ = false;
 	bool raytrace_ = true;
 	bool verbose_ = false;
-	GLuint spheres_program_ = 0;
-	GLuint hyperboloids_program_ = 0;
+	GLuint S_program_ = 0;
+	GLuint H_program_ = 0;
 
 	MixedComplexCells cells_[4];
 
