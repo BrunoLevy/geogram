@@ -50,6 +50,10 @@ namespace GEO {
 	    CellsInfo(*this), CellsInfo(*this),
 	    CellsInfo(*this), CellsInfo(*this)
     } {
+	cells_[CELL_TYPE_S0].set_color({0.0, 1.0, 0.0});
+	cells_[CELL_TYPE_H1].set_color({1.0, 1.0, 0.0});
+	cells_[CELL_TYPE_H2].set_color({1.0, 0.0, 1.0});
+	cells_[CELL_TYPE_S3].set_color({1.0, 0.0, 0.0});
     }
 
     Molecule::~Molecule() {
@@ -471,7 +475,7 @@ namespace GEO {
     void Molecule::draw_S0_cells() const {
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_S0].data()
+	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_S0].color().data()
 	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
@@ -487,7 +491,7 @@ namespace GEO {
     void Molecule::draw_H1_cells() const {
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H1].data()
+	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_H1].color().data()
 	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
@@ -508,7 +512,7 @@ namespace GEO {
     void Molecule::draw_H2_cells() const {
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_H2].data()
+	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_H2].color().data()
 	);
 	if(raytrace_) {
 	    glupEnable(GLUP_TEXTURING);
@@ -529,7 +533,7 @@ namespace GEO {
 
     void Molecule::draw_S3_cells() const {
 	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cell_color_[CELL_TYPE_S3].data()
+	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_S3].color().data()
 	);
 	glupDisable(GLUP_VERTEX_COLORS);
 	if(raytrace_) {

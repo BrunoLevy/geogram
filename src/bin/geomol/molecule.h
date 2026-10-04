@@ -231,22 +231,22 @@ namespace GEO {
 	    }
 
 	    void clear() {
-		cell_facet_ptr.resize(0);
-		cell_facet_ptr.push_back(0);
-		cell_facet_vertex_ptr.resize(0);
-		cell_facet_vertex_ptr.push_back(0);
-		cell_facet_vertex.resize(0);
-		cell_facet_plane.resize(0);
-		cell_eqn.resize(0);
-		cell_facet_ptr_tbo.reset();
-		cell_facet_plane_tbo.reset();
+		cell_facet_ptr_.resize(0);
+		cell_facet_ptr_.push_back(0);
+		cell_facet_vertex_ptr_.resize(0);
+		cell_facet_vertex_ptr_.push_back(0);
+		cell_facet_vertex_.resize(0);
+		cell_facet_plane_.resize(0);
+		cell_eqn_.resize(0);
+		cell_facet_ptr_tbo_.reset();
+		cell_facet_plane_tbo_.reset();
 	    }
 
 	    /*************************************************/
 
 	    void begin_S_cell(vec3 center, double radius) {
-		index_t cell_id = cell_eqn.size();
-		cell_eqn.emplace_back(
+		index_t cell_id = cell_eqn_.size();
+		cell_eqn_.emplace_back(
 		    vec4f{
 			float(center.x), float(center.y), float(center.z),
 			float(radius)
@@ -256,8 +256,8 @@ namespace GEO {
 	    }
 
 	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
-		index_t cell_id = cell_eqn.size();
-		cell_eqn.emplace_back(
+		index_t cell_id = cell_eqn_.size();
+		cell_eqn_.emplace_back(
 		    vec4f{
 			float(center.x), float(center.y), float(center.z),
 			float(R2)
@@ -270,30 +270,30 @@ namespace GEO {
 	    }
 
 	    void end_cell() {
-		// -1 because count intervals instead of count bounds-------.
-		//                                                          v
-		index_t total_nb_cell_facets = cell_facet_vertex_ptr.size()-1;
-		cell_facet_ptr.push_back(total_nb_cell_facets);
+		// -1 because count intervals instead of count bounds--------.
+		//                                                           v
+		index_t total_nb_cell_facets = cell_facet_vertex_ptr_.size()-1;
+		cell_facet_ptr_.push_back(total_nb_cell_facets);
 	    }
 
 	    void begin_facet() {
 	    }
 
 	    void end_facet() {
-		cell_facet_vertex_ptr.push_back(cell_facet_vertex.size());
-		auto it = cell_facet_vertex.rbegin();
+		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
+		auto it = cell_facet_vertex_.rbegin();
 		vec3 p3 = molecule_.mixed_vertex(*it);
 		vec3 p2 = molecule_.mixed_vertex(*(it+1));
 		vec3 p1 = molecule_.mixed_vertex(*(it+2));
 		vec3 n = cross(p2-p1,p3-p1);
 		vec4 P{n,-dot(n,p1)};
-		cell_facet_plane.push_back(
+		cell_facet_plane_.push_back(
 		    {float(P.x),float(P.y),float(P.z),float(P.w)}
 		);
 	    }
 
 	    void add_vertex(mixed_vertex_id V) {
-		cell_facet_vertex.push_back(V);
+		cell_facet_vertex_.push_back(V);
 	    }
 
 	    /*************************************************/
@@ -302,7 +302,7 @@ namespace GEO {
 	    typedef index_as_iterator const_iterator;
 
 	    index_t nb_cells() const {
-		return cell_eqn.size();
+		return cell_eqn_.size();
 	    }
 
 	    index_as_iterator begin() const {
@@ -315,17 +315,17 @@ namespace GEO {
 
 	    auto cell_facets(index_t c) const {
 		geo_debug_assert(c < nb_cells());
-		return index_range(cell_facet_ptr[c], cell_facet_ptr[c+1]);
+		return index_range(cell_facet_ptr_[c], cell_facet_ptr_[c+1]);
 	    }
 
 	    auto cell_facet_vertices(index_t f) const {
 		geo_debug_assert(f+1 < cell_facet_vertex_ptr.size());
 		return transform_range(
 		    index_range(
-			cell_facet_vertex_ptr[f],
-			cell_facet_vertex_ptr[f+1]
+			cell_facet_vertex_ptr_[f],
+			cell_facet_vertex_ptr_[f+1]
 		    ), [this](index_t v) -> mixed_vertex_id {
-			return cell_facet_vertex[v];
+			return cell_facet_vertex_[v];
 		    }
 		);
 	    }
@@ -333,9 +333,9 @@ namespace GEO {
 	    auto cell_planes(index_t c) const {
 		geo_debug_assert(c < nb_cells());
 		return transform_range(
-		    index_range(cell_facet_ptr[c], cell_facet_ptr[c+1]),
+		    index_range(cell_facet_ptr_[c], cell_facet_ptr_[c+1]),
 		    [this](index_t p) -> vec4f {
-			return cell_facet_plane[p];
+			return cell_facet_plane_[p];
 		    }
 		);
 	    }
@@ -347,20 +347,32 @@ namespace GEO {
 
 	    void bind_tbos() const {
 		glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
-		if(cell_facet_ptr_tbo.TBO() == 0) {
-		    cell_facet_ptr_tbo.create_or_update(
-			cell_facet_ptr.size(), cell_facet_ptr.data()
+		if(cell_facet_ptr_tbo_.TBO() == 0) {
+		    cell_facet_ptr_tbo_.create_or_update(
+			cell_facet_ptr_.size(), cell_facet_ptr_.data()
 		    );
 		}
 		glActiveTexture(GL_TEXTURE0 + FACET_PLANE_TEXTURE_UNIT);
-		if(cell_facet_plane_tbo.TBO() == 0) {
-		    cell_facet_plane_tbo.create_or_update(
-			cell_facet_plane.size(), cell_facet_plane.data()
+		if(cell_facet_plane_tbo_.TBO() == 0) {
+		    cell_facet_plane_tbo_.create_or_update(
+			cell_facet_plane_.size(), cell_facet_plane_.data()
 		    );
 		}
 		glActiveTexture(GL_TEXTURE0);
-		cell_facet_ptr_tbo.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
-		cell_facet_plane_tbo.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
+		cell_facet_ptr_tbo_.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
+		cell_facet_plane_tbo_.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
+	    }
+
+	    vec3 color() const {
+		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
+		    vec3f c = molecule_.constant_color();
+		    return vec3(double(c.x), double(c.y), double(c.z));
+		}
+		return color_;
+	    }
+
+	    void set_color(const vec3& c) {
+		color_ = c;
 	    }
 
 	    void draw() const {
@@ -373,8 +385,8 @@ namespace GEO {
 	    }
 
 	    void draw_cell(index_t c) const {
-		glupTexCoord4fv(cell_eqn[c].first.data());
-		glupNormal4fv(cell_eqn[c].second.data());
+		glupTexCoord4fv(cell_eqn_[c].first.data());
+		glupNormal4fv(cell_eqn_[c].second.data());
 		for(index_t f: cell_facets(c)) {
 		    draw_facet(f);
 		}
@@ -473,17 +485,19 @@ namespace GEO {
 	    // do something smarter to speed-up display... Let us think a little
 	    // bit more about it...
 	    // Well, let us keep moving forward for now!
-	    vector<index_t> cell_facet_ptr;
-	    vector<vec4f>   cell_facet_plane;
-	    vector<index_t> cell_facet_vertex_ptr;
-	    vector<mixed_vertex_id> cell_facet_vertex;
+	    vector<index_t> cell_facet_ptr_;
+	    vector<vec4f>   cell_facet_plane_;
+	    vector<index_t> cell_facet_vertex_ptr_;
+	    vector<mixed_vertex_id> cell_facet_vertex_;
 
 	    // TODOC: format
-	    vector<std::pair<vec4f, vec4f>> cell_eqn;
+	    vector<std::pair<vec4f, vec4f>> cell_eqn_;
 
 	    // For sending to the GPU
-	    mutable TextureBufferObject cell_facet_ptr_tbo;
-	    mutable TextureBufferObject cell_facet_plane_tbo;
+	    mutable TextureBufferObject cell_facet_ptr_tbo_;
+	    mutable TextureBufferObject cell_facet_plane_tbo_;
+
+	    vec3 color_;
 	};
 
 	/***********************************************************************/
@@ -511,12 +525,6 @@ namespace GEO {
 	bool raytrace_ = true;
 	bool draw_cell_[4] = {
 	    true, true, true, true
-	};
-	vec3 cell_color_[4] = {
-	    {0.0, 1.0, 0.0},
-	    {1.0, 1.0, 0.0},
-	    {1.0, 0.0, 1.0},
-	    {1.0, 0.0, 0.0}
 	};
 	bool verbose_ = false;
 	GLuint spheres_program_ = 0;
