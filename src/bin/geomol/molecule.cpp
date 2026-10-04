@@ -392,6 +392,8 @@ namespace GEO {
 		spheres_program_, "facet_plane_TBO",
 		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
+	    cells_[CELL_TYPE_S0].set_program(spheres_program_);
+	    cells_[CELL_TYPE_S3].set_program(spheres_program_);
 	}
 
 	if(hyperboloids_program_ == 0) {
@@ -406,6 +408,8 @@ namespace GEO {
 		hyperboloids_program_, "facet_plane_TBO",
 		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
+	    cells_[CELL_TYPE_H1].set_program(hyperboloids_program_);
+	    cells_[CELL_TYPE_H2].set_program(hyperboloids_program_);
 	}
 
 	nb_triangles_ = 0;
@@ -473,78 +477,42 @@ namespace GEO {
     }
 
     void Molecule::draw_S0_cells() const {
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_S0].color().data()
+	cells_[CELL_TYPE_S0].draw(
+	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
+	              : MixedComplexCells::DRAW_MODE_CELLS
 	);
-	if(raytrace_) {
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(spheres_program_);
-	}
-	cells_[CELL_TYPE_S0].draw();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
     }
 
     void Molecule::draw_H1_cells() const {
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_H1].color().data()
+	GLSL::set_program_uniform_by_name(
+	    hyperboloids_program_, "cAxisPerp",
+	    float(-1.0/(1.0 - shrink_factor_)),
+	    float(1.0 / shrink_factor_)
 	);
-	if(raytrace_) {
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(-1.0/(1.0 - shrink_factor_)),
-		float(1.0 / shrink_factor_)
-	    );
-	    glupUseProgram(hyperboloids_program_);
-	}
-	cells_[CELL_TYPE_H1].draw();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
+	cells_[CELL_TYPE_H1].draw(
+	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
+	              : MixedComplexCells::DRAW_MODE_CELLS
+	);
     }
 
     void Molecule::draw_H2_cells() const {
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_H2].color().data()
+	GLSL::set_program_uniform_by_name(
+	    hyperboloids_program_, "cAxisPerp",
+	    float(1.0 / shrink_factor_),
+	    float(-1.0/(1.0 - shrink_factor_))
 	);
-	if(raytrace_) {
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    GLSL::set_program_uniform_by_name(
-		hyperboloids_program_, "cAxisPerp",
-		float(1.0 / shrink_factor_),
-		float(-1.0/(1.0 - shrink_factor_))
-	    );
-	    glupUseProgram(hyperboloids_program_);
-	}
-	cells_[CELL_TYPE_H2].draw();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
+	cells_[CELL_TYPE_H2].draw(
+	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
+	              : MixedComplexCells::DRAW_MODE_CELLS
+	);
     }
 
 
     void Molecule::draw_S3_cells() const {
-	glupSetColor3dv(
-	    GLUP_FRONT_AND_BACK_COLOR, cells_[CELL_TYPE_S3].color().data()
+	cells_[CELL_TYPE_S3].draw(
+	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
+	              : MixedComplexCells::DRAW_MODE_CELLS
 	);
-	glupDisable(GLUP_VERTEX_COLORS);
-	if(raytrace_) {
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(spheres_program_);
-	}
-	cells_[CELL_TYPE_S3].draw();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
     }
 
     /************************************************************************/

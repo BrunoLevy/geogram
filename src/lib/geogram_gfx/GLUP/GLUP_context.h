@@ -1287,9 +1287,9 @@ namespace GLUP {
         }
 
 	/**
-	 * \brief Gets the current GLSL program
-	 * \retval the latest program bound using set_user_program()
-	 * \retval 0 if there is no currently bound program
+	 * \brief Gets the current user program
+	 * \retval the latest user program bound using set_user_program()
+	 * \retval 0 if there is no currently bound user program
 	 */
 	GLuint user_program() const {
 	    return user_program_;

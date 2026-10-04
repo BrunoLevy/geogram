@@ -378,13 +378,29 @@ namespace GEO {
 		color_ = c;
 	    }
 
-	    void draw() const {
+	    void set_program(GLuint program) {
+		program_ = program;
+	    }
+
+	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
+
+	    void draw(DrawMode mode = DRAW_MODE_CELLS) const {
+		glupDisable(GLUP_VERTEX_COLORS);
+		glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+		if(mode == DRAW_MODE_MSS) {
+		    glupEnable(GLUP_TEXTURING);
+		    glupEnable(GLUP_VERTEX_NORMALS);
+		    glupUseProgram(program_);
+		}
 		bind_tbos();
 		glupBegin(GLUP_TRIANGLES);
 		for(index_t c: *this) {
 		    draw_cell(c);
 		}
 		glupEnd();
+		glupUseProgram(0);
+		glupDisable(GLUP_TEXTURING);
+		glupDisable(GLUP_VERTEX_NORMALS);
 	    }
 
 	    void draw_cell(index_t c) const {
@@ -500,7 +516,8 @@ namespace GEO {
 	    mutable TextureBufferObject cell_facet_ptr_tbo_;
 	    mutable TextureBufferObject cell_facet_plane_tbo_;
 
-	    vec3 color_;
+	    vec3 color_ = {1.0, 1.0, 1.0, 1.0};
+	    GLuint program_ = 0;
 	};
 
 	/***********************************************************************/
