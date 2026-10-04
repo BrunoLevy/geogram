@@ -593,6 +593,13 @@ extern "C" {
     void GLUP_API glupUseProgram(GLUPuint program);
 
     /**
+     * \brief Gets the current GLSL program
+     * \retval the latest program bound using glupUseProgram()
+     * \retval 0 if there is no currently bound program
+     */
+    GLUPuint GLUP_API glupGetCurrentProgram();
+
+    /**
      * @}
      */
 

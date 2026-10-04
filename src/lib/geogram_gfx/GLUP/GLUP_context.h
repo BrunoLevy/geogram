@@ -1286,6 +1286,15 @@ namespace GLUP {
             user_program_ = program;
         }
 
+	/**
+	 * \brief Gets the current GLSL program
+	 * \retval the latest program bound using set_user_program()
+	 * \retval 0 if there is no currently bound program
+	 */
+	GLuint user_program() const {
+	    return user_program_;
+	}
+
         /**
          * \brief Begins rendering in immediate mode.
          * \param[in] primitive the primitive to be rendered.

@@ -1652,6 +1652,11 @@ void glupUseProgram(GLUPuint program) {
     GLUP::current_context_->set_user_program(program);
 }
 
+GLUPuint glupGetCurrentProgram() {
+    GEO_CHECK_GL();
+    return GLUP::current_context_->user_program();
+}
+
 
 
 /****************************************************************************/
