@@ -93,10 +93,10 @@ namespace {
 		    molecule_.update();
 		}
 		ImGui::Checkbox("raytrace", &molecule_.raytrace());
-		ImGui::Checkbox("0-patches", &molecule_.draw_S0());
-		ImGui::Checkbox("1-patches", &molecule_.draw_H1());
-		ImGui::Checkbox("2-patches", &molecule_.draw_H2());
-		ImGui::Checkbox("3-patches", &molecule_.draw_S3());
+		ImGui::Checkbox("0-patches", &molecule_.visible(0));
+		ImGui::Checkbox("1-patches", &molecule_.visible(1));
+		ImGui::Checkbox("2-patches", &molecule_.visible(2));
+		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
 		std::string trgls_string = String::format(

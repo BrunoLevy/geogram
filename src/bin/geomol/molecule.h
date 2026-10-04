@@ -150,20 +150,9 @@ namespace GEO {
 	    return raytrace_;
 	}
 
-	bool& draw_S0() {
-	    return cells_[CELL_TYPE_S0].visible();
-	}
-
-	bool& draw_H1() {
-	    return cells_[CELL_TYPE_H1].visible();
-	}
-
-	bool& draw_H2() {
-	    return cells_[CELL_TYPE_H2].visible();
-	}
-
-	bool& draw_S3() {
-	    return cells_[CELL_TYPE_S3].visible();
+	bool& visible(index_t type) {
+	    geo_debug_assert(type < 4);
+	    return cells_[type].visible();
 	}
 
 	bool& verbose() {
@@ -490,13 +479,19 @@ namespace GEO {
 	    vector<index_t> cell_facet_ptr_;
 	    vector<vec4f>   cell_facet_plane_;
 	    vector<index_t> cell_facet_vertex_ptr_;
-	    // vector<mixed_vertex_id> cell_facet_vertex_;
 	    vector<vec3f> cell_facet_vertex_;
 
-	    // TODOC: format
+	    /**
+	     * \brief Quadric equation
+	     * \details Sent through GLUP tex_coord and normal vertex attributes.
+	     * - sphere:      {cx,cy,cz,R},  {unused, unused, unused, cell_id}
+	     * - hyperboloid: {fx,fy,fz,R2}, {axisx,  axisy,  axisz,  cell_id}
+	     */
 	    vector<std::pair<vec4f, vec4f>> cell_eqn_;
 
-	    // For sending to the GPU
+	    /**
+	     * \brief For each cell, clipping planes in compressed row storage
+	     */
 	    mutable TextureBufferObject cell_facet_ptr_tbo_;
 	    mutable TextureBufferObject cell_facet_plane_tbo_;
 
