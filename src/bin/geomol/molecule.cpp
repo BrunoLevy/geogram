@@ -232,6 +232,10 @@ namespace GEO {
     }
 
     void Molecule::update_S0_cells() {
+	// S0 cells are shrunk Voronoi cells, obtained as follows:
+	// for each atom
+	//   for each edge incident to the atom in the diagram
+	//      add the polygonal facet obtained by turning around the edge
 	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	cells.clear();
 	for(index_t v: atoms()) {
@@ -247,10 +251,16 @@ namespace GEO {
     }
 
     void Molecule::update_H1_cells() {
+	// H1 cells are polygonal prisms aligned with the edges of the
+	// triangulation. They are obtained as follows:
+	// for each atom v1
+	//    for each edge incident to v1 in the diagram pointing to
+	//    another atom v2 and such that v1 > v2:
+	//       for each halfedge around edge (v1,v2)
+	//           generate a quad facet
+	//    generate the two polygonal caps
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
 	cells.clear();
-	// Select the edges incident to two real atoms,
-	// and keep only one halfedge per pair (v1 < v2)
 	for(index_t v1: atoms()) {
 	    for(index_t h0: diagram_->incident_edges(v1)) {
 		if(h0 == NO_INDEX) {
@@ -273,11 +283,14 @@ namespace GEO {
 
 		cells.begin_H_cell(c,axis,R2);
 
+		// generate the quad facets
 		index_t h = h0;
 		do {
 		    cells.add_quad_facet(h);
 		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
 		} while(h != h0);
+
+		// generate the two polygonal caps
 		cells.add_shrunk_power_facet(h, FLIPPED);
 		h = diagram_->halfedge_flip(h);
 		cells.add_shrunk_power_facet(h, FLIPPED);
@@ -288,7 +301,9 @@ namespace GEO {
     }
 
     void Molecule::update_H2_cells() {
-
+	// H2 cells are triangular prisms extruded from tetrahedra facets.
+	// Their two triangular and three quadrangular facets are explicitly
+	// constructed.
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
 	cells.clear();
 	for(index_t t1: diagram_->tets()) {
@@ -340,6 +355,8 @@ namespace GEO {
     }
 
     void Molecule::update_S3_cells() {
+	// S3 cells are shrunk tetrahedra.
+	// Their four triangular facets are explicitly constructed.
 	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
 	cells.clear();
 	for(index_t t: diagram_->tets()) {
@@ -380,12 +397,9 @@ namespace GEO {
 	    return;
 	}
 
-	/******************************************/
-
+	// All the rest of this function is for drawing
+	// the molecular skin surface
 	create_shaders_if_needed();
-
-	/******************************************/
-
 	nb_triangles_ = 0;
 
 	glCullFace(GL_BACK);
@@ -395,7 +409,6 @@ namespace GEO {
 	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
         	      : MixedComplexCells::DRAW_MODE_CELLS;
 
-	// Hyperboloid axis factors
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
