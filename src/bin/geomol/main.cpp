@@ -51,13 +51,56 @@ namespace {
     public:
         GeoMolApplication() : SimpleApplication("GeoMol") {
             set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
-	    // lighting_ = false;
-	    // effect_ = 1;
-	    // full_screen_effect_ = new AmbientOcclusionImpl();
+	    lighting_ = false;
+	    effect_ = 1;
+	    full_screen_effect_ = new AmbientOcclusionImpl();
 	    clip_mode_ = GLUP_CLIP_SLICE_CELLS;
+
+	    static constexpr double ROT_STEP = 5.0;   // degrees per key press
+
+	    add_key_func(
+		"left",  [this]() { rotate_object(1, -ROT_STEP); }, "turn left"
+	    );
+	    add_key_func(
+		"right", [this]() { rotate_object(1,  ROT_STEP); }, "turn right"
+	    );
+	    add_key_func(
+		"up",    [this]() { rotate_object(0, -ROT_STEP); }, "turn up"
+	    );
+	    add_key_func(
+		"down",  [this]() { rotate_object(0,  ROT_STEP); }, "turn down"
+	    );
+	    add_key_func(
+		"page_up", [this]() { rotate_object(2,  ROT_STEP); }, "roll"
+	    );
+	    add_key_func(
+		"page_down", [this]() { rotate_object(2, -ROT_STEP); },
+		"roll back"
+	    );
         }
 
     protected:
+
+	/**
+	 * \brief Turns the object around one of the three screen axes.
+	 * \param[in] axis 0 for the horizontal of the screen, 1 for its
+	 *  vertical, 2 for the axis pointing at the viewer.
+	 * \param[in] degrees the angle, in degrees.
+	 */
+	void rotate_object(index_t axis, double degrees) {
+	    double a = degrees * M_PI / 180.0;
+	    double ca = ::cos(a);
+	    double sa = ::sin(a);
+	    index_t i = (axis + 1) % 3;
+	    index_t j = (axis + 2) % 3;
+	    mat4 R;
+	    R.load_identity();
+	    R(i,i) =  ca; R(i,j) =  sa;
+	    R(j,i) = -sa; R(j,j) =  ca;
+	    //  Row-vector convention (v * M), as in OpenGL: a rotation made
+	    // in screen space multiplies on the RIGHT of the current one.
+	    object_rotation_.set_value(object_rotation_.get_value() * R);
+	}
 
 	void declare_args() override {
 	    SimpleApplication::declare_args();
@@ -70,7 +113,6 @@ namespace {
 
         void draw_object_properties() override {
             SimpleApplication::draw_object_properties();
-	    // ImGui::SliderInt("size", &molecule_.atom_size(), 1, 30);
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {
 		molecule_.atom_size() = double(size);

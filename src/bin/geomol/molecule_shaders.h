@@ -103,7 +103,7 @@ namespace {
               q = b_prime + sqrt_a_delta;
               t = q/a;
               M = R.O + t*R.V;
-              sign = sign * -1;
+              sign = sign * -1.0;
               if(!in_cell(M,cell_id)) {
                   discard;
               }
@@ -190,7 +190,7 @@ namespace {
             // Advance R's origin to projection of C onto R, to avoid
             // numeric precision errors (a bit like in sphere shader)
             R.V = normalize(R.V);
-            R.O = R.O + dot(C-R.O,R.V)*R.V;
+            R.O += dot(C-R.O,R.V)*R.V;
 
             vec3 co = R.O-C;
             float coDn = dot(co,n);
@@ -225,7 +225,7 @@ namespace {
             float sign = 1;
             float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
-            if(t1 > t2) { sign = -1; }
+            if(t1 > t2) { sign = -1.0; }
 
             if(!in_cell(M,cell_id)) {
                 t = max(t1,t2);
