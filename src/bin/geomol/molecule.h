@@ -303,9 +303,7 @@ namespace GEO {
 		vec3f p1 = *(it+2);
 		vec3f n = cross(p2-p1,p3-p1);
 		vec4f P{n,-dot(n,p1)};
-		cell_facet_plane_.push_back(
-		    {float(P.x),float(P.y),float(P.z),float(P.w)}
-		);
+		cell_facet_plane_.push_back(P);
 	    }
 
 	    void add_vertex(mixed_vertex_id V) {
