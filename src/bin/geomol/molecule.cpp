@@ -360,26 +360,49 @@ namespace GEO {
 	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
 	cells.clear();
 	for(index_t t: diagram_->tets()) {
+
+	    index_t v[4] = {
+		diagram_->tet_vertex(t,0),
+		diagram_->tet_vertex(t,1),
+		diagram_->tet_vertex(t,2),
+		diagram_->tet_vertex(t,3)
+	    };
+
 	    if(
-		!is_atom(diagram_->tet_vertex(t,0)) ||
-		!is_atom(diagram_->tet_vertex(t,1)) ||
-		!is_atom(diagram_->tet_vertex(t,2)) ||
-		!is_atom(diagram_->tet_vertex(t,3))
+		!is_atom(v[0]) || !is_atom(v[1]) ||
+		!is_atom(v[2]) || !is_atom(v[3])
 	    ) {
 		continue;
 	    }
 
 	    vec3 c = tet_dual_[t];
-	    index_t v0 = diagram_->tet_vertex(t,0);
-	    vec3 p0 = diagram_->vertex(v0);
-	    double R2 = distance2(c,p0) - diagram_->weight(v0);
-	    // TODO: detect also sphere surface completely outside
-	    // of shrunk tet
-	    if(R2 < 0.0) {
+	    vec3 p0 = diagram_->vertex(v[0]);
+	    double R2 = (
+		distance2(c,p0) - diagram_->weight(v[0])
+	    ) * (1.0 - shrink_factor_);
+
+	    // If sphere is imaginary (negative radius) then tet is solid
+	    bool carries_surface = (R2 > 0.0);
+	    if(!carries_surface) {
 		continue;
 	    }
 
-	    double R = ::sqrt(R2*(1.0-shrink_factor_));
+	    vec3 p[4] = {
+		mixed_vertex({v[0],t}), mixed_vertex({v[1],t}),
+		mixed_vertex({v[2],t}), mixed_vertex({v[3],t})
+	    };
+
+	    // If tet is entirely contained in sphere then tet is empty
+	    carries_surface = false;
+	    for(index_t i=0; i<4; ++i) {
+		carries_surface = carries_surface || (distance2(c,p[i]) > R2);
+	    }
+
+	    if(!carries_surface) {
+		continue;
+	    }
+
+	    double R = ::sqrt(R2);
 	    cells.begin_S_cell(c,R);
 	    cells.add_shrunk_tet_facet(t,0);
 	    cells.add_shrunk_tet_facet(t,1);

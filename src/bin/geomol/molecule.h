@@ -174,13 +174,12 @@ namespace GEO {
 	 * \details first index is a primal vertex, second index is a tet
 	 */
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
+
 	vec3 mixed_vertex(mixed_vertex_id V) const {
-	    double s = shrink_factor_;
-	    return mix(atom_pos_[V.first], tet_dual_[V.second], s);
+	    return mix(atom_pos_[V.first], tet_dual_[V.second], shrink_factor_);
 	}
 
 	/***********************************************************************/
-
 
     protected:
 
@@ -273,10 +272,7 @@ namespace GEO {
 	    void begin_S_cell(vec3 center, double radius) {
 		index_t cell_id = cell_eqn_.size();
 		cell_eqn_.emplace_back(
-		    vec4f{
-			float(center.x), float(center.y), float(center.z),
-			float(radius)
-		    },
+		    vec4f{vec3f(center), float(radius)},
 		    vec4f{0.0f, 0.0f, 0.0f, float(cell_id)}
 		);
 	    }
@@ -284,14 +280,8 @@ namespace GEO {
 	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
 		index_t cell_id = cell_eqn_.size();
 		cell_eqn_.emplace_back(
-		    vec4f{
-			float(center.x), float(center.y), float(center.z),
-			float(R2)
-		    },
-		    vec4f{
-			float(axis.x), float(axis.y), float(axis.z),
-			float(cell_id)
-		    }
+		    vec4f{vec3f(center),float(R2)},
+		    vec4f{vec3f(axis), float(cell_id)}
 		);
 	    }
 
@@ -319,10 +309,7 @@ namespace GEO {
 	    }
 
 	    void add_vertex(mixed_vertex_id V) {
-		vec3 p = molecule_.mixed_vertex(V);
-		cell_facet_vertex_.push_back(
-		    {float(p.x), float(p.y), float(p.z)}
-		);
+		cell_facet_vertex_.push_back(vec3f(molecule_.mixed_vertex(V)));
 	    }
 
 	    /*************************************************/
