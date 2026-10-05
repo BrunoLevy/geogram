@@ -110,8 +110,8 @@ namespace {
            }
 
            if(
-              glupIsEnabled(GLUP_CLIPPING) &&
-              GLUP.clipping_mode == GLUP_CLIP_STANDARD
+              glupIsEnabled(GLUP_CLIPPING) /* &&
+              GLUP.clipping_mode == GLUP_CLIP_STANDARD */
            ) {
               if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
                  discard;
@@ -237,8 +237,8 @@ namespace {
             }
 
             if(
-               glupIsEnabled(GLUP_CLIPPING) &&
-               GLUP.clipping_mode == GLUP_CLIP_STANDARD
+               glupIsEnabled(GLUP_CLIPPING) /* &&
+               GLUP.clipping_mode == GLUP_CLIP_STANDARD */
             ) {
                if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
                   discard;
