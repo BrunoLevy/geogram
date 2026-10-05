@@ -186,10 +186,18 @@ namespace GEO {
 	/** \brief symbolic constant for MixedCells::add_XXX() */
 	static constexpr bool FLIPPED = true;
 
+	/**
+	 * \brief When called the first time, creates the shaders used to
+	 *  render S0, H1, H2 and S3 patches.
+	 * \details Shaders sources are in molecule_shaders.h
+	 */
 	void create_shaders_if_needed();
 
 	/***********************************************************************/
 
+	/**
+	 * \brief Draws the atoms as spheres.
+	 */
 	void draw_atoms() const;
 
 	/***********************************************************************/
@@ -252,27 +260,20 @@ namespace GEO {
 	class MixedComplexCells {
 	public:
 	    explicit MixedComplexCells(Molecule& mol): molecule_(mol) {
-		clear();
+		clear(); // positions the two sentries.
 	    }
 
-	    void clear() {
-		cell_facet_ptr_.resize(0);
-		cell_facet_ptr_.push_back(0);
-		cell_facet_vertex_ptr_.resize(0);
-		cell_facet_vertex_ptr_.push_back(0);
-		cell_facet_vertex_.resize(0);
-		cell_facet_plane_.resize(0);
-		cell_eqn_.resize(0);
-		cell_facet_ptr_tbo_.reset();
-		cell_facet_plane_tbo_.reset();
-	    }
+	    /**
+	     * \brief Clears both cells and clipping planes.
+	     */
+	    void clear();
 
 	    /*************************************************/
 
 	    void begin_S_cell(vec3 center, double radius) {
 		index_t cell_id = cell_eqn_.size();
 		cell_eqn_.emplace_back(
-		    vec4f{vec3f(center), float(radius)},
+		    vec4f{vec3f(center),    float(radius) },
 		    vec4f{0.0f, 0.0f, 0.0f, float(cell_id)}
 		);
 	    }
@@ -280,8 +281,8 @@ namespace GEO {
 	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
 		index_t cell_id = cell_eqn_.size();
 		cell_eqn_.emplace_back(
-		    vec4f{vec3f(center),float(R2)},
-		    vec4f{vec3f(axis), float(cell_id)}
+		    vec4f{vec3f(center), float(R2)     },
+		    vec4f{vec3f(axis),   float(cell_id)}
 		);
 	    }
 
@@ -292,18 +293,14 @@ namespace GEO {
 		cell_facet_ptr_.push_back(total_nb_cell_facets);
 	    }
 
-	    void begin_facet() {
-	    }
+	    void begin_facet() {  } // yes, does nothing, but it's nicer with it.
 
 	    void end_facet() {
 		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
 		auto it = cell_facet_vertex_.rbegin();
-		vec3f p3 = *it;
-		vec3f p2 = *(it+1);
-		vec3f p1 = *(it+2);
-		vec3f n = cross(p2-p1,p3-p1);
-		vec4f P{n,-dot(n,p1)};
-		cell_facet_plane_.push_back(P);
+		vec3f p[3] = {*(it+2), *(it+1), *it};
+		vec3f n = cross(p[1]-p[0],p[2]-p[0]);
+		cell_facet_plane_.emplace_back(n,-dot(n,p[0]));
 	    }
 
 	    void add_vertex_by_point(vec3f p) {
@@ -314,23 +311,14 @@ namespace GEO {
 		add_vertex_by_point(vec3f(molecule_.mixed_vertex(V)));
 	    }
 
-
 	    /*************************************************/
 
 	    typedef index_as_iterator iterator;
 	    typedef index_as_iterator const_iterator;
 
-	    index_t nb_cells() const {
-		return cell_eqn_.size();
-	    }
-
-	    index_as_iterator begin() const {
-		return 0;
-	    }
-
-	    index_as_iterator end() const {
-		return nb_cells();
-	    }
+	    index_t nb_cells() const     { return cell_eqn_.size(); }
+	    index_as_iterator begin() const    { return 0;          }
+	    index_as_iterator end()   const    { return nb_cells(); }
 
 	    auto cell_facets(index_t c) const {
 		geo_debug_assert(c < nb_cells());
@@ -367,23 +355,13 @@ namespace GEO {
 	    static constexpr GLint FACET_PTR_TEXTURE_UNIT = 4;
 	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT = 5;
 
-	    void bind_tbos() const {
-		glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
-		if(cell_facet_ptr_tbo_.TBO() == 0) {
-		    cell_facet_ptr_tbo_.create_or_update(
-			cell_facet_ptr_.size(), cell_facet_ptr_.data()
-		    );
-		}
-		glActiveTexture(GL_TEXTURE0 + FACET_PLANE_TEXTURE_UNIT);
-		if(cell_facet_plane_tbo_.TBO() == 0) {
-		    cell_facet_plane_tbo_.create_or_update(
-			cell_facet_plane_.size(), cell_facet_plane_.data()
-		    );
-		}
-		glActiveTexture(GL_TEXTURE0);
-		cell_facet_ptr_tbo_.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
-		cell_facet_plane_tbo_.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
-	    }
+	    /**
+	     * \brief Creates the texture buffer objects with the compressed
+	     *  row storage list of clipping planes if not already
+	     *  present and binds them to FACET_PTR_TEXTURE_UNIT and
+	     *  FACET_PLANE_TEXTURE_UNIT.
+	     */
+	    void bind_tbos() const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -393,139 +371,53 @@ namespace GEO {
 		return color_;
 	    }
 
-	    void set_color(const vec3& c) {
-		color_ = c;
-	    }
-
-	    void set_program(GLuint program) {
-		program_ = program;
-	    }
-
-	    bool& visible() {
-		return visible_;
-	    }
+	    void set_color(const vec3& c)    { color_ = c; }
+	    void set_program(GLuint program) { program_ = program; }
+	    bool& visible() { return visible_; }
 
 	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
-
-	    void draw(DrawMode mode = DRAW_MODE_CELLS) const {
-		if(!visible_) {
-		    return;
-		}
-		glupDisable(GLUP_VERTEX_COLORS);
-		glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
-		if(mode == DRAW_MODE_MSS) {
-		    // cell equation is sent through vertex tex coord
-		    // and vertex normal, so we need to activate these
-		    // vertex attributes.
-		    glupEnable(GLUP_TEXTURING);
-		    glupEnable(GLUP_VERTEX_NORMALS);
-		    glupUseProgram(program_);
-		}
-		bind_tbos(); // texture buffer object with clipping planes
-		glupBegin(GLUP_TRIANGLES);
-		for(index_t c: *this) {
-		    draw_cell(c);
-		}
-		glupEnd();
-		glupUseProgram(0);
-		glupDisable(GLUP_TEXTURING);
-		glupDisable(GLUP_VERTEX_NORMALS);
-	    }
-
-	    void draw_cell(index_t c) const {
-		// send cell equation through tex coord and vertex normal.
-		glupTexCoord4fv(cell_eqn_[c].first.data());
-		glupNormal4fv(cell_eqn_[c].second.data());
-		for(index_t f: cell_facets(c)) {
-		    draw_facet(f);
-		}
-	    }
-
-	    void draw_facet(index_t f) const {
-		// triangulates the facet on the fly
-		bool has_v1 = false;
-		bool has_v2 = false;
-		vec3f v1;
-		vec3f v2;
-		for(vec3f v: cell_facet_vertices(f)) {
-		    if(!has_v1) {
-			has_v1 = true;
-			v1 = v;
-		    } else if(!has_v2) {
-			has_v2 = true;
-			v2 = v;
-		    } else {
-			glupVertex3fv(v1.data());
-			glupVertex3fv(v2.data());
-			glupVertex3fv(v.data());
-			++molecule_.nb_triangles_;
-			v2 = v;
-		    }
-		}
-	    }
+	    void draw(DrawMode mode = DRAW_MODE_CELLS) const;
 
 	    /*************************************************/
 
-	    void add_shrunk_power_facet(index_t h0, bool flipped = false) {
-		if(flipped) {
-		    h0 = diagram().halfedge_flip(h0);
-		}
-		index_t v1 = diagram().halfedge_v(h0,0);
-		index_t v2 = diagram().halfedge_v(h0,1);
-		index_t h = h0;
-		begin_facet();
-		do {
-		    index_t t = diagram().halfedge_t(h);
-		    add_vertex({flipped ? v2 : v1,t});
-		    h = diagram().next_halfedge_around_edge(h, v1, v2);
-		} while(h != h0);
-		end_facet();
-	    }
+	    /**
+	     * \brief Adds a shrunk power facet to the current cell
+	     * \details used by Molecule::reset_XX_cells()
+	     * \param[in] h0 the halfedge around which the power facet winds
+	     * \param[in] flipped if set, turns the other way around \p h0
+	     */
+	    void add_shrunk_power_facet(index_t h0, bool flipped = false);
 
-	    void add_quad_facet(index_t h, bool flipped = false) {
-		index_t v1 = diagram().halfedge_v(h,0);
-		index_t v2 = diagram().halfedge_v(h,1);
-		index_t t1 = diagram().halfedge_t(h);
-		index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
-		begin_facet();
-		if(flipped) {
-		    add_vertex({v2,t1});
-		    add_vertex({v2,t2});
-		    add_vertex({v1,t2});
-		    add_vertex({v1,t1});
-		} else {
-		    add_vertex({v1,t1});
-		    add_vertex({v1,t2});
-		    add_vertex({v2,t2});
-		    add_vertex({v2,t1});
-		}
-		end_facet();
-	    }
+	    /**
+	     * \brief Adds a quad facet to the current cell
+	     * \details used by Molecule::reset_XX_cells().
+	     *  The quad facet is defined by all combinations of the
+	     *  two vertices of \p h and the two tetrahedra \p h is adjacent to
+	     * \param[in] h the halfedge that defines the quad facet
+	     * \param[in] flipped if set, turns the other way round
+	     */
+	    void add_quad_facet(index_t h, bool flipped = false);
 
+	    /**
+	     * \brief Adds a shrunk tetrahedron facet to the current cell
+	     * \details used by Molecule::reset_XX_cells().
+	     * \param[in] t the tetrahedron
+	     * \param[in] lf the local facet index, in {0,1,2,3}
+	     * \param[in] flipped if set, turns the other way round
+	     */
 	    void add_shrunk_tet_facet(
 		index_t t, index_t lf, bool flipped=false
-	    ) {
-		index_t v1 = diagram().tet_facet_vertex(t, lf, 0);
-		index_t v2 = diagram().tet_facet_vertex(t, lf, 1);
-		index_t v3 = diagram().tet_facet_vertex(t, lf, 2);
-		begin_facet();
-		if(flipped) {
-		    add_vertex({v3,t});
-		    add_vertex({v2,t});
-		    add_vertex({v1,t});
-		} else {
-		    add_vertex({v1,t});
-		    add_vertex({v2,t});
-		    add_vertex({v3,t});
-		}
-		end_facet();
-	    }
+	    );
 
 	    /*************************************************/
 
-	    const PowerDiagram& diagram() const {
-		return *(molecule_.diagram_);
-	    }
+	protected:
+	    /**
+	     * \brief Used internally by draw()
+	     */
+	    void draw_cell(index_t c) const;
+
+	    const PowerDiagram& diagram() const { return *(molecule_.diagram_); }
 
 	private:
 	    Molecule& molecule_;

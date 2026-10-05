@@ -585,4 +585,148 @@ namespace GEO {
 	return result;
     }
 
+    /************************************************************************/
+
+    void Molecule::MixedComplexCells::clear() {
+	cell_facet_ptr_.resize(0);
+	cell_facet_ptr_.push_back(0);
+	cell_facet_vertex_ptr_.resize(0);
+	cell_facet_vertex_ptr_.push_back(0);
+	cell_facet_vertex_.resize(0);
+	cell_facet_plane_.resize(0);
+	cell_eqn_.resize(0);
+	cell_facet_ptr_tbo_.reset();
+	cell_facet_plane_tbo_.reset();
+    }
+
+    void Molecule::MixedComplexCells::bind_tbos() const {
+	glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
+	if(cell_facet_ptr_tbo_.TBO() == 0) {
+	    cell_facet_ptr_tbo_.create_or_update(
+		cell_facet_ptr_.size(), cell_facet_ptr_.data()
+	    );
+	}
+	glActiveTexture(GL_TEXTURE0 + FACET_PLANE_TEXTURE_UNIT);
+	if(cell_facet_plane_tbo_.TBO() == 0) {
+	    cell_facet_plane_tbo_.create_or_update(
+		cell_facet_plane_.size(), cell_facet_plane_.data()
+	    );
+	}
+	glActiveTexture(GL_TEXTURE0);
+	cell_facet_ptr_tbo_.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
+	cell_facet_plane_tbo_.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
+    }
+
+    void Molecule::MixedComplexCells::draw(DrawMode mode) const {
+	if(!visible_) {
+	    return;
+	}
+	glupDisable(GLUP_VERTEX_COLORS);
+	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+	if(mode == DRAW_MODE_MSS) {
+	    // cell equation is sent through vertex tex coord
+	    // and vertex normal, so we need to activate these
+	    // vertex attributes.
+	    glupEnable(GLUP_TEXTURING);
+	    glupEnable(GLUP_VERTEX_NORMALS);
+	    glupUseProgram(program_);
+	}
+	bind_tbos(); // texture buffer object with clipping planes
+	glupBegin(GLUP_TRIANGLES);
+	for(index_t c: *this) {
+	    draw_cell(c);
+	}
+	glupEnd();
+	glupUseProgram(0);
+	glupDisable(GLUP_TEXTURING);
+	glupDisable(GLUP_VERTEX_NORMALS);
+    }
+
+    void Molecule::MixedComplexCells::draw_cell(index_t c) const {
+	// send cell equation through tex coord and vertex normal.
+	glupTexCoord4fv(cell_eqn_[c].first.data());
+	glupNormal4fv(cell_eqn_[c].second.data());
+	for(index_t f: cell_facets(c)) {
+	    // triangulates the facet on the fly
+	    bool has_v1 = false;
+	    bool has_v2 = false;
+	    vec3f v1;
+	    vec3f v2;
+	    for(vec3f v: cell_facet_vertices(f)) {
+		if(!has_v1) {
+		    has_v1 = true;
+		    v1 = v;
+		} else if(!has_v2) {
+		    has_v2 = true;
+		    v2 = v;
+		} else {
+		    glupVertex3fv(v1.data());
+		    glupVertex3fv(v2.data());
+		    glupVertex3fv(v.data());
+		    ++molecule_.nb_triangles_;
+		    v2 = v;
+		}
+	    }
+	}
+    }
+
+    void Molecule::MixedComplexCells::add_shrunk_power_facet(
+	index_t h0, bool flipped
+    ) {
+	if(flipped) {
+	    h0 = diagram().halfedge_flip(h0);
+	}
+	index_t v1 = diagram().halfedge_v(h0,0);
+	index_t v2 = diagram().halfedge_v(h0,1);
+	index_t h = h0;
+	begin_facet();
+	do {
+	    index_t t = diagram().halfedge_t(h);
+	    add_vertex({flipped ? v2 : v1,t});
+	    h = diagram().next_halfedge_around_edge(h, v1, v2);
+	} while(h != h0);
+	end_facet();
+    }
+
+    void Molecule::MixedComplexCells::add_quad_facet(index_t h, bool flipped) {
+	index_t v1 = diagram().halfedge_v(h,0);
+	index_t v2 = diagram().halfedge_v(h,1);
+	index_t t1 = diagram().halfedge_t(h);
+	index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
+	begin_facet();
+	if(flipped) {
+	    add_vertex({v2,t1});
+	    add_vertex({v2,t2});
+	    add_vertex({v1,t2});
+	    add_vertex({v1,t1});
+	} else {
+	    add_vertex({v1,t1});
+	    add_vertex({v1,t2});
+	    add_vertex({v2,t2});
+	    add_vertex({v2,t1});
+	}
+	end_facet();
+    }
+
+    void Molecule::MixedComplexCells::add_shrunk_tet_facet(
+	index_t t, index_t lf, bool flipped
+    ) {
+	index_t v1 = diagram().tet_facet_vertex(t, lf, 0);
+	index_t v2 = diagram().tet_facet_vertex(t, lf, 1);
+	index_t v3 = diagram().tet_facet_vertex(t, lf, 2);
+	begin_facet();
+	if(flipped) {
+	    add_vertex({v3,t});
+	    add_vertex({v2,t});
+	    add_vertex({v1,t});
+	} else {
+	    add_vertex({v1,t});
+	    add_vertex({v2,t});
+	    add_vertex({v3,t});
+	}
+	end_facet();
+    }
+
+/**************************************************************/
+
 }
