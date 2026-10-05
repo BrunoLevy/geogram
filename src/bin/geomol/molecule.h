@@ -117,6 +117,10 @@ namespace GEO {
 	/** \brief displays some statistics when updaring */
 	bool&         verbose()        { return verbose_; }
 
+	/**
+	 * \brief toggle display mixed complex cells by type
+	 * \param[in] type one of 0,1,2,3
+	 */
 	bool& visible(index_t type) {
 	    geo_debug_assert(type < 4);
 	    return cells_[type].visible();

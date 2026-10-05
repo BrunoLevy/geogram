@@ -177,6 +177,12 @@ namespace {
             float beta  = cAxisPerp.y;
 
             Ray R = glup_primary_ray();
+
+            // Advance R's origin to projection of C onto R, to avoid
+            // numeric precision errors (a bit like in sphere shader)
+            R.V = normalize(R.V);
+            R.O = R.O + dot(C-R.O,R.V)*R.V;
+
             vec3 co = R.O-C;
             float coDn = dot(co,n);
             float vDn  = dot(R.V,n);
@@ -190,11 +196,13 @@ namespace {
             float c =      alpha*coDn*coDn + beta*dot(coXn,coXn) - R2;
             */
 
-            // This version for Matthieu's shader, more efficient I think
-            // Probably computes YZ components by subtracging X component
+            // This version from Matthieu's shader, more efficient I think
+            // Probably computes YZ components by subtracting X component
             // (to be understood)
-            float gamma = alpha - beta;
-            float a =      gamma*vDn*vDn   + beta*dot(R.V, R.V);
+            // Initially there was dot(R.V,R.V) here but R.V is unit now
+                                                   //       |
+            float gamma = alpha - beta;            //       v
+            float a =      gamma*vDn*vDn   + beta; // *dot(R.V,R.V);
             float b = 2.0*(gamma*coDn*vDn  + beta*dot(R.V, co));
             float c =      gamma*coDn*coDn + beta*dot(co,co) - R2;
 
