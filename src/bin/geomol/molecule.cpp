@@ -65,7 +65,6 @@ namespace GEO {
 	}
     }
 
-
     bool Molecule::load(const std::string& filename) {
 	Mesh M;
 	if(!mesh_load(filename, M)) {
@@ -404,10 +403,20 @@ namespace GEO {
 
 	    double R = ::sqrt(R2);
 	    cells.begin_S_cell(c,R);
-	    cells.add_shrunk_tet_facet(t,0);
-	    cells.add_shrunk_tet_facet(t,1);
-	    cells.add_shrunk_tet_facet(t,2);
-	    cells.add_shrunk_tet_facet(t,3);
+
+	    // we could instead do cells.add_shrunk_tet_facet(t,0..3) but
+	    // it is slower because it recomputes the shrunk vertices
+	    for(index_t lf=0; lf<4; ++lf) {
+		index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
+		index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
+		index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[lv1]));
+		cells.add_vertex_by_point(vec3f(p[lv2]));
+		cells.add_vertex_by_point(vec3f(p[lv3]));
+		cells.end_facet();
+	    }
+
 	    cells.end_cell();
 	}
     }

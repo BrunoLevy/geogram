@@ -306,9 +306,14 @@ namespace GEO {
 		cell_facet_plane_.push_back(P);
 	    }
 
-	    void add_vertex(mixed_vertex_id V) {
-		cell_facet_vertex_.push_back(vec3f(molecule_.mixed_vertex(V)));
+	    void add_vertex_by_point(vec3f p) {
+		cell_facet_vertex_.push_back(p);
 	    }
+
+	    void add_vertex(mixed_vertex_id V) {
+		add_vertex_by_point(vec3f(molecule_.mixed_vertex(V)));
+	    }
+
 
 	    /*************************************************/
 
