@@ -274,19 +274,15 @@ namespace GEO {
 	    /*************************************************/
 
 	    void begin_S_cell(vec3 center, double radius) {
-		index_t cell_id = cell_eqn_.size();
-		cell_eqn_.emplace_back(
-		    vec4f{vec3f(center),    float(radius) },
-		    vec4f{0.0f, 0.0f, 0.0f, float(cell_id)}
-		);
+		index_t cell_id = nb_cells();
+		cell_eqn_c_R_.emplace_back(vec3f(center),float(radius));
+		cell_eqn_axis_id_.emplace_back(0.0f, 0.0f, 0.0f, float(cell_id));
 	    }
 
 	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
-		index_t cell_id = cell_eqn_.size();
-		cell_eqn_.emplace_back(
-		    vec4f{vec3f(center), float(R2)     },
-		    vec4f{vec3f(axis),   float(cell_id)}
-		);
+		index_t cell_id = nb_cells();
+		cell_eqn_c_R_.emplace_back(vec3f(center), float(R2));
+		cell_eqn_axis_id_.emplace_back(vec3f(axis), float(cell_id));
 	    }
 
 	    void end_cell() {
@@ -319,7 +315,7 @@ namespace GEO {
 	    typedef index_as_iterator iterator;
 	    typedef index_as_iterator const_iterator;
 
-	    index_t nb_cells() const     { return cell_eqn_.size(); }
+	    index_t nb_cells() const     { return cell_eqn_c_R_.size(); }
 	    index_as_iterator begin() const    { return 0;          }
 	    index_as_iterator end()   const    { return nb_cells(); }
 
@@ -350,9 +346,9 @@ namespace GEO {
 		);
 	    }
 
-	    const std::pair<vec4f, vec4f>& cell_eqn(index_t c) const {
+	    std::pair<vec4f, vec4f> cell_eqn(index_t c) const {
 		geo_debug_assert(c < nb_cells());
-		return cell_eqn_[c];
+		return {cell_eqn_c_R_[c], cell_eqn_axis_id_[c]};
 	    }
 
 	    /*************************************************/
@@ -362,6 +358,8 @@ namespace GEO {
 	    // expected to be a *signed* integer (no idea why).
 	    static constexpr GLint FACET_PTR_TEXTURE_UNIT = 4;
 	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT = 5;
+	    static constexpr GLint CELL_EQN_1_TEXTURE_UNIT = 6;
+	    static constexpr GLint CELL_EQN_2_TEXTURE_UNIT = 7;
 
 	    /**
 	     * \brief Creates the texture buffer objects with the compressed
@@ -369,7 +367,7 @@ namespace GEO {
 	     *  present and binds them to FACET_PTR_TEXTURE_UNIT and
 	     *  FACET_PLANE_TEXTURE_UNIT.
 	     */
-	    void bind_tbos() const;
+	    void bind_tbos(bool eqn1=false, bool eqn2=false) const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -450,13 +448,17 @@ namespace GEO {
 	     * - sphere:      {cx,cy,cz,R},  {unused, unused, unused, cell_id}
 	     * - hyperboloid: {fx,fy,fz,R2}, {axisx,  axisy,  axisz,  cell_id}
 	     */
-	    vector<std::pair<vec4f, vec4f>> cell_eqn_;
+	    vector<vec4f> cell_eqn_c_R_;
+	    vector<vec4f> cell_eqn_axis_id_;
 
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage
 	     */
 	    mutable TextureBufferObject cell_facet_ptr_tbo_;
 	    mutable TextureBufferObject cell_facet_plane_tbo_;
+
+	    mutable TextureBufferObject cell_eqn_1_tbo_;
+	    mutable TextureBufferObject cell_eqn_2_tbo_;
 
 	    vec3 color_ = {1.0, 1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
@@ -495,6 +497,7 @@ namespace GEO {
 
 	bool use_imposters_ = false;
 	GLuint S_imposters_program_ = 0;
+	GLuint empty_VAO_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells
 

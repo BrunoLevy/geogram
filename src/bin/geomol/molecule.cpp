@@ -66,6 +66,9 @@ namespace GEO {
 	if(S_imposters_program_ != 0) {
 	    glDeleteProgram(S_imposters_program_);
 	}
+	if(empty_VAO_ != 0) {
+	    glDeleteVertexArrays(1,&empty_VAO_);
+	}
     }
 
     bool Molecule::load(const std::string& filename) {
@@ -522,6 +525,14 @@ namespace GEO {
 		S_imposters_program_, "facet_plane_TBO",
 		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
 	    );
+	    GLSL::set_program_uniform_by_name(
+		S_imposters_program_, "cell_eqn_1_TBO",
+		MixedComplexCells::CELL_EQN_1_TEXTURE_UNIT
+	    );
+	}
+
+	if(empty_VAO_ == 0) {
+	    glGenVertexArrays(1, &empty_VAO_);
 	}
     }
 
@@ -570,17 +581,20 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	glupEnable(GLUP_VERTEX_NORMALS);
-	glupUseProgram(S_imposters_program_);
-	cells.bind_tbos();
+
+	// This one is super dirty: just to make sure GLUP uniform state is
+	// updated (sent to GPU).
 	glupBegin(GLUP_SPHERES);
-	for(index_t c: cells) {
-	    glupNormal4fv(cells.cell_eqn(c).second.data());
-	    glupVertex4fv(cells.cell_eqn(c).first.data());
-	}
 	glupEnd();
-	glupUseProgram(0);
-	glupDisable(GLUP_VERTEX_NORMALS);
+
+	cells.bind_tbos(true,false);
+	glUseProgram(S_imposters_program_);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glBindVertexArray(empty_VAO_);
+	glDrawArrays(GL_POINTS, 0, GLsizei(cells.nb_cells()));
+	glDisable(GL_PROGRAM_POINT_SIZE);
+	glBindVertexArray(0);
+	glUseProgram(0);
     }
 
     /************************************************************************/
@@ -646,12 +660,15 @@ namespace GEO {
 	cell_facet_vertex_ptr_.push_back(0);
 	cell_facet_vertex_.resize(0);
 	cell_facet_plane_.resize(0);
-	cell_eqn_.resize(0);
+	cell_eqn_c_R_.resize(0);
+	cell_eqn_axis_id_.resize(0);
 	cell_facet_ptr_tbo_.reset();
 	cell_facet_plane_tbo_.reset();
+	cell_eqn_1_tbo_.reset();
+	cell_eqn_2_tbo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos() const {
+    void Molecule::MixedComplexCells::bind_tbos(bool eqn1, bool eqn2) const {
 	glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
 	if(cell_facet_ptr_tbo_.TBO() == 0) {
 	    cell_facet_ptr_tbo_.create_or_update(
@@ -667,6 +684,28 @@ namespace GEO {
 	glActiveTexture(GL_TEXTURE0);
 	cell_facet_ptr_tbo_.bind(GL_TEXTURE0+FACET_PTR_TEXTURE_UNIT);
 	cell_facet_plane_tbo_.bind(GL_TEXTURE0+FACET_PLANE_TEXTURE_UNIT);
+
+	if(eqn1) {
+	    glActiveTexture(GL_TEXTURE0 + CELL_EQN_1_TEXTURE_UNIT);
+	    if(cell_eqn_1_tbo_.TBO() == 0) {
+		cell_eqn_1_tbo_.create_or_update(
+		    cell_eqn_c_R_.size(), cell_eqn_c_R_.data()
+		);
+	    }
+	    cell_eqn_1_tbo_.bind(GL_TEXTURE0 + CELL_EQN_1_TEXTURE_UNIT);
+	}
+
+	if(eqn2) {
+	    glActiveTexture(GL_TEXTURE0 + CELL_EQN_2_TEXTURE_UNIT);
+	    if(cell_eqn_2_tbo_.TBO() == 0) {
+		cell_eqn_2_tbo_.create_or_update(
+		    cell_eqn_axis_id_.size(), cell_eqn_axis_id_.data()
+		);
+	    }
+	    cell_eqn_2_tbo_.bind(GL_TEXTURE0 + CELL_EQN_2_TEXTURE_UNIT);
+	}
+
+	glActiveTexture(GL_TEXTURE0);
     }
 
     void Molecule::MixedComplexCells::draw(DrawMode mode) const {
@@ -696,8 +735,8 @@ namespace GEO {
 
     void Molecule::MixedComplexCells::draw_cell(index_t c) const {
 	// send cell equation through tex coord and vertex normal.
-	glupTexCoord4fv(cell_eqn_[c].first.data());
-	glupNormal4fv(cell_eqn_[c].second.data());
+	glupTexCoord4fv(cell_eqn_c_R_[c].data());
+	glupNormal4fv(cell_eqn_axis_id_[c].data());
 	for(index_t f: cell_facets(c)) {
 	    // triangulates the facet on the fly
 	    bool has_v1 = false;

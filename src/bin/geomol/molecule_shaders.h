@@ -273,10 +273,7 @@ namespace {
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
 
-        glup_in vec4 vertex_in;
-        glup_in vec4 normal_in;
-
-        // uniform samplerBuffer spheres_TBO;
+        uniform samplerBuffer cell_eqn_1_TBO;
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;
 
@@ -285,8 +282,12 @@ namespace {
         }
 
 	void main() {
-	    focus_R = vertex_in; //texelFetch(gl_VertexID);
-            cell_id = int(normal_in.w); // gl_VertexID;
+	    // focus_R = vertex_in; //texelFetch(gl_VertexID);
+            // cell_id = int(normal_in.w); // gl_VertexID;
+
+            focus_R = texelFetch(cell_eqn_1_TBO,gl_VertexID);
+            cell_id = gl_VertexID;
+
             vec3 p = focus_R.xyz;
             float R = focus_R.w;
             gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
@@ -296,7 +297,7 @@ namespace {
                1.0, 0.0, 0.0, 0.0,
                0.0, 1.0, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
-               vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
+               p.x/R, p.y/R, p.z/R, 1.0/R
             );
 
             mat4 PMT = GLUP.modelviewprojection_matrix * T;
