@@ -275,14 +275,14 @@ namespace GEO {
 
 	    void begin_S_cell(vec3 center, double radius) {
 		index_t cell_id = nb_cells();
-		cell_eqn_c_R_.emplace_back(vec3f(center),float(radius));
-		cell_eqn_axis_id_.emplace_back(0.0f, 0.0f, 0.0f, float(cell_id));
+		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
+		cell_eqn_2_.emplace_back(0.0f, 0.0f, 0.0f, float(cell_id));
 	    }
 
 	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
 		index_t cell_id = nb_cells();
-		cell_eqn_c_R_.emplace_back(vec3f(center), float(R2));
-		cell_eqn_axis_id_.emplace_back(vec3f(axis), float(cell_id));
+		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
+		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
 	    }
 
 	    void end_cell() {
@@ -315,7 +315,7 @@ namespace GEO {
 	    typedef index_as_iterator iterator;
 	    typedef index_as_iterator const_iterator;
 
-	    index_t nb_cells() const     { return cell_eqn_c_R_.size(); }
+	    index_t nb_cells() const     { return cell_eqn_1_.size(); }
 	    index_as_iterator begin() const    { return 0;          }
 	    index_as_iterator end()   const    { return nb_cells(); }
 
@@ -348,7 +348,7 @@ namespace GEO {
 
 	    std::pair<vec4f, vec4f> cell_eqn(index_t c) const {
 		geo_debug_assert(c < nb_cells());
-		return {cell_eqn_c_R_[c], cell_eqn_axis_id_[c]};
+		return {cell_eqn_1_[c], cell_eqn_2_[c]};
 	    }
 
 	    /*************************************************/
@@ -448,8 +448,8 @@ namespace GEO {
 	     * - sphere:      {cx,cy,cz,R},  {unused, unused, unused, cell_id}
 	     * - hyperboloid: {fx,fy,fz,R2}, {axisx,  axisy,  axisz,  cell_id}
 	     */
-	    vector<vec4f> cell_eqn_c_R_;
-	    vector<vec4f> cell_eqn_axis_id_;
+	    vector<vec4f> cell_eqn_1_;
+	    vector<vec4f> cell_eqn_2_;
 
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage

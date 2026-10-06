@@ -5,6 +5,7 @@
 namespace {
 
     void register_geomol_shader_utilities() {
+
 	GEO::GLSL::register_GLSL_include_file("geomol/clipping.h",
         R"(
         uniform isamplerBuffer facet_ptr_TBO;
@@ -20,6 +21,42 @@ namespace {
               }
            }
            return true;
+        }
+        )"
+	);
+
+	GEO::GLSL::register_GLSL_include_file("geomol/imposter.h",
+	R"(
+
+        vec4 row(in mat4 M, in int i) {
+           return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
+        }
+
+        // clip-space radius of a circle covering the projection
+        // of a world-space sphere
+        float projected_radius(in vec3 p, in float R) {
+            // TODO: optimize: directly compute r1,r2,r4
+            mat4 T = mat4(
+               1.0, 0.0, 0.0, 0.0,
+               0.0, 1.0, 0.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+               p.x/R, p.y/R, p.z/R, 1.0/R
+            );
+
+            mat4 PMT = GLUP.modelviewprojection_matrix * T;
+            vec4 r1 = row(PMT,0);
+            vec4 r2 = row(PMT,1);
+            vec4 r4 = row(PMT,3);
+
+            float r1Dr4T = dot(r1.xyz,r4.xyz)-r1.w*r4.w;
+            float r1Dr1T = dot(r1.xyz,r1.xyz)-r1.w*r1.w;
+            float r4Dr4T = dot(r4.xyz,r4.xyz)-r4.w*r4.w;
+            float r2Dr2T = dot(r2.xyz,r2.xyz)-r2.w*r2.w;
+            float r2Dr4T = dot(r2.xyz,r4.xyz)-r2.w*r4.w;
+
+            float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
+            float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
+            return -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
         }
         )"
 	);
@@ -263,7 +300,7 @@ namespace {
 
     const char* spheres_imposters_source =
         R"(
-        //primitive GLUP_SPHERES
+        //primitive GLUP_TRIANGLES
 	)"
 
         R"(
@@ -272,14 +309,11 @@ namespace {
 	//import <GLUP/stdglup.h>
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
+        //import <geomol/imposter.h>
 
         uniform samplerBuffer cell_eqn_1_TBO;
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;
-
-        vec4 row(in mat4 M, in int i) {
-           return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
-        }
 
         const vec2 offsets[6] = vec2[](
             vec2(-1.0, -1.0),
@@ -293,32 +327,9 @@ namespace {
 	void main() {
             cell_id = gl_VertexID / 6;
             focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
-
             vec3 p = focus_R.xyz;
             float R = focus_R.w;
-
-            // TODO: optimize: directly compute r1,r2,r4
-            mat4 T = mat4(
-               1.0, 0.0, 0.0, 0.0,
-               0.0, 1.0, 0.0, 0.0,
-               0.0, 0.0, 1.0, 0.0,
-               p.x/R, p.y/R, p.z/R, 1.0/R
-            );
-
-            mat4 PMT = GLUP.modelviewprojection_matrix * T;
-            vec4 r1 = row(PMT,0);
-            vec4 r2 = row(PMT,1);
-            vec4 r4 = row(PMT,3);
-
-            float r1Dr4T = dot(r1.xyz,r4.xyz)-r1.w*r4.w;
-            float r1Dr1T = dot(r1.xyz,r1.xyz)-r1.w*r1.w;
-            float r4Dr4T = dot(r4.xyz,r4.xyz)-r4.w*r4.w;
-            float r2Dr2T = dot(r2.xyz,r2.xyz)-r2.w*r2.w;
-            float r2Dr4T = dot(r2.xyz,r4.xyz)-r2.w*r4.w;
-
-            float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
-            float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
-            float qsize = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
+            float qsize = projected_radius(p,R);
             gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
             gl_Position.xy += gl_Position.w*qsize*offsets[gl_VertexID % 6];
 	}

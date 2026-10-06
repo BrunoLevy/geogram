@@ -660,8 +660,8 @@ namespace GEO {
 	cell_facet_vertex_ptr_.push_back(0);
 	cell_facet_vertex_.resize(0);
 	cell_facet_plane_.resize(0);
-	cell_eqn_c_R_.resize(0);
-	cell_eqn_axis_id_.resize(0);
+	cell_eqn_1_.resize(0);
+	cell_eqn_2_.resize(0);
 	cell_facet_ptr_tbo_.reset();
 	cell_facet_plane_tbo_.reset();
 	cell_eqn_1_tbo_.reset();
@@ -689,7 +689,7 @@ namespace GEO {
 	    glActiveTexture(GL_TEXTURE0 + CELL_EQN_1_TEXTURE_UNIT);
 	    if(cell_eqn_1_tbo_.TBO() == 0) {
 		cell_eqn_1_tbo_.create_or_update(
-		    cell_eqn_c_R_.size(), cell_eqn_c_R_.data()
+		    cell_eqn_1_.size(), cell_eqn_1_.data()
 		);
 	    }
 	    cell_eqn_1_tbo_.bind(GL_TEXTURE0 + CELL_EQN_1_TEXTURE_UNIT);
@@ -699,7 +699,7 @@ namespace GEO {
 	    glActiveTexture(GL_TEXTURE0 + CELL_EQN_2_TEXTURE_UNIT);
 	    if(cell_eqn_2_tbo_.TBO() == 0) {
 		cell_eqn_2_tbo_.create_or_update(
-		    cell_eqn_axis_id_.size(), cell_eqn_axis_id_.data()
+		    cell_eqn_2_.size(), cell_eqn_2_.data()
 		);
 	    }
 	    cell_eqn_2_tbo_.bind(GL_TEXTURE0 + CELL_EQN_2_TEXTURE_UNIT);
@@ -735,8 +735,8 @@ namespace GEO {
 
     void Molecule::MixedComplexCells::draw_cell(index_t c) const {
 	// send cell equation through tex coord and vertex normal.
-	glupTexCoord4fv(cell_eqn_c_R_[c].data());
-	glupNormal4fv(cell_eqn_axis_id_[c].data());
+	glupTexCoord4fv(cell_eqn_1_[c].data());
+	glupNormal4fv(cell_eqn_2_[c].data());
 	for(index_t f: cell_facets(c)) {
 	    // triangulates the facet on the fly
 	    bool has_v1 = false;
