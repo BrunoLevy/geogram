@@ -66,6 +66,9 @@ namespace GEO {
 	if(S_imposters_program_ != 0) {
 	    glDeleteProgram(S_imposters_program_);
 	}
+	if(H_imposters_program_ != 0) {
+	    glDeleteProgram(H_imposters_program_);
+	}
 	if(empty_VAO_ != 0) {
 	    glDeleteVertexArrays(1,&empty_VAO_);
 	}
@@ -290,7 +293,11 @@ namespace GEO {
 		double R2 = distance2(c, diagram_->vertex(v1)) -
 		    diagram_->weight(v1);
 
-		cells.begin_H_cell(c,axis,R2);
+		cells.begin_H_cell(
+		    c,axis,R2,
+		    atom_pos_[v1], atom_radius(v1),
+		    atom_pos_[v2], atom_radius(v2)
+		);
 
 		// generate the quad facets
 		index_t h = h0;
@@ -465,8 +472,15 @@ namespace GEO {
 	    cells_[CELL_TYPE_S0].draw(mode);
 	}
 
-	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
-	cells_[CELL_TYPE_H1].draw(mode);
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cAxisPerp", t1, t2
+	    );
+	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
+	} else {
+	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
+	    cells_[CELL_TYPE_H1].draw(mode);
+	}
 
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	cells_[CELL_TYPE_H2].draw(mode);
@@ -528,6 +542,36 @@ namespace GEO {
 	    GLSL::set_program_uniform_by_name(
 		S_imposters_program_, "cell_eqn_1_TBO",
 		MixedComplexCells::CELL_EQN_1_TEXTURE_UNIT
+	    );
+	}
+
+	if(H_imposters_program_ == 0) {
+	    H_imposters_program_ = glupCompileProgram(
+		hyperboloids_imposters_source
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "facet_ptr_TBO",
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "facet_plane_TBO",
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cell_eqn_1_TBO",
+		MixedComplexCells::CELL_EQN_1_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cell_eqn_2_TBO",
+		MixedComplexCells::CELL_EQN_2_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cell_imposter_1_TBO",
+		MixedComplexCells::CELL_IMPOSTER_1_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cell_imposter_2_TBO",
+		MixedComplexCells::CELL_IMPOSTER_2_TEXTURE_UNIT
 	    );
 	}
 
@@ -597,6 +641,29 @@ namespace GEO {
 	glUseProgram(0);
     }
 
+
+    void Molecule::draw_hyperboloids_imposters(
+	const MixedComplexCells& cells
+    ) const {
+	if(!cells.visible()) {
+	    return;
+	}
+	glupDisable(GLUP_VERTEX_COLORS);
+	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
+
+	// This one is super dirty: just to make sure GLUP uniform state is
+	// updated (sent to GPU).
+	glupBegin(GLUP_SPHERES);
+	glupEnd();
+
+	cells.bind_tbos(true,true,true);
+	glUseProgram(H_imposters_program_);
+	glBindVertexArray(empty_VAO_);
+	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
+	glBindVertexArray(0);
+	glUseProgram(0);
+    }
+
     /************************************************************************/
 
     double Molecule::atom_radius_from_type(char c) {
@@ -662,13 +729,19 @@ namespace GEO {
 	cell_facet_plane_.resize(0);
 	cell_eqn_1_.resize(0);
 	cell_eqn_2_.resize(0);
+	cell_imposter_1_.resize(0);
+	cell_imposter_2_.resize(0);
 	cell_facet_ptr_tbo_.reset();
 	cell_facet_plane_tbo_.reset();
 	cell_eqn_1_tbo_.reset();
 	cell_eqn_2_tbo_.reset();
+	cell_imposter_1_tbo_.reset();
+	cell_imposter_2_tbo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos(bool eqn1, bool eqn2) const {
+    void Molecule::MixedComplexCells::bind_tbos(
+	bool eqn1, bool eqn2, bool imposters
+    ) const {
 	glActiveTexture(GL_TEXTURE0 + FACET_PTR_TEXTURE_UNIT);
 	if(cell_facet_ptr_tbo_.TBO() == 0) {
 	    cell_facet_ptr_tbo_.create_or_update(
@@ -703,6 +776,28 @@ namespace GEO {
 		);
 	    }
 	    cell_eqn_2_tbo_.bind(GL_TEXTURE0 + CELL_EQN_2_TEXTURE_UNIT);
+	}
+
+	if(imposters) {
+	    glActiveTexture(GL_TEXTURE0 + CELL_IMPOSTER_1_TEXTURE_UNIT);
+	    if(cell_imposter_1_tbo_.TBO() == 0) {
+		cell_imposter_1_tbo_.create_or_update(
+		    cell_imposter_1_.size(), cell_imposter_1_.data()
+		);
+	    }
+	    cell_imposter_1_tbo_.bind(
+		GL_TEXTURE0 + CELL_IMPOSTER_1_TEXTURE_UNIT
+	    );
+
+	    glActiveTexture(GL_TEXTURE0 + CELL_IMPOSTER_2_TEXTURE_UNIT);
+	    if(cell_imposter_2_tbo_.TBO() == 0) {
+		cell_imposter_2_tbo_.create_or_update(
+		    cell_imposter_2_.size(), cell_imposter_2_.data()
+		);
+	    }
+	    cell_imposter_2_tbo_.bind(
+		GL_TEXTURE0 + CELL_IMPOSTER_2_TEXTURE_UNIT
+	    );
 	}
 
 	glActiveTexture(GL_TEXTURE0);

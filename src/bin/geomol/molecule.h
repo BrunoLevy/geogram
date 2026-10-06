@@ -285,6 +285,18 @@ namespace GEO {
 		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
 	    }
 
+	    void begin_H_cell(
+		vec3 center, vec3 axis, double R2,
+		vec3 impos1, double Rimpos1, vec3 impos2, double Rimpos2
+	    ) {
+		index_t cell_id = nb_cells();
+		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
+		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
+		cell_imposter_1_.emplace_back(vec3f(impos1),float(Rimpos1));
+		cell_imposter_2_.emplace_back(vec3f(impos2),float(Rimpos2));
+	    }
+
+
 	    void end_cell() {
 		// -1 because count intervals instead of count bounds--------.
 		//                                                           v
@@ -356,10 +368,12 @@ namespace GEO {
 	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
 	    // does not seem to work to set a texture unit, that seems to be
 	    // expected to be a *signed* integer (no idea why).
-	    static constexpr GLint FACET_PTR_TEXTURE_UNIT = 4;
-	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT = 5;
-	    static constexpr GLint CELL_EQN_1_TEXTURE_UNIT = 6;
-	    static constexpr GLint CELL_EQN_2_TEXTURE_UNIT = 7;
+	    static constexpr GLint FACET_PTR_TEXTURE_UNIT       = 4;
+	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT     = 5;
+	    static constexpr GLint CELL_EQN_1_TEXTURE_UNIT      = 6;
+	    static constexpr GLint CELL_EQN_2_TEXTURE_UNIT      = 7;
+	    static constexpr GLint CELL_IMPOSTER_1_TEXTURE_UNIT = 8;
+	    static constexpr GLint CELL_IMPOSTER_2_TEXTURE_UNIT = 9;
 
 	    /**
 	     * \brief Creates the texture buffer objects with the compressed
@@ -367,7 +381,9 @@ namespace GEO {
 	     *  present and binds them to FACET_PTR_TEXTURE_UNIT and
 	     *  FACET_PLANE_TEXTURE_UNIT.
 	     */
-	    void bind_tbos(bool eqn1=false, bool eqn2=false) const;
+	    void bind_tbos(
+		bool eqn1=false, bool eqn2=false, bool imposters=false
+	    ) const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -451,6 +467,10 @@ namespace GEO {
 	    vector<vec4f> cell_eqn_1_;
 	    vector<vec4f> cell_eqn_2_;
 
+	    // center and radii of capsule extremities for H patches
+	    vector<vec4f> cell_imposter_1_;
+	    vector<vec4f> cell_imposter_2_;
+
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage
 	     */
@@ -460,6 +480,9 @@ namespace GEO {
 	    mutable TextureBufferObject cell_eqn_1_tbo_;
 	    mutable TextureBufferObject cell_eqn_2_tbo_;
 
+	    mutable TextureBufferObject cell_imposter_1_tbo_;
+	    mutable TextureBufferObject cell_imposter_2_tbo_;
+
 	    vec3 color_ = {1.0, 1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
 	    bool visible_ = true;
@@ -468,6 +491,7 @@ namespace GEO {
 	/***********************************************************************/
 
 	void draw_spheres_imposters(const MixedComplexCells& cells) const;
+	void draw_hyperboloids_imposters(const MixedComplexCells& cells) const;
 
 
     private:
@@ -497,6 +521,7 @@ namespace GEO {
 
 	bool use_imposters_ = false;
 	GLuint S_imposters_program_ = 0;
+	GLuint H_imposters_program_ = 0;
 	GLuint empty_VAO_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells

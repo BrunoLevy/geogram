@@ -407,4 +407,165 @@ namespace {
 	}
 	)";
 
+   /********************************************************************/
+
+    const char* hyperboloids_imposters_source =
+        R"(
+        //primitive GLUP_TRIANGLES
+	)"
+
+        R"(
+        //stage GL_VERTEX_SHADER
+        //import <GLUP/current_profile/vertex_shader_preamble.h>
+	//import <GLUP/stdglup.h>
+	//import <GLUPGLSL/state.h>
+	//import <GLUP/current_profile/toggles.h>
+        //import <geomol/imposter.h>
+
+        uniform samplerBuffer cell_eqn_1_TBO;
+        uniform samplerBuffer cell_eqn_2_TBO;
+        uniform samplerBuffer cell_imposter_1_TBO;
+        uniform samplerBuffer cell_imposter_2_TBO;
+
+        glup_flat glup_out vec3  C;  // focus
+        glup_flat glup_out vec3  n;  // axis
+        glup_flat glup_out float R2;
+        glup_flat glup_out int cell_id;
+
+	void main() {
+            cell_id = gl_VertexID / 6;
+            vec4 focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
+            C = focus_R.xyz;
+            R2 = -focus_R.w;
+            n = texelFetch(cell_eqn_2_TBO,cell_id).xyz;
+
+            vec4 imp1 = texelFetch(cell_imposter_1_TBO,cell_id);
+            vec4 imp2 = texelFetch(cell_imposter_2_TBO,cell_id);
+
+            float qsize = max(
+                projected_radius(imp1.xyz, imp1.w),
+                projected_radius(imp2.xyz, imp2.w)
+            );
+
+            vec4 UVW1 = GLUP.modelviewprojection_matrix*vec4(imp1.xyz,1.0);
+            vec4 UVW2 = GLUP.modelviewprojection_matrix*vec4(imp2.xyz,1.0);
+
+            vec2 UV1 = (1.0/UVW1.w)*UVW1.xy;
+            vec2 UV2 = (1.0/UVW2.w)*UVW2.xy;
+            vec2 H = normalize(UV2-UV1);
+            vec2 Hperp = vec2(-H.y,H.x);
+
+            switch(gl_VertexID % 6) {
+            case 0:
+            case 3:
+                gl_Position = vec4(UV1 + qsize*(-H -Hperp),0,1);
+                break;
+            case 1:
+                gl_Position = vec4(UV2 + qsize*( H -Hperp),0,1);
+                break;
+            case 2:
+            case 4:
+                gl_Position = vec4(UV2 + qsize*( H +Hperp),0,1);
+                break;
+            case 5:
+                gl_Position = vec4(UV1 + qsize*(-H +Hperp),0,1);
+                break;
+            };
+	}
+	)"
+
+        R"(
+        //stage GL_FRAGMENT_SHADER
+        //import <GLUP/current_profile/fragment_shader_preamble.h>
+        //import <GLUP/stdglup.h>
+        //import <GLUPGLSL/state.h>
+        //import <GLUP/current_profile/toggles.h>
+        //import <GLUP/current_profile/primitive.h>
+        //import <GLUP/fragment_shader_utils.h>
+        //import <GLUP/fragment_ray_tracing.h>
+        //import <geomol/clipping.h>
+
+        uniform vec2 cAxisPerp;
+        glup_flat glup_in vec3  C;  // focus
+        glup_flat glup_in vec3  n;  // axis
+        glup_flat glup_in float R2;
+        glup_flat glup_in int cell_id;
+
+	void main() {
+            float alpha = cAxisPerp.x;
+            float beta  = cAxisPerp.y;
+
+            Ray R = glup_primary_ray();
+
+            // Advance R's origin to projection of C onto R, to avoid
+            // numeric precision errors (a bit like in sphere shader)
+            R.V = normalize(R.V);
+            R.O += dot(C-R.O,R.V)*R.V;
+
+            vec3 co = R.O-C;
+            float coDn = dot(co,n);
+            float vDn  = dot(R.V,n);
+
+            // my old version using length of cross product for YZ axis
+            /*
+            vec3 coXn = cross(co,n);
+            vec3 vXn  = cross(R.V,n);
+            float a =      alpha*vDn*vDn   + beta*dot(vXn,vXn)  ;
+            float b = 2.0*(alpha*coDn*vDn  + beta*dot(coXn,vXn));
+            float c =      alpha*coDn*coDn + beta*dot(coXn,coXn) - R2;
+            */
+
+            // This version from Matthieu's shader, more efficient I think
+            // Probably computes YZ components by subtracting X component
+            // (to be understood)
+            // Initially there was dot(R.V,R.V) here but R.V is unit now
+                                                   //       |
+            float gamma = alpha - beta;            //       v
+            float a =      gamma*vDn*vDn   + beta; // *dot(R.V,R.V);
+            float b = 2.0*(gamma*coDn*vDn  + beta*dot(R.V, co));
+            float c =      gamma*coDn*coDn + beta*dot(co,co) - R2;
+
+            float delta = b*b - 4.0*a*c;
+            if(delta < 0.0) {
+               discard;
+            }
+            float sq = sqrt(delta);
+            float t1 = (-b - sq) / (2.0*a);
+            float t2 = (-b + sq) / (2.0*a);
+            float sign = 1;
+            float t = min(t1,t2);
+            vec3 M = R.O + t * R.V;
+            if(t1 > t2) { sign = -1.0; }
+
+            if(!in_cell(M,cell_id)) {
+                t = max(t1,t2);
+                M = R.O + t * R.V;
+                sign = sign * -1.0;
+                if(!in_cell(M,cell_id)) {
+                   discard;
+                }
+            }
+
+            if(
+               glupIsEnabled(GLUP_CLIPPING) /* &&
+               GLUP.clipping_mode == GLUP_CLIP_STANDARD */
+            ) {
+               if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
+                  discard;
+               }
+            }
+
+            glup_update_depth(M);
+            vec4 result = GLUP.front_color;
+            if(glupIsEnabled(GLUP_LIGHTING)) {
+               vec3 CM = M-C;
+               vec3 CMperp = dot(CM,n)*n;
+               vec3 CMpar  = CM - CMperp;
+               vec3 N = alpha * CMperp + beta * CMpar;
+               N = sign*normalize(GLUP.normal_matrix*N);
+               result = glup_lighting(result, N);
+            }
+            glup_FragColor = result;
+        }
+	)";
 }
