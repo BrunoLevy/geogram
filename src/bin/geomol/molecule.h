@@ -493,7 +493,7 @@ namespace GEO {
 	GLuint S_program_ = 0; // GPU program for spheres
 	GLuint H_program_ = 0; // GPU program for hyperboloids
 
-	bool use_imposters_ = true;
+	bool use_imposters_ = false;
 	GLuint S_imposters_program_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells

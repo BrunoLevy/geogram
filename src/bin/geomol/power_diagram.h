@@ -389,6 +389,23 @@ namespace GEO {
 	}
 
 	/**
+	 * \brief Gets the number of edges starting from a vertex
+	 * \param[in] v the vertex
+	 * \details counts only the real edges (not the NO_INDEX),
+	 *  see incident_edges().
+	 */
+	index_t nb_incident_edges(index_t v) const {
+	    index_t result = 0;
+	    for(index_t h: incident_edges(v)) {
+		if(h == NO_INDEX) {
+		    break;
+		}
+		++result;
+	    }
+	    return result;
+	}
+
+	/**
 	 * \brief Computes the radical point of four vertices
 	 * \param[in] v1 , v2 , v3 , v4 four vertex indices
 	 * \return the point equidistant to the four vertices

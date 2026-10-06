@@ -241,6 +241,10 @@ namespace GEO {
 	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	cells.clear();
 	for(index_t v: atoms()) {
+	    // empty Laguerre cell
+	    if(diagram_->nb_incident_edges(v) == 0) {
+		continue;
+	    }
 	    vec3 c = atom_pos_[v];
 	    double R = atom_radius(v);
 	    cells.begin_S_cell(c,R);
@@ -571,11 +575,8 @@ namespace GEO {
 	cells.bind_tbos();
 	glupBegin(GLUP_SPHERES);
 	for(index_t c: cells) {
-	    // There can be empty Laguerre cells, they have no facets...
-	    if(cells.cell_facets(c).end() - cells.cell_facets(c).begin() > 0) {
-		glupNormal4fv(cells.cell_eqn(c).second.data());
-		glupVertex4fv(cells.cell_eqn(c).first.data());
-	    }
+	    glupNormal4fv(cells.cell_eqn(c).second.data());
+	    glupVertex4fv(cells.cell_eqn(c).first.data());
 	}
 	glupEnd();
 	glupUseProgram(0);
