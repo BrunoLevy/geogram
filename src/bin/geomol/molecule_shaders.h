@@ -281,16 +281,21 @@ namespace {
            return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
         }
 
-	void main() {
-	    // focus_R = vertex_in; //texelFetch(gl_VertexID);
-            // cell_id = int(normal_in.w); // gl_VertexID;
+        const vec2 offsets[6] = vec2[](
+            vec2(-1.0, -1.0),
+            vec2( 1.0, -1.0),
+            vec2( 1.0,  1.0),
+            vec2(-1.0, -1.0),
+            vec2( 1.0,  1.0),
+            vec2(-1.0,  1.0)
+        );
 
-            focus_R = texelFetch(cell_eqn_1_TBO,gl_VertexID);
-            cell_id = gl_VertexID;
+	void main() {
+            cell_id = gl_VertexID / 6;
+            focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
 
             vec3 p = focus_R.xyz;
             float R = focus_R.w;
-            gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
 
             // TODO: optimize: directly compute r1,r2,r4
             mat4 T = mat4(
@@ -313,10 +318,9 @@ namespace {
 
             float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
             float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
-            float screen = max(GLUP.viewport[2], GLUP.viewport[3]);
-
-            gl_PointSize = sqrt(max(discriminant_x,discriminant_y)) *
-                screen/(-r4Dr4T);
+            float qsize = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
+            gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
+            gl_Position.xy += gl_Position.w*qsize*offsets[gl_VertexID % 6];
 	}
 	)"
 

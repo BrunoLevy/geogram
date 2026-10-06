@@ -589,10 +589,10 @@ namespace GEO {
 
 	cells.bind_tbos(true,false);
 	glUseProgram(S_imposters_program_);
-	glEnable(GL_PROGRAM_POINT_SIZE);
+	// glEnable(GL_PROGRAM_POINT_SIZE);
 	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_POINTS, 0, GLsizei(cells.nb_cells()));
-	glDisable(GL_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
+	// glDisable(GL_PROGRAM_POINT_SIZE);
 	glBindVertexArray(0);
 	glUseProgram(0);
     }
