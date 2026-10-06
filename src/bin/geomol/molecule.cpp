@@ -343,6 +343,26 @@ namespace GEO {
 		    continue;
 		}
 
+		vec3 p11 = mixed_vertex({v1,t1});
+		vec3 p21 = mixed_vertex({v2,t1});
+		vec3 p31 = mixed_vertex({v3,t1});
+
+		vec3 g1 = (1.0/3.0)*(p11+p21+p31);
+		double r1 = std::max(
+		    std::max(distance2(p11,g1),distance2(p21,g1)),
+		    distance2(p31,g1)
+		);
+
+		vec3 p12 = mixed_vertex({v1,t2});
+		vec3 p22 = mixed_vertex({v2,t2});
+		vec3 p32 = mixed_vertex({v3,t2});
+
+		vec3 g2 = (1.0/3.0)*(p12+p22+p32);
+		double r2 = std::max(
+		    std::max(distance2(p12,g2),distance2(p22,g2)),
+		    distance2(p32,g2)
+		);
+
 
 		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
 
@@ -351,7 +371,8 @@ namespace GEO {
 		    distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
 		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 
-		cells.begin_H_cell(c,axis,R2);
+
+		cells.begin_H_cell(c,axis,R2, g1,::sqrt(r1),g2,::sqrt(r2));
 
 		// TODO: would be easier and faster to get the 6 mixed complex
 		// vertices directly and generate facets explicitly
@@ -482,8 +503,15 @@ namespace GEO {
 	    cells_[CELL_TYPE_H1].draw(mode);
 	}
 
-	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
-	cells_[CELL_TYPE_H2].draw(mode);
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cAxisPerp", t2, t1
+	    );
+	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
+	} else {
+	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
+	    cells_[CELL_TYPE_H2].draw(mode);
+	}
 
 	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
 	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);

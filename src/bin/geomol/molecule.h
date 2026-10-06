@@ -519,7 +519,7 @@ namespace GEO {
 	GLuint S_program_ = 0; // GPU program for spheres
 	GLuint H_program_ = 0; // GPU program for hyperboloids
 
-	bool use_imposters_ = false;
+	bool use_imposters_ = true;
 	GLuint S_imposters_program_ = 0;
 	GLuint H_imposters_program_ = 0;
 	GLuint empty_VAO_ = 0;
