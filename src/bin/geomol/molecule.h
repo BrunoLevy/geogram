@@ -61,7 +61,8 @@ namespace GEO {
 	};
 
 	enum MixedCellType {
-	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3
+	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3,
+	    CELL_TYPE_NB=4
 	};
 
 	Molecule();
