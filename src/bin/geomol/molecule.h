@@ -117,6 +117,9 @@ namespace GEO {
 	/** \brief displays some statistics when updaring */
 	bool&         verbose()        { return verbose_; }
 
+
+	bool& use_imposters() { return use_imposters_; }
+
 	/**
 	 * \brief toggle display mixed complex cells by type
 	 * \param[in] type one of 0,1,2,3
@@ -347,6 +350,11 @@ namespace GEO {
 		);
 	    }
 
+	    const std::pair<vec4f, vec4f>& cell_eqn(index_t c) const {
+		geo_debug_assert(c < nb_cells());
+		return cell_eqn_[c];
+	    }
+
 	    /*************************************************/
 
 	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
@@ -374,6 +382,8 @@ namespace GEO {
 	    void set_color(const vec3& c)    { color_ = c; }
 	    void set_program(GLuint program) { program_ = program; }
 	    bool& visible() { return visible_; }
+	    const bool& visible() const { return visible_; }
+
 
 	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
 	    void draw(DrawMode mode = DRAW_MODE_CELLS) const;
@@ -455,6 +465,9 @@ namespace GEO {
 
 	/***********************************************************************/
 
+	void draw_spheres_imposters(const MixedComplexCells& cells) const;
+
+
     private:
 	index_t nb_atoms_;
 	vector<vec3> atom_pos_;
@@ -479,6 +492,9 @@ namespace GEO {
 	bool verbose_ = false;
 	GLuint S_program_ = 0; // GPU program for spheres
 	GLuint H_program_ = 0; // GPU program for hyperboloids
+
+	bool use_imposters_ = true;
+	GLuint S_imposters_program_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells
 

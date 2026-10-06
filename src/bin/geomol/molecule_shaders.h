@@ -259,6 +259,136 @@ namespace {
         }
 	)";
 
-
    /********************************************************************/
+
+    const char* spheres_imposters_source =
+        R"(
+        //primitive GLUP_SPHERES
+	)"
+
+        R"(
+        //stage GL_VERTEX_SHADER
+        //import <GLUP/current_profile/vertex_shader_preamble.h>
+	//import <GLUP/stdglup.h>
+	//import <GLUPGLSL/state.h>
+	//import <GLUP/current_profile/toggles.h>
+
+        glup_in vec4 vertex_in;
+        glup_in vec4 normal_in;
+
+        // uniform samplerBuffer spheres_TBO;
+        glup_flat glup_out vec4 focus_R;
+        glup_flat glup_out int cell_id;
+
+        vec4 row(in mat4 M, in int i) {
+           return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
+        }
+
+	void main() {
+	    focus_R = vertex_in; //texelFetch(gl_VertexID);
+            cell_id = int(normal_in.w); // gl_VertexID;
+            vec3 p = focus_R.xyz;
+            float R = focus_R.w;
+            gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
+
+            // TODO: optimize: directly compute r1,r2,r4
+            mat4 T = mat4(
+               1.0, 0.0, 0.0, 0.0,
+               0.0, 1.0, 0.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+               vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
+            );
+
+            mat4 PMT = GLUP.modelviewprojection_matrix * T;
+            vec4 r1 = row(PMT,0);
+            vec4 r2 = row(PMT,1);
+            vec4 r4 = row(PMT,3);
+
+            float r1Dr4T = dot(r1.xyz,r4.xyz)-r1.w*r4.w;
+            float r1Dr1T = dot(r1.xyz,r1.xyz)-r1.w*r1.w;
+            float r4Dr4T = dot(r4.xyz,r4.xyz)-r4.w*r4.w;
+            float r2Dr2T = dot(r2.xyz,r2.xyz)-r2.w*r2.w;
+            float r2Dr4T = dot(r2.xyz,r4.xyz)-r2.w*r4.w;
+
+            float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
+            float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
+            float screen = max(GLUP.viewport[2], GLUP.viewport[3]);
+
+            gl_PointSize = sqrt(max(discriminant_x,discriminant_y)) *
+                screen/(-r4Dr4T);
+	}
+	)"
+
+        R"(
+        //stage GL_FRAGMENT_SHADER
+        //import <GLUP/current_profile/fragment_shader_preamble.h>
+        //import <GLUP/stdglup.h>
+        //import <GLUPGLSL/state.h>
+        //import <GLUP/current_profile/toggles.h>
+        //import <GLUP/current_profile/primitive.h>
+        //import <GLUP/fragment_shader_utils.h>
+        //import <GLUP/fragment_ray_tracing.h>
+        //import <geomol/clipping.h>
+
+        glup_flat glup_in vec4 focus_R;
+        glup_flat glup_in int cell_id;
+
+	void main() {
+           vec3 C = focus_R.xyz;
+           float r = focus_R.w;
+           float sign = 1.0;
+
+           Ray R = glup_primary_ray();
+
+	   // High-precision ray-sphere intersection
+	   // See Ray Tracing Gems, Chapter 7,
+	   // Precision Improvements for Ray-Sphere Intersection,
+	   // E. Haines, J. Gunther, T. Akenine-Moller
+           vec3  D = R.O-C;
+           float a = dot(R.V,R.V);
+
+	   float b_prime = -dot(D,R.V);
+	   vec3  H = D + (b_prime/a) * R.V;
+	   float delta = r*r - dot(H,H);
+           if(delta < 0.0) {
+               discard;
+           }
+	   // Original article: q = b_prime + sign(b_prime)*sqrt(a*delta)
+	   // Don't know why they do that, here we know we want t1
+           float sqrt_a_delta = sqrt(a*delta);
+	   float q = b_prime - sqrt_a_delta;
+	   float t = q/a;
+
+           vec3 M = R.O + t*R.V;
+
+           if(!in_cell(M,cell_id)) {
+              // Get the other root, still using the high-precision method
+              q = b_prime + sqrt_a_delta;
+              t = q/a;
+              M = R.O + t*R.V;
+              sign = sign * -1.0;
+              if(!in_cell(M,cell_id)) {
+                  discard;
+              }
+           }
+
+           if(
+              glupIsEnabled(GLUP_CLIPPING) /* &&
+              GLUP.clipping_mode == GLUP_CLIP_STANDARD */
+           ) {
+              if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
+                 discard;
+              }
+           }
+
+           glup_update_depth(M);
+           vec4 result = GLUP.front_color;
+           if(glupIsEnabled(GLUP_LIGHTING)) {
+               vec3 N = sign*normalize(GLUP.normal_matrix*(M-C));
+               result = glup_lighting(result, N);
+           }
+           glup_FragColor = result;
+	}
+	)";
+
 }

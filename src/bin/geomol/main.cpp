@@ -113,6 +113,8 @@ namespace {
 
         void draw_object_properties() override {
             SimpleApplication::draw_object_properties();
+	    ImGui::Text("atoms: %d",molecule_.nb_atoms());
+
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {
 		molecule_.atom_size() = double(size);
@@ -135,16 +137,16 @@ namespace {
 		    molecule_.update();
 		}
 		ImGui::Checkbox("raytrace", &molecule_.raytrace());
+		if(molecule_.raytrace()) {
+		    ImGui::Checkbox("imposters", &molecule_.use_imposters());
+		}
 		ImGui::Checkbox("0-patches", &molecule_.visible(0));
 		ImGui::Checkbox("1-patches", &molecule_.visible(1));
 		ImGui::Checkbox("2-patches", &molecule_.visible(2));
 		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
-		std::string trgls_string = String::format(
-		    "triangles: %d", molecule_.nb_drawn_triangles()
-		);
-		ImGui::Text("%s",trgls_string.c_str());
+		ImGui::Text("triangles: %d",molecule_.nb_drawn_triangles());
 	    }
         }
 

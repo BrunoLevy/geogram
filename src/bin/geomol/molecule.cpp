@@ -63,6 +63,9 @@ namespace GEO {
 	if(H_program_ != 0) {
 	    glDeleteProgram(H_program_);
 	}
+	if(S_imposters_program_ != 0) {
+	    glDeleteProgram(S_imposters_program_);
+	}
     }
 
     bool Molecule::load(const std::string& filename) {
@@ -326,6 +329,7 @@ namespace GEO {
 		    continue;
 		}
 
+
 		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
 
 		vec3 c = diagram_->radical_point(v1,v2,v3);
@@ -334,6 +338,9 @@ namespace GEO {
 		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 
 		cells.begin_H_cell(c,axis,R2);
+
+		// TODO: would be easier and faster to get the 6 mixed complex
+		// vertices directly and generate facets explicitly
 
 		index_t h1 =
 		    diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
@@ -382,6 +389,7 @@ namespace GEO {
 
 	    // If sphere is imaginary (negative radius) then tet is solid
 	    bool carries_surface = (R2 > 0.0);
+
 	    if(!carries_surface) {
 		continue;
 	    }
@@ -444,7 +452,11 @@ namespace GEO {
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
-	cells_[CELL_TYPE_S0].draw(mode);
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
+	} else {
+	    cells_[CELL_TYPE_S0].draw(mode);
+	}
 
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
 	cells_[CELL_TYPE_H1].draw(mode);
@@ -452,7 +464,11 @@ namespace GEO {
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	cells_[CELL_TYPE_H2].draw(mode);
 
-	cells_[CELL_TYPE_S3].draw(mode);
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
+	} else {
+	    cells_[CELL_TYPE_S3].draw(mode);
+	}
 
 	glDisable(GL_CULL_FACE);
     }
@@ -490,6 +506,18 @@ namespace GEO {
 	    );
 	    cells_[CELL_TYPE_H1].set_program(H_program_);
 	    cells_[CELL_TYPE_H2].set_program(H_program_);
+	}
+
+	if(S_imposters_program_ == 0) {
+	    S_imposters_program_ = glupCompileProgram(spheres_imposters_source);
+	    GLSL::set_program_uniform_by_name(
+		S_imposters_program_, "facet_ptr_TBO",
+		MixedComplexCells::FACET_PTR_TEXTURE_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		S_imposters_program_, "facet_plane_TBO",
+		MixedComplexCells::FACET_PLANE_TEXTURE_UNIT
+	    );
 	}
     }
 
@@ -529,6 +557,29 @@ namespace GEO {
 	}
 	glupEnd();
 	glupDisable(GLUP_VERTEX_COLORS);
+    }
+
+
+    void Molecule::draw_spheres_imposters(const MixedComplexCells& cells) const {
+	if(!cells.visible()) {
+	    return;
+	}
+	glupDisable(GLUP_VERTEX_COLORS);
+	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
+	glupEnable(GLUP_VERTEX_NORMALS);
+	glupUseProgram(S_imposters_program_);
+	cells.bind_tbos();
+	glupBegin(GLUP_SPHERES);
+	for(index_t c: cells) {
+	    // There can be empty Laguerre cells, they have no facets...
+	    if(cells.cell_facets(c).end() - cells.cell_facets(c).begin() > 0) {
+		glupNormal4fv(cells.cell_eqn(c).second.data());
+		glupVertex4fv(cells.cell_eqn(c).first.data());
+	    }
+	}
+	glupEnd();
+	glupUseProgram(0);
+	glupDisable(GLUP_VERTEX_NORMALS);
     }
 
     /************************************************************************/
