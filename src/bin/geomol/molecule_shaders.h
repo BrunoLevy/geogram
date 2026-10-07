@@ -331,6 +331,7 @@ namespace {
             vec3 p = focus_R.xyz;
             float R = focus_R.w;
             float qsize = projected_radius(p,R);
+
             gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
             gl_Position.xy += gl_Position.w*qsize*offsets[gl_VertexID % 6];
 	}
@@ -353,7 +354,7 @@ namespace {
 	void main() {
            if(show_imposters) {
               glup_FragColor = GLUP.front_color;
-              glup_FragDepth = 0.0;
+              glup_update_depth(focus_R.xyz);
               return;
            }
            vec3 C = focus_R.xyz;
@@ -501,7 +502,7 @@ namespace {
 
             if(show_imposters) {
                glup_FragColor = GLUP.front_color;
-               glup_FragDepth = 0.0;
+               glup_update_depth(C);
                return;
             }
 
