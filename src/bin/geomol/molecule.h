@@ -485,7 +485,7 @@ namespace GEO {
 	    mutable TextureBufferObject cell_imposter_1_tbo_;
 	    mutable TextureBufferObject cell_imposter_2_tbo_;
 
-	    vec3 color_ = {1.0, 1.0, 1.0, 1.0};
+	    vec3 color_ = {1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
 	    bool visible_ = true;
 	};

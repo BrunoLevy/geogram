@@ -246,15 +246,15 @@ namespace GEO {
 	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	cells.clear();
 	for(index_t v: atoms()) {
-	    // empty Laguerre cell
-	    if(diagram_->nb_incident_edges(v) == 0) {
+	    auto incident_edges = diagram_->incident_edges(v);
+	    // skip empty power cell
+	    if(incident_edges.end() == incident_edges.begin()) {
 		continue;
 	    }
 	    vec3 c = atom_pos_[v];
 	    double R = atom_radius(v);
 	    cells.begin_S_cell(c,R);
-	    for(index_t h0: diagram_->incident_edges(v)) {
-		if(h0 == NO_INDEX) { break; }
+	    for(index_t h0: incident_edges) {
 		cells.add_shrunk_power_facet(h0);
 	    }
 	    cells.end_cell();

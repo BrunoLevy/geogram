@@ -63,7 +63,6 @@ namespace GEO {
      *   the Delaunay skeleton can be traversed as follows:
      *   \code
      *      for(index_t h: incident_edges(v)) {
-     *         if(h != NO_INDEX) { // there can be empty slots in the list
      *            do something with h
      *         }
      *      }
@@ -373,7 +372,6 @@ namespace GEO {
 	 * \details the list of incident edges can be traversed as follows:
 	 * \code
 	 *   for(index_t h: incident_edges(v)) {
-	 *      if(h != NO_INDEX) { // there can be empty slots in the list
 	 *         do something with h
 	 *      }
 	 *   }
@@ -391,18 +389,9 @@ namespace GEO {
 	/**
 	 * \brief Gets the number of edges starting from a vertex
 	 * \param[in] v the vertex
-	 * \details counts only the real edges (not the NO_INDEX),
-	 *  see incident_edges().
 	 */
 	index_t nb_incident_edges(index_t v) const {
-	    index_t result = 0;
-	    for(index_t h: incident_edges(v)) {
-		if(h == NO_INDEX) {
-		    break;
-		}
-		++result;
-	    }
-	    return result;
+	    return skel_end(v) - skel_begin(v);
 	}
 
 	/**
@@ -503,7 +492,18 @@ namespace GEO {
 	 */
 	index_t skel_end(index_t v) const {
 	    geo_debug_assert(v+1 < skel_ptr_.size());
-	    return skel_ptr_[v+1];
+	    index_t b = skel_ptr_[v];
+	    index_t e = skel_ptr_[v+1];
+	    // strip the NO_INDEX entries that can be there
+	    // when too much space was allocated (due to
+	    // infinite tetrahedra). But maybe we can still
+	    // have the exact number (topological disk plus
+	    // count real tetrahedra only)... Keeping that
+	    // for now.
+	    while(e != b && skel_h_[e-1] == NO_INDEX) {
+		--e;
+	    }
+	    return e;
 	}
 
 	/**
