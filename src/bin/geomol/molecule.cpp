@@ -331,63 +331,100 @@ namespace GEO {
 		    continue;
 		}
 
-		index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
-		index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
-		index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
-		index_t v1 = diagram_->tet_vertex(t1,lv1);
-		index_t v2 = diagram_->tet_vertex(t1,lv2);
-		index_t v3 = diagram_->tet_vertex(t1,lv3);
+		index_t lv[3] = {
+		    PowerDiagram::tet_facet_lv(lf,0),
+		    PowerDiagram::tet_facet_lv(lf,1),
+		    PowerDiagram::tet_facet_lv(lf,2)
+		};
 
-		if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
+		index_t v[3] = {
+		    diagram_->tet_vertex(t1,lv[0]),
+		    diagram_->tet_vertex(t1,lv[1]),
+		    diagram_->tet_vertex(t1,lv[2])
+		};
+
+		if(!is_atom(v[0]) || !is_atom(v[1]) || !is_atom(v[2])) {
 		    continue;
 		}
 
-		vec3 p11 = mixed_vertex({v1,t1});
-		vec3 p21 = mixed_vertex({v2,t1});
-		vec3 p31 = mixed_vertex({v3,t1});
-
-		vec3 g1 = (1.0/3.0)*(p11+p21+p31);
-		double r1 = std::max(
-		    std::max(distance2(p11,g1),distance2(p21,g1)),
-		    distance2(p31,g1)
-		);
-
-		vec3 p12 = mixed_vertex({v1,t2});
-		vec3 p22 = mixed_vertex({v2,t2});
-		vec3 p32 = mixed_vertex({v3,t2});
-
-		vec3 g2 = (1.0/3.0)*(p12+p22+p32);
-		double r2 = std::max(
-		    std::max(distance2(p12,g2),distance2(p22,g2)),
-		    distance2(p32,g2)
-		);
-
-
-		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-
-		vec3 c = diagram_->radical_point(v1,v2,v3);
-		double R2 =
-		    distance2(c,diagram_->vertex(v1)) - diagram_->weight(v1);
 		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 
+		vec3 p[3][2];
 
-		cells.begin_H_cell(c,axis,R2, g1,::sqrt(r1),g2,::sqrt(r2));
+		for(index_t tlv=0; tlv<3; ++tlv) {
+		    p[tlv][0] = mixed_vertex({v[tlv],t1});
+		    p[tlv][1] = mixed_vertex({v[tlv],t2});
+		}
 
-		// TODO: would be easier and faster to get the 6 mixed complex
-		// vertices directly and generate facets explicitly
+		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
+		double r1 = std::max(
+		    std::max(distance2(p[0][0],g1),distance2(p[1][0],g1)),
+		    distance2(p[2][0],g1)
+		);
 
-		index_t h1 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv1, lv2);
-		index_t h2 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv2, lv3);
-		index_t h3 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv3, lv1);
+		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
+		double r2 = r1; // it is a prism!
 
-		cells.add_quad_facet(h1,FLIPPED);
-		cells.add_quad_facet(h2,FLIPPED);
-		cells.add_quad_facet(h3,FLIPPED);
-		cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
-		cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+
+		vec3 g = 0.5*(g1+g2);
+		double hmin = std::numeric_limits<double>::max();
+		double hmax = -std::numeric_limits<double>::max();
+
+		for(index_t tlv=0; tlv<3; ++tlv) {
+		    double h = dot(atom_pos_[v[tlv]]-g,axis);
+		    double r = atom_radius(v[tlv]);
+		    hmin = std::min(hmin, h-r);
+		    hmax = std::max(hmax, h+r);
+		}
+
+		// Yes, min for the max and max for the min, clip by cell
+		hmin = std::max(hmin, dot(p[0][0]-g,axis));
+		hmax = std::min(hmax, dot(p[0][1]-g,axis));
+
+		g1 = g + hmax * axis;
+		g2 = g + hmin * axis;
+
+		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
+		double R2 =
+		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
+
+		cells.begin_H_cell(
+		    c,axis,R2,
+		    g1,::sqrt(r1), g2,::sqrt(r2)
+		);
+
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[0][0]));
+		cells.add_vertex_by_point(vec3f(p[1][0]));
+		cells.add_vertex_by_point(vec3f(p[1][1]));
+		cells.add_vertex_by_point(vec3f(p[0][1]));
+		cells.end_facet();
+
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[1][0]));
+		cells.add_vertex_by_point(vec3f(p[2][0]));
+		cells.add_vertex_by_point(vec3f(p[2][1]));
+		cells.add_vertex_by_point(vec3f(p[1][1]));
+		cells.end_facet();
+
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[2][0]));
+		cells.add_vertex_by_point(vec3f(p[0][0]));
+		cells.add_vertex_by_point(vec3f(p[0][1]));
+		cells.add_vertex_by_point(vec3f(p[2][1]));
+		cells.end_facet();
+
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[2][0]));
+		cells.add_vertex_by_point(vec3f(p[1][0]));
+		cells.add_vertex_by_point(vec3f(p[0][0]));
+		cells.end_facet();
+
+		cells.begin_facet();
+		cells.add_vertex_by_point(vec3f(p[0][1]));
+		cells.add_vertex_by_point(vec3f(p[1][1]));
+		cells.add_vertex_by_point(vec3f(p[2][1]));
+		cells.end_facet();
 
 		cells.end_cell();
 	    }
