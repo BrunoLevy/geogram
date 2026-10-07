@@ -348,7 +348,6 @@ namespace GEO {
 		}
 
 		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
-
 		vec3 p[3][2];
 
 		for(index_t tlv=0; tlv<3; ++tlv) {
@@ -364,25 +363,6 @@ namespace GEO {
 
 		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
 		double r2 = r1; // it is a prism!
-
-
-		vec3 g = 0.5*(g1+g2);
-		double hmin = std::numeric_limits<double>::max();
-		double hmax = -std::numeric_limits<double>::max();
-
-		for(index_t tlv=0; tlv<3; ++tlv) {
-		    double h = dot(atom_pos_[v[tlv]]-g,axis);
-		    double r = atom_radius(v[tlv]);
-		    hmin = std::min(hmin, h-r);
-		    hmax = std::max(hmax, h+r);
-		}
-
-		// Yes, min for the max and max for the min, clip by cell
-		hmin = std::max(hmin, dot(p[0][0]-g,axis));
-		hmax = std::min(hmax, dot(p[0][1]-g,axis));
-
-		g1 = g + hmax * axis;
-		g2 = g + hmin * axis;
 
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
