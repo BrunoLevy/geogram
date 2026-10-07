@@ -483,6 +483,8 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::draw() {
+	create_shaders_if_needed();
+
 	if(!draw_mss_) {
 	    draw_atoms();
 	    return;
@@ -490,7 +492,6 @@ namespace GEO {
 
 	// All the rest of this function is for drawing
 	// the molecular skin surface
-	create_shaders_if_needed();
 	nb_triangles_ = 0;
 
 	glCullFace(GL_BACK);
@@ -570,6 +571,7 @@ namespace GEO {
     }
 
     void Molecule::draw_atoms() const {
+	/*
 	bool slicing_mode =
 	    glupIsEnabled(GLUP_CLIPPING) &&
 	    glupGetClipMode() == GLUP_CLIP_SLICE_CELLS;
@@ -605,6 +607,28 @@ namespace GEO {
 	}
 	glupEnd();
 	glupDisable(GLUP_VERTEX_COLORS);
+	*/
+
+	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
+	glupDisable(GLUP_VERTEX_COLORS);
+	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
+	cells.bind_tbos(S_imposters_program_, true, false, false);
+	GLSL::set_program_uniform_by_name(
+	    S_imposters_program_, "facet_ptr_TBO", 0
+	);
+	GLSL::set_program_uniform_by_name(
+	    S_imposters_program_, "facet_plane_TBO", 0
+	);
+	GLSL::set_program_uniform_by_name(
+	    S_imposters_program_, "show_imposters", false
+	);
+	glupUpdateUniformState();
+	glUseProgram(S_imposters_program_);
+	glBindVertexArray(empty_VAO_);
+	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
+	glBindVertexArray(0);
+	glUseProgram(0);
+	nb_triangles_ += 2*cells.nb_cells();
     }
 
 
