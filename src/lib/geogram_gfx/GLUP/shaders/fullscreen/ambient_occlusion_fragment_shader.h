@@ -94,7 +94,7 @@ vec2 horizon_point(in vec2 from, in vec2 dir) {
     vec2 result;
     float horizon_delta = -100000.0;
     float from_z = get_obj_z(from, depth_texture);
-    float step = (1.0 / width);
+    float step = (1.0 / max(width,512.0));
     float r = 2.0 * step;
     vec2 cur_point = from + r * dir;
 

@@ -347,9 +347,7 @@ namespace GEO {
 		    continue;
 		}
 
-		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 		vec3 p[3][2];
-
 		for(index_t tlv=0; tlv<3; ++tlv) {
 		    p[tlv][0] = mixed_vertex({v[tlv],t1});
 		    p[tlv][1] = mixed_vertex({v[tlv],t2});
@@ -364,6 +362,7 @@ namespace GEO {
 		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
 		double r2 = r1; // it is a prism!
 
+		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);

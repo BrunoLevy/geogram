@@ -2497,7 +2497,7 @@ namespace GLUP {
         "    vec2 result; \n"
         "    float horizon_delta = -100000.0; \n"
         "    float from_z = get_obj_z(from, depth_texture); \n"
-        "    float step = (1.0 / width); \n"
+        "    float step = (1.0 / max(width,512.0)); \n"
         "    float r = 2.0 * step; \n"
         "    vec2 cur_point = from + r * dir; \n"
         " \n"
