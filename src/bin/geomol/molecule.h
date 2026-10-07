@@ -377,13 +377,9 @@ namespace GEO {
 	    static constexpr GLint CELL_IMPOSTER_1_TEX_UNIT = 8;
 	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
 
-	    /**
-	     * \brief Creates the texture buffer objects with the compressed
-	     *  row storage list of clipping planes if not already
-	     *  present and binds them to FACET_PTR_TEX_UNIT and
-	     *  FACET_PLANE_TEX_UNIT.
-	     */
+	    // TODOC!
 	    void bind_tbos(
+		GLuint program,
 		bool eqn1=false, bool eqn2=false, bool imposters=false
 	    ) const;
 

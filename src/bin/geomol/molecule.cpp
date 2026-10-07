@@ -199,7 +199,7 @@ namespace GEO {
 			vec3 p = cc - (w/w1)*(p1-cc)
 			    - (w/w2)*(p2-cc)
 			    - (w/w3)*(p3-cc);
-			// Do not add points directly, becase this may
+			// Do not add points directly, because this may
 			// cause atom_pos_ reallocation, and wreck
 			// diagram_ (that keeps a pointer to it), so we
 			// store the new points in a temporary vector
@@ -541,84 +541,29 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::create_shaders_if_needed() {
-	if(S_program_ == 0 && H_program_ == 0) {
+	static bool first_time = true;
+	if(first_time) {
 	    register_geomol_shader_utilities();
+	    first_time=false;
 	}
-
 	if(S_program_ == 0) {
 	    S_program_ = glupCompileProgram(spheres_source);
-	    GLSL::set_program_uniform_by_name(
-		S_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		S_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEX_UNIT
-	    );
 	    cells_[CELL_TYPE_S0].set_program(S_program_);
 	    cells_[CELL_TYPE_S3].set_program(S_program_);
 	}
-
 	if(H_program_ == 0) {
 	    H_program_ = glupCompileProgram(hyperboloids_source);
-	    GLSL::set_program_uniform_by_name(
-		H_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEX_UNIT
-	    );
 	    cells_[CELL_TYPE_H1].set_program(H_program_);
 	    cells_[CELL_TYPE_H2].set_program(H_program_);
 	}
-
 	if(S_imposters_program_ == 0) {
 	    S_imposters_program_ = glupCompileProgram(spheres_imposters_source);
-	    GLSL::set_program_uniform_by_name(
-		S_imposters_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		S_imposters_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		S_imposters_program_, "cell_eqn_1_TBO",
-		MixedComplexCells::CELL_EQN_1_TEX_UNIT
-	    );
 	}
-
 	if(H_imposters_program_ == 0) {
 	    H_imposters_program_ = glupCompileProgram(
 		hyperboloids_imposters_source
 	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "facet_ptr_TBO",
-		MixedComplexCells::FACET_PTR_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "facet_plane_TBO",
-		MixedComplexCells::FACET_PLANE_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cell_eqn_1_TBO",
-		MixedComplexCells::CELL_EQN_1_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cell_eqn_2_TBO",
-		MixedComplexCells::CELL_EQN_2_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cell_imposter_1_TBO",
-		MixedComplexCells::CELL_IMPOSTER_1_TEX_UNIT
-	    );
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cell_imposter_2_TBO",
-		MixedComplexCells::CELL_IMPOSTER_2_TEX_UNIT
-	    );
 	}
-
 	if(empty_VAO_ == 0) {
 	    glGenVertexArrays(1, &empty_VAO_);
 	}
@@ -669,7 +614,7 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(true,false);
+	cells.bind_tbos(S_imposters_program_,true,false);
 	GLSL::set_program_uniform_by_name(
 	    S_imposters_program_, "show_imposters", show_imposters_
 	);
@@ -691,7 +636,7 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(true,true,true);
+	cells.bind_tbos(H_imposters_program_,true,true,true);
 	GLSL::set_program_uniform_by_name(
 	    H_imposters_program_, "show_imposters", show_imposters_
 	);
@@ -780,7 +725,7 @@ namespace GEO {
     }
 
     void Molecule::MixedComplexCells::bind_tbos(
-	bool eqn1, bool eqn2, bool imposters
+	GLuint program, bool eqn1, bool eqn2, bool imposters
     ) const {
 	bind_tbo(cell_facet_ptr_tbo_, cell_facet_ptr_, FACET_PTR_TEX_UNIT);
 	bind_tbo(cell_facet_plane_tbo_, cell_facet_plane_, FACET_PLANE_TEX_UNIT);
@@ -796,6 +741,30 @@ namespace GEO {
 	    );
 	    bind_tbo(
 		cell_imposter_2_tbo_, cell_imposter_2_, CELL_IMPOSTER_2_TEX_UNIT
+	    );
+	}
+	GLSL::set_program_uniform_by_name(
+	    program, "facet_ptr_TBO", FACET_PTR_TEX_UNIT
+	);
+	GLSL::set_program_uniform_by_name(
+	    program, "facet_plane_TBO", FACET_PLANE_TEX_UNIT
+	);
+	if(eqn1) {
+	    GLSL::set_program_uniform_by_name(
+		program, "cell_eqn_1_TBO", CELL_EQN_1_TEX_UNIT
+	    );
+	}
+	if(eqn2) {
+	    GLSL::set_program_uniform_by_name(
+		program, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
+	    );
+	}
+	if(imposters) {
+	    GLSL::set_program_uniform_by_name(
+		program, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
+	    );
+	    GLSL::set_program_uniform_by_name(
+		program, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
 	    );
 	}
     }
@@ -814,7 +783,7 @@ namespace GEO {
 	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupUseProgram(program_);
 	}
-	bind_tbos(); // texture buffer object with clipping planes
+	bind_tbos(program_); // texture buffer object with clipping planes
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t c: *this) {
 	    draw_cell(c);
