@@ -370,18 +370,18 @@ namespace GEO {
 	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
 	    // does not seem to work to set a texture unit, that seems to be
 	    // expected to be a *signed* integer (no idea why).
-	    static constexpr GLint FACET_PTR_TEXTURE_UNIT       = 4;
-	    static constexpr GLint FACET_PLANE_TEXTURE_UNIT     = 5;
-	    static constexpr GLint CELL_EQN_1_TEXTURE_UNIT      = 6;
-	    static constexpr GLint CELL_EQN_2_TEXTURE_UNIT      = 7;
-	    static constexpr GLint CELL_IMPOSTER_1_TEXTURE_UNIT = 8;
-	    static constexpr GLint CELL_IMPOSTER_2_TEXTURE_UNIT = 9;
+	    static constexpr GLint FACET_PTR_TEX_UNIT       = 4;
+	    static constexpr GLint FACET_PLANE_TEX_UNIT     = 5;
+	    static constexpr GLint CELL_EQN_1_TEX_UNIT      = 6;
+	    static constexpr GLint CELL_EQN_2_TEX_UNIT      = 7;
+	    static constexpr GLint CELL_IMPOSTER_1_TEX_UNIT = 8;
+	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
 
 	    /**
 	     * \brief Creates the texture buffer objects with the compressed
 	     *  row storage list of clipping planes if not already
-	     *  present and binds them to FACET_PTR_TEXTURE_UNIT and
-	     *  FACET_PLANE_TEXTURE_UNIT.
+	     *  present and binds them to FACET_PTR_TEX_UNIT and
+	     *  FACET_PLANE_TEX_UNIT.
 	     */
 	    void bind_tbos(
 		bool eqn1=false, bool eqn2=false, bool imposters=false
@@ -442,8 +442,31 @@ namespace GEO {
 	     * \brief Used internally by draw()
 	     */
 	    void draw_cell(index_t c) const;
-
 	    const PowerDiagram& diagram() const { return *(molecule_.diagram_); }
+
+	    /**
+	     * \brief Binds a texture buffer object to the specified texture unit
+	     * \details If the texture buffer object \p tbo is uninitialized,
+	     *  create it with the specified vector \p V. Note that if \p tbo is
+	     *  initialized then \p V is ignored. One needs to call tbo.reset()
+	     *  before in order to load new values of \p V.
+	     *  \param[in] tbo the TextureBufferObject to be bound
+	     *  \param[in] V the vector of values to initialize \p tbo the first
+	     *   time it is called or each time \p tbo is uninitialized
+	     *  \param texture_unit one of 0,1,2,...N. Note: it is different
+	     *   from GL_TEXTURE0, GL_TEXTURE1, ... GL_TEXTUREN.
+	     */
+	    template <class T> static void bind_tbo(
+		TextureBufferObject& tbo, const vector<T>& V, GLint texture_unit
+	    ) {
+		GLenum unit = GLenum(GL_TEXTURE0 + texture_unit);
+		glActiveTexture(unit);
+		if(tbo.TBO() == 0) {
+		    tbo.create_or_update(V);
+		}
+		tbo.bind(unit);
+		glActiveTexture(GL_TEXTURE0);
+	    }
 
 	private:
 	    Molecule& molecule_;

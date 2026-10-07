@@ -43,6 +43,8 @@
 #include <geogram/basic/geometry.h>
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
+#include <geogram/basic/memory.h>
+#include <vector>
 #include <typeinfo>
 
 namespace GEO {
@@ -135,6 +137,15 @@ namespace GEO {
 		glBindTexture(GL_TEXTURE_BUFFER, TBO_);
 		glTexBuffer(GL_TEXTURE_BUFFER, format(T()), VBO_);
 	    }
+	}
+
+
+	template <class T> void create_or_update(const std::vector<T>& v) {
+	    create_or_update(index_t(v.size()), v.data());
+	}
+
+	template <class T> void create_or_update(const GEO::vector<T>& v) {
+	    create_or_update(v.size(), v.data());
 	}
 
 	void bind(GLuint texture_unit) {
