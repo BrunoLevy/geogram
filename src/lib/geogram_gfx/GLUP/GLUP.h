@@ -132,6 +132,13 @@ extern "C" {
     void GLUP_API glupBindUniformState(GLUPuint program);
 
     /**
+     * \brief Updates the GPU-side representation of the uniform state
+     * \details Useful when some user custom shaders that access the GLUP state
+     *  are combined with GLUP rendering.
+     */
+    void GLUP_API glupUpdateUniformState();
+
+    /**
      * @}
      */
 

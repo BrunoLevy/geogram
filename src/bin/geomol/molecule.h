@@ -120,6 +120,7 @@ namespace GEO {
 
 
 	bool& use_imposters() { return use_imposters_; }
+	bool& show_imposters() { return show_imposters_; }
 
 	/**
 	 * \brief toggle display mixed complex cells by type
@@ -521,6 +522,7 @@ namespace GEO {
 	GLuint H_program_ = 0; // GPU program for hyperboloids
 
 	bool use_imposters_ = true;
+	bool show_imposters_ = false;
 	GLuint S_imposters_program_ = 0;
 	GLuint H_imposters_program_ = 0;
 	GLuint empty_VAO_ = 0;

@@ -334,6 +334,12 @@ void glupBindUniformState(GLUPuint program) {
     GEO_CHECK_GL();
 }
 
+void glupUpdateUniformState() {
+    GEO_CHECK_GL();
+    GLUP::current_context_->update_uniform_buffer();
+    GEO_CHECK_GL();
+}
+
 
 #if !defined(GEO_OS_EMSCRIPTEN) &&              \
     !defined(GEO_OS_APPLE) &&                   \

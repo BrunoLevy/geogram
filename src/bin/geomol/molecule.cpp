@@ -107,7 +107,6 @@ namespace GEO {
 	return B;
     }
 
-
     void Molecule::update() {
 	atom_weight_.resize(nb_atoms());
 	atom_pos_.resize(nb_atoms());
@@ -653,18 +652,17 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-
-	// This one is super dirty: just to make sure GLUP uniform state is
-	// updated (sent to GPU).
-	glupBegin(GLUP_SPHERES);
-	glupEnd();
-
 	cells.bind_tbos(true,false);
+	GLSL::set_program_uniform_by_name(
+	    S_imposters_program_, "show_imposters", show_imposters_
+	);
+	glupUpdateUniformState();
 	glUseProgram(S_imposters_program_);
 	glBindVertexArray(empty_VAO_);
 	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
 	glBindVertexArray(0);
 	glUseProgram(0);
+	nb_triangles_ += 2*cells.nb_cells();
     }
 
 
@@ -676,18 +674,17 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-
-	// This one is super dirty: just to make sure GLUP uniform state is
-	// updated (sent to GPU).
-	glupBegin(GLUP_SPHERES);
-	glupEnd();
-
 	cells.bind_tbos(true,true,true);
+	GLSL::set_program_uniform_by_name(
+	    H_imposters_program_, "show_imposters", show_imposters_
+	);
+	glupUpdateUniformState();
 	glUseProgram(H_imposters_program_);
 	glBindVertexArray(empty_VAO_);
 	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
 	glBindVertexArray(0);
 	glUseProgram(0);
+	nb_triangles_ += 2*cells.nb_cells();
     }
 
     /************************************************************************/

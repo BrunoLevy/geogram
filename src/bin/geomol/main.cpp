@@ -139,6 +139,7 @@ namespace {
 		ImGui::Checkbox("raytrace", &molecule_.raytrace());
 		if(molecule_.raytrace()) {
 		    ImGui::Checkbox("imposters", &molecule_.use_imposters());
+		    ImGui::Checkbox("show imps", &molecule_.show_imposters());
 		}
 		ImGui::Checkbox("0-patches", &molecule_.visible(0));
 		ImGui::Checkbox("1-patches", &molecule_.visible(1));

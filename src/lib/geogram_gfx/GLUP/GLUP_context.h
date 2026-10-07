@@ -1540,6 +1540,15 @@ namespace GLUP {
          */
         static const char* glup_primitive_name(GLUPprimitive prim);
 
+        /**
+         * \brief Copies GLUP uniform state to OpenGL
+         *  if required.
+         */
+        void update_uniform_buffer() {
+            if(uniform_buffer_dirty_) {
+                do_update_uniform_buffer();
+            }
+        }
 
     protected:
 
@@ -1721,15 +1730,6 @@ namespace GLUP {
             index_t* element_indices
         );
 
-        /**
-         * \brief Copies GLUP uniform state to OpenGL
-         *  if required.
-         */
-        void update_uniform_buffer() {
-            if(uniform_buffer_dirty_) {
-                do_update_uniform_buffer();
-            }
-        }
 
         /**
          * \brief Copies GLUP uniform state to OpenGL.

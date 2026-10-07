@@ -10,6 +10,7 @@ namespace {
         R"(
         uniform isamplerBuffer facet_ptr_TBO;
         uniform samplerBuffer facet_plane_TBO;
+        uniform bool show_imposters;
 
         bool in_cell(in vec3 p, in int cell_id) {
            int b = texelFetch(facet_ptr_TBO, cell_id).x;
@@ -350,6 +351,11 @@ namespace {
         glup_flat glup_in int cell_id;
 
 	void main() {
+           if(show_imposters) {
+              glup_FragColor = GLUP.front_color;
+              glup_FragDepth = 0.0;
+              return;
+           }
            vec3 C = focus_R.xyz;
            float r = focus_R.w;
            float sign = 1.0;
@@ -492,6 +498,13 @@ namespace {
         glup_flat glup_in int cell_id;
 
 	void main() {
+
+            if(show_imposters) {
+               glup_FragColor = GLUP.front_color;
+               glup_FragDepth = 0.0;
+               return;
+            }
+
             float alpha = cAxisPerp.x;
             float beta  = cAxisPerp.y;
 
@@ -565,7 +578,9 @@ namespace {
                N = sign*normalize(GLUP.normal_matrix*N);
                result = glup_lighting(result, N);
             }
+
             glup_FragColor = result;
+
         }
 	)";
 }
