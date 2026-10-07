@@ -332,8 +332,14 @@ namespace {
             float R = focus_R.w;
             float qsize = projected_radius(p,R);
 
+            vec2 scaling =
+               (GLUP.viewport[3] > GLUP.viewport[2]) ?
+               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
+               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+
             gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
-            gl_Position.xy += gl_Position.w*qsize*offsets[gl_VertexID % 6];
+            gl_Position.xy +=
+                scaling*(gl_Position.w*qsize*offsets[gl_VertexID % 6]);
 	}
 	)"
 
@@ -454,6 +460,11 @@ namespace {
                 projected_radius(imp2.xyz, imp2.w)
             );
 
+            vec2 scaling =
+               (GLUP.viewport[3] > GLUP.viewport[2]) ?
+               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
+               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+
             vec4 UVW1 = GLUP.modelviewprojection_matrix*vec4(imp1.xyz,1.0);
             vec4 UVW2 = GLUP.modelviewprojection_matrix*vec4(imp2.xyz,1.0);
 
@@ -465,17 +476,17 @@ namespace {
             switch(gl_VertexID % 6) {
             case 0:
             case 3:
-                gl_Position = vec4(UV1 + qsize*(-H -Hperp),0,1);
+                gl_Position = vec4(UV1 + qsize*scaling*(-H -Hperp),0,1);
                 break;
             case 1:
-                gl_Position = vec4(UV2 + qsize*( H -Hperp),0,1);
+                gl_Position = vec4(UV2 + qsize*scaling*( H -Hperp),0,1);
                 break;
             case 2:
             case 4:
-                gl_Position = vec4(UV2 + qsize*( H +Hperp),0,1);
+                gl_Position = vec4(UV2 + qsize*scaling*( H +Hperp),0,1);
                 break;
             case 5:
-                gl_Position = vec4(UV1 + qsize*(-H +Hperp),0,1);
+                gl_Position = vec4(UV1 + qsize*scaling*(-H +Hperp),0,1);
                 break;
             };
 	}
