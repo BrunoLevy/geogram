@@ -17,6 +17,11 @@ set(FULL_WARNINGS
     -Wno-format-nonliteral # Todo: use Laurent Alonso's trick
     -Wno-poison-system-directories
     -Wno-switch-default
+    # Clang's C++ Safe Buffers model (-Wunsafe-buffer-usage, clang 16+): flags
+    # every raw pointer subscript / arithmetic. Geogram's numerics, predicates
+    # and mesh code are built on raw arrays by design, so this opt-in
+    # hardening model does not apply.
+    -Wno-unsafe-buffer-usage
 )
 
 # Compile with full warnings by default
