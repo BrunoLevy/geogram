@@ -146,11 +146,11 @@ namespace GEO {
  * \param[in] x the boolean expression of the condition
  * \see geo_assertion_failed()
  */
-#define geo_assert(x) {                                         \
+#define geo_assert(x) do {                                      \
         if(!(x)) {                                              \
             GEO::geo_assertion_failed(#x, __FILE__, __LINE__);  \
         }                                                       \
-    }
+    } while(false)
 
 /**
  * \brief Verifies that a value is in a legal range
@@ -162,21 +162,21 @@ namespace GEO {
  * \param[in] max_val maximum allowed value
  * \see geo_range_assertion_failed()
  */
-#define geo_range_assert(x, min_val, max_val) {                         \
+#define geo_range_assert(x, min_val, max_val) do {                      \
         if(((x) < (min_val)) || ((x) > (max_val))) {                    \
             GEO::geo_range_assertion_failed(x, min_val, max_val,        \
                                             __FILE__, __LINE__          \
                                            );                           \
         }                                                               \
-    }
+    } while(false)
 
 /**
  * \brief Sets a non reachable point in the program
  * \details
  */
-#define geo_assert_not_reached {                                \
+#define geo_assert_not_reached do {                             \
         GEO::geo_should_not_have_reached(__FILE__, __LINE__);   \
-    }
+    } while(false)
 
 /**
  * \def geo_debug_assert(x)
@@ -193,8 +193,8 @@ namespace GEO {
 #define geo_debug_range_assert(x, min_val, max_val) geo_range_assert(x, min_val, max_val)
 #define geo_debug(x) x
 #else
-#define geo_debug_assert(x)
-#define geo_debug_range_assert(x, min_val, max_val)
+#define geo_debug_assert(x) do { } while(false)
+#define geo_debug_range_assert(x, min_val, max_val) do { } while(false)
 #define geo_debug(x)
 #endif
 
@@ -212,8 +212,8 @@ namespace GEO {
 #define geo_parano_assert(x) geo_assert(x)
 #define geo_parano_range_assert(x, min_val, max_val) geo_range_assert(x, min_val, max_val)
 #else
-#define geo_parano_assert(x)
-#define geo_parano_range_assert(x, min_val, max_val)
+#define geo_parano_assert(x) do { } while(false)
+#define geo_parano_range_assert(x, min_val, max_val) do { } while(false)
 #endif
 
 #endif

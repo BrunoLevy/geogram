@@ -4837,8 +4837,8 @@ namespace GEO {
                     } else if (M.facets.nb_vertices(f) == 4) {
                         type = 3;
                     } else {
-                        geo_assert_not_reached
-                            }
+                        geo_assert_not_reached;
+                    }
                     elt_id += 1;
                     out << elt_id << " " << type << " " << "2" << " "
                         << attr_value << " " << attr_value << " ";
