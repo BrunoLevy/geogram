@@ -41,8 +41,38 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/debug_stream.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
+
+// Try to obtain tigher cells / tigher imposters
+// using the equation, especially for H2 and H1 cells,
+// but also S3 cells (S0 cells are OK!)
+//
+//   wi = Ri^2/s
+//   t1 = -1/(1-s)   t2 = 1/s
+//
+//   H1 cells equation:
+//   ------------------
+// 	 c  = radical_point(i,j)
+//       R2 = |pi - c|^2 - wi
+//          = |pj - c|^2 - wj
+//   t1*X^2 + t2*(Y^2+Z^2) = R2
+//
+//   H2 cells equation:
+//   ------------------
+// 	 c = radical_point(i,j,k)
+//       R2 = |pi - c|^2 - wi
+//          = |pj - c|^2 - wj
+//          = |pk - c|^2 - wi
+//   t2*X^2 + t1*(Y^2+Z^2) = R2
+//
+//   S3 cells equation:
+//   ------------------
+//      c  = radical_point(i,j,k,l)
+//      R2 = (|pi - c|^2 - wi)*(1-s)
+//         = ...
+//         = (|pl - c|^2 - wl)*(1-s)
 
 namespace GEO {
 
@@ -366,10 +396,9 @@ namespace GEO {
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
-
 		cells.begin_H_cell(
-		    c,axis,R2,
-		    g1,::sqrt(r1), g2,::sqrt(r2)
+		    c, axis, R2,
+		    g1, ::sqrt(r1), g2, ::sqrt(r2)
 		);
 
 		cells.begin_facet();
@@ -406,6 +435,31 @@ namespace GEO {
 		cells.end_facet();
 
 		cells.end_cell();
+
+		if(false) {
+		    index_t cc = cells.nb_cells()-1;
+		    cells_[CELL_TYPE_H2].save_cell(
+			cc, String::format("H2_cell_%05u.obj", cc)
+		    );
+
+		    DebugStream dbg("H2_debug",cc);
+		    vec3 atom[3] = {
+			atom_pos_[v[0]], atom_pos_[v[1]], atom_pos_[v[2]]
+		    };
+		    double rad[3] = {
+			atom_radius(v[0]),atom_radius(v[1]), atom_radius(v[2])
+		    };
+
+		    vec3 g = 0.5*(g1+g2);
+		    double hmin =  std::numeric_limits<double>::max();
+		    double hmax = -std::numeric_limits<double>::max();
+		    for(index_t i=0; i<3; ++i) {
+			double h = dot(atom[i]-g,axis);
+			hmin = std::min(hmin, h-rad[i]);
+			hmax = std::max(hmax, h+rad[i]);
+		    }
+		    dbg.add_segment(g+hmin*axis, g+hmax*axis);
+		}
 	    }
 	}
     }
@@ -903,5 +957,25 @@ namespace GEO {
     }
 
 /**************************************************************/
+
+    void Molecule::MixedComplexCells::save_cell(
+	index_t c, const std::string& filename
+    ) {
+	index_t n=1;
+	std::ofstream out(filename.c_str());
+	for(index_t f: cell_facets(c)) {
+	    for(vec3f p: cell_facet_vertices(f)) {
+		out << "v " << p << std::endl;
+	    }
+	    out << "f ";
+	    for(vec3f p: cell_facet_vertices(f)) {
+		geo_argused(p);
+		out << n << " ";
+		++n;
+	    }
+	    out << std::endl;
+	}
+    }
+
 
 }

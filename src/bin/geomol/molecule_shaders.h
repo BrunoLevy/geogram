@@ -34,7 +34,10 @@ namespace {
         }
 
         // clip-space radius of a circle covering the projection
-        // of a world-space sphere
+        // of a world-space sphere.
+        // Dmitry Sokolov tutorial: https://github.com/ssloy/glsltuto
+        // Inrial ref: http://reality.cs.ucl.ac.uk/projects/quadrics/pbg06.pdf
+
         float projected_radius(in vec3 p, in float R) {
             // TODO: optimize: directly compute r1,r2,r4
             mat4 T = mat4(

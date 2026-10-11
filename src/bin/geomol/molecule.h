@@ -400,6 +400,8 @@ namespace GEO {
 	    enum DrawMode { DRAW_MODE_CELLS, DRAW_MODE_MSS };
 	    void draw(DrawMode mode = DRAW_MODE_CELLS) const;
 
+	    void save_cell(index_t c, const std::string& filename);
+
 	    /*************************************************/
 
 	    /**
@@ -432,6 +434,7 @@ namespace GEO {
 	    );
 
 	    /*************************************************/
+
 
 	protected:
 	    /**
