@@ -11,6 +11,11 @@ set(FULL_WARNINGS
     -Weverything
     -Wno-padded # Disable generating a message each time padding is used
     -Wno-float-equal # Sometimes we compare floats (against 0.0 or 1.0 mainly)
+    # -Wswitch-default (clang 18+) contradicts -Wcovered-switch-default: a
+    # switch that covers every enumerator warns without a default label and
+    # with one. Geogram keeps covered enum switches default-free so -Wswitch
+    # reports a missing enumerator. Same as Darwin-clang.cmake.
+    -Wno-switch-default
     -Wno-global-constructors
     -Wno-exit-time-destructors
     -Wno-old-style-cast # Yes, old-style cast is sometime more legible...
