@@ -165,6 +165,13 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::initialize(index_t w, index_t h) {
+
+	// For mac retina displays, systematically downscale, else
+	// SSAO is super slow...
+	if(w > 2000) {
+	    downscale_factor_ = 2;
+	}
+
         GEO_CHECK_GL();
         FullScreenEffectImpl::initialize(w,h);
         GEO_CHECK_GL();
