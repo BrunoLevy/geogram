@@ -41,6 +41,9 @@
 
 namespace GEO {
 
+    PowerDiagram::~PowerDiagram() {
+    }
+
     void PowerDiagram::compute_skeleton(index_t max_v) {
 	if(max_v == NO_INDEX) {
 	    max_v = nb_vertices();

@@ -78,6 +78,8 @@ namespace GEO {
 	    set_keeps_infinite(true);
 	}
 
+	~PowerDiagram() override;
+
 	/**
 	 * \brief gets the number of tetrahedra
 	 * \return the total number of tetrahedra, including the infinite ones

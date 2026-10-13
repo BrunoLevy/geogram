@@ -15,10 +15,10 @@ public:
   GLuint CreateCubemapRGBE();
   GLuint CreateCubemapHILO(bool rg);
 
-  int GetWidth() { return m_width; };
-  int GetHeight() { return m_height; };
+  int GetWidth() { return m_width; }
+  int GetHeight() { return m_height; }
 
-  bool IsValid() { return m_valid; };
+  bool IsValid() { return m_valid; }
 
   void Analyze();
   void ConvertHILO();

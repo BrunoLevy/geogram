@@ -535,7 +535,6 @@ namespace GEO {
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	double atom_size_ = 1.0;
-	mutable bool wireframe_ = 0.0;
 
 	bool draw_mss_ = false;
 	bool raytrace_ = true;

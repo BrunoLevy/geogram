@@ -113,7 +113,7 @@ namespace {
 
         void draw_object_properties() override {
             SimpleApplication::draw_object_properties();
-	    ImGui::Text("atoms: %d",molecule_.nb_atoms());
+	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
 
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {
@@ -147,7 +147,7 @@ namespace {
 		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
-		ImGui::Text("triangles: %d",molecule_.nb_drawn_triangles());
+		ImGui::Text("triangles: %u",molecule_.nb_drawn_triangles());
 	    }
         }
 

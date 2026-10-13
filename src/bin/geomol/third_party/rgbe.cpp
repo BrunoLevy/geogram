@@ -34,7 +34,7 @@ enum rgbe_error_codes {
   rgbe_read_error,
   rgbe_write_error,
   rgbe_format_error,
-  rgbe_memory_error,
+  rgbe_memory_error
 };
 
 /* default error routine.  change this to change error handling */
@@ -152,7 +152,7 @@ int RGBE_ReadHeader(FILE *fp, int *width, int *height, rgbe_header_info *info)
       info->programtype[i] = buf[i+2];
     }
     info->programtype[i] = 0;
-    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == 0)
+    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == nullptr)
       return rgbe_error(rgbe_read_error,NULL);
   }
 
@@ -169,12 +169,12 @@ int RGBE_ReadHeader(FILE *fp, int *width, int *height, rgbe_header_info *info)
       info->exposure = tempf;
       info->valid |= RGBE_VALID_EXPOSURE;
     }
-    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == 0)
+    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == nullptr)
       return rgbe_error(rgbe_read_error,NULL);
   }
 
 #if 0
-  if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == 0)
+  if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == nullptr)
     return rgbe_error(rgbe_read_error,NULL);
   if (strcmp(buf,"\n") != 0)
     return rgbe_error(rgbe_format_error,
@@ -182,7 +182,7 @@ int RGBE_ReadHeader(FILE *fp, int *width, int *height, rgbe_header_info *info)
 #endif
 
   for(;;) {
-    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == 0)
+    if (fgets(buf,sizeof(buf)/sizeof(buf[0]),fp) == nullptr)
       return rgbe_error(rgbe_read_error,NULL);
 
     if (sscanf(buf,"-Y %d +X %d",height,width) == 2)
@@ -225,7 +225,7 @@ int RGBE_ReadPixels(FILE *fp, float *data, int numpixels)
 }
 
 
-int RGBE_ReadPixels_Raw(FILE *fp, unsigned char *data, int numpixels)
+static int RGBE_ReadPixels_Raw(FILE *fp, unsigned char *data, int numpixels)
 {
  if (int(fread(data, 4, size_t(numpixels), fp)) < numpixels)
     return rgbe_error(rgbe_read_error,NULL);
