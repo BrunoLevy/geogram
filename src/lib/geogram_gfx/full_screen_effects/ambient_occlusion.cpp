@@ -49,8 +49,16 @@
 
 namespace {
     using namespace GEO;
-    static const index_t R_WIDTH  = 32;
-    static const index_t R_HEIGHT = 32;
+    static constexpr index_t R_WIDTH  = 32;
+    static constexpr index_t R_HEIGHT = 32;
+
+#if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
+    static constexpr GLint internal_format = GL_RGBA;
+#else
+    static constexpr GLint internal_format = GL_RED;
+#endif
+
+    static constexpr GLint depth_internal_format = GL_R32F;
 }
 
 // Requirements for Android compile are the same
@@ -74,6 +82,9 @@ namespace GEO {
 
         max_radius_ = 0.5;
         step_mul_   = 1.2;
+
+	downscale_program_ = 0;
+	downscale_factor_ = 1;
     }
 
     AmbientOcclusionImpl::~AmbientOcclusionImpl() {
@@ -84,6 +95,9 @@ namespace GEO {
         }
         if (blur_program_ != 0) {
             glDeleteProgram(blur_program_);
+        }
+        if (downscale_program_ != 0) {
+            glDeleteProgram(downscale_program_);
         }
     }
 
@@ -142,6 +156,12 @@ namespace GEO {
                 blur_program_, "blur_width", float(blur_width_)
             );
         }
+	if(downscale_program_ != 0) {
+            GLSL::set_program_uniform_by_name(
+		downscale_program_, "downscale_factor", GLint(downscale_factor_)
+	    );
+	}
+
     }
 
     void AmbientOcclusionImpl::initialize(index_t w, index_t h) {
@@ -151,11 +171,6 @@ namespace GEO {
         if(!OK()) {
             return;
         }
-#if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
-        const GLint internal_format = GL_RGBA;
-#else
-        const GLint internal_format = GL_RED;
-#endif
         // Shader sources are embedded in source code,
         // Sourcecode is in:
         // geogram_gfx/GLUP/shaders/fullscreen
@@ -178,20 +193,25 @@ namespace GEO {
             SSAO_program_, "random_texture", 1
         );
         proj_inv_loc_ = glGetUniformLocation(SSAO_program_, "mat_proj_inv");
-        if( !blur_1_.initialize(
-                width(), height(), false, internal_format)
-          ) {
+
+	index_t dw = width() / downscale_factor_;
+	index_t dh = height() / downscale_factor_;
+
+        if( !blur_1_.initialize(dw, dh, false, internal_format)) {
             Logger::err("SSAO")
                 << "blur_1_ FBO is not initialized" << std::endl;
         }
-        if( !blur_2_.initialize(
-                width(), height(), false, internal_format
-            )
-          ) {
+        if( !blur_2_.initialize(dw, dh, false, internal_format)) {
             Logger::err("SSAO")
                 << "blur_2_ FBO is not initialized" << std::endl;
         }
 
+	if(downscale_factor_ >= 2) {
+	    if( !downscale_.initialize(dw, dh, false, depth_internal_format)) {
+		Logger::err("SSAO")
+		    << "downscale_ FBO is not initialized" << std::endl;
+	    }
+	}
 
         // Shader sources are embedded in source code,
         // Initial sourcecode is in:
@@ -237,12 +257,45 @@ namespace GEO {
             );
         }
 
+        downscale_program_ = GLSL::compile_program_with_includes_no_link(
+            this,
+            "//stage GL_VERTEX_SHADER\n"
+            "//import <fullscreen/vertex_shader.h>\n",
+            "//stage GL_FRAGMENT_SHADER\n"
+            "//import <fullscreen/downscale_fragment_shader.h>\n"
+	);
+
+        GEO_CHECK_GL();
+        glBindAttribLocation(downscale_program_, 0, "vertex_in");
+        glBindAttribLocation(downscale_program_, 1, "tex_coord_in");
+        GLSL::link_program(downscale_program_);
+
+        GLSL::set_program_uniform_by_name(
+            downscale_program_, "tex", 0
+        );
+
         update();
     }
 
     void AmbientOcclusionImpl::resize(index_t width, index_t height) {
-        blur_1_.resize(width, height);
-        blur_2_.resize(width, height);
+	index_t w = width/downscale_factor_;
+	index_t h = height/downscale_factor_;
+        blur_1_.resize(w,h);
+        blur_2_.resize(w,h);
+	if(downscale_factor_ >= 2) {
+	    if(downscale_.initialized()) {
+		downscale_.resize(w,h);
+	    } else {
+		GLint prev_frame_buffer;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
+		downscale_.initialize(w, h, false, depth_internal_format);
+		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
+	    }
+	} else {
+	    if(downscale_.initialized()) {
+		downscale_.destroy();
+	    }
+	}
 
         if(ES_profile_) {
             GLSL::set_program_uniform_by_name(
@@ -307,6 +360,21 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::compute_SSAO() {
+
+	if(downscale_.initialized()) {
+	    downscale_.bind_as_framebuffer();
+	    glActiveTexture(GL_TEXTURE0);
+	    draw_FBO_.bind_depth_buffer_as_texture();
+	    glViewport(
+		0, 0,
+		GLsizei(width()/downscale_factor_),
+		GLsizei(height()/downscale_factor_)
+	    );
+	    glUseProgram(downscale_program_);
+	    draw_unit_textured_quad();
+	    glUseProgram(0);
+	}
+
         blur_1_.bind_as_framebuffer();
         glClearColor(1.0, 1.0, 1.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -321,11 +389,19 @@ namespace GEO {
         glUniformMatrix4fv(proj_inv_loc_, 1, false, proj_inv_);
 
         glActiveTexture(GL_TEXTURE0);
-        draw_FBO_.bind_depth_buffer_as_texture();
+	if(downscale_.initialized()) {
+	    downscale_.bind_as_texture();
+	} else {
+	    draw_FBO_.bind_depth_buffer_as_texture();
+	}
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, random_tex_);
-        glViewport(0, 0, GLsizei(width()), GLsizei(height()));
+        glViewport(
+	    0, 0,
+	    GLsizei(width()/downscale_factor_),
+	    GLsizei(height()/downscale_factor_)
+	);
 
         draw_unit_textured_quad();
 

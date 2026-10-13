@@ -2515,7 +2515,7 @@ namespace GLUP {
         "    vec2 result; \n"
         "    float horizon_delta = -100000.0; \n"
         "    float from_z = get_obj_z(from, depth_texture); \n"
-        "    float step = (1.0 / max(width,512.0)); \n"
+        "    float step = 1.0 / width; \n"
         "    float r = 2.0 * step; \n"
         "    vec2 cur_point = from + r * dir; \n"
         " \n"
@@ -2852,6 +2852,29 @@ namespace GLUP {
         "void main() { \n"
         "    tex_coord = tex_coord_in; \n"
         "    gl_Position = vec4(vertex_in, 0.0, 1.0); \n"
+        "} \n"
+     );
+
+     GEO::GLSL::register_GLSL_include_file("fullscreen/downscale_fragment_shader.h",
+        "//import <fullscreen/current_profile/fragment_shader_preamble.h> \n"
+        "//import <GLUP/stdglup.h> \n"
+        " \n"
+        "glup_in vec2 tex_coord; \n"
+        "uniform sampler2D tex; \n"
+        "uniform int downscale_factor; \n"
+        " \n"
+        "// downscaling for depth buffer, takes the max value \n"
+        " \n"
+        "void main() { \n"
+        "   float g = 0.0; \n"
+        "   int x = int(gl_FragCoord.x)*downscale_factor; \n"
+        "   int y = int(gl_FragCoord.y)*downscale_factor; \n"
+        "   for(int dx = 0; dx<downscale_factor; ++dx) { \n"
+        "       for(int dy = 0; dy<downscale_factor; ++dy) { \n"
+        "	   g = max(g,texelFetch(tex, ivec2(x+dx,y+dy),0).x); \n"
+        "       } \n"
+        "   } \n"
+        "   glup_FragColor = vec4(g,g,g,1.0); \n"
         "} \n"
      );
 

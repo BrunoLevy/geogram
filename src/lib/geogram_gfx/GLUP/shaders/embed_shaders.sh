@@ -41,6 +41,7 @@ fullscreen/blur_fragment_shader.h
 fullscreen/depth_dependent_blur_fragment_shader.h
 fullscreen/unsharp_masking_fragment_shader.h
 fullscreen/vertex_shader.h
+fullscreen/downscale_fragment_shader.h
 "
 
 cat <<EOF
