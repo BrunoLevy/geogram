@@ -305,13 +305,11 @@ namespace GEO {
 		downscale_AO_.resize(dw,dh);
 	    } else {
 		downscale_AO_.initialize(dw, dh, false, internal_format);
-		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
 	    }
 
 	    if(downscale_Z_.initialized()) {
 		downscale_Z_.resize(dw,dh);
 	    } else {
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
 		downscale_Z_.initialize(dw, dh, false, depth_internal_format);
 	    }
 
