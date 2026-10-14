@@ -67,6 +67,7 @@ set(FULL_WARNINGS
     # and mesh code are built on raw arrays by design, so this opt-in
     # hardening model does not apply.
     -Wno-unsafe-buffer-usage
+    -Wno-unknown-warning-option # silence warnings on unknown warnings...
 )
 
 # Additional C++ flags
