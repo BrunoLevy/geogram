@@ -165,11 +165,13 @@ namespace GEO {
 
     void AmbientOcclusionImpl::initialize(index_t w, index_t h) {
 
+	#ifndef GEO_OS_EMSCRIPTEN
 	// For mac retina displays, systematically downscale, else
 	// SSAO is super slow...
 	if(w > 1024) {
 	    downscale_factor_ = 2;
 	}
+	#endif
 
         GEO_CHECK_GL();
         FullScreenEffectImpl::initialize(w,h);
@@ -269,6 +271,9 @@ namespace GEO {
             );
         }
 
+	// WebGL 1.0 does not support loops with variable indices
+	// so downscaling is deactivated for now
+	#ifndef GEO_OS_EMSCRIPTEN
         downscale_program_ = GLSL::compile_program_with_includes_no_link(
             this,
             "//stage GL_VERTEX_SHADER\n"
@@ -276,15 +281,14 @@ namespace GEO {
             "//stage GL_FRAGMENT_SHADER\n"
             "//import <fullscreen/downscale_fragment_shader.h>\n"
 	);
-
         GEO_CHECK_GL();
         glBindAttribLocation(downscale_program_, 0, "vertex_in");
         glBindAttribLocation(downscale_program_, 1, "tex_coord_in");
         GLSL::link_program(downscale_program_);
-
         GLSL::set_program_uniform_by_name(
             downscale_program_, "tex", 0
         );
+	#endif
 
         update();
     }

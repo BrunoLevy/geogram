@@ -215,13 +215,18 @@ namespace GEO {
 	 * \param[in] x the ratio between framebuffer resolution and
 	 *  effect resolution.
 	 * \details On very high dpi devices, such as mac retinas, it is
-	 *  necessary to keep rendering time reasonable.
+	 *  necessary to keep rendering time reasonable. On Emscripten,
+	 *  it is not supported yet (simply ignored)
 	 */
 	void set_downscale_factor(index_t x) {
+#ifdef GEO_OS_EMSCRIPTEN
+	    geo_argused(x);
+#else
 	    if(x > 0 && x != downscale_factor_) {
 		downscale_factor_ = x;
 		resize(width(),height());
 	    }
+#endif
 	}
 
     protected:
