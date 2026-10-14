@@ -295,11 +295,15 @@ namespace GEO {
         blur_1_.resize(width,height);
         blur_2_.resize(width,height);
 	if(downscale_factor_ >= 2) {
+
+	    #ifndef GEO_OS_EMSCRIPTEN
+	    GLint prev_frame_buffer;
+	    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
+	    #endif
+
 	    if(downscale_AO_.initialized()) {
 		downscale_AO_.resize(dw,dh);
 	    } else {
-		GLint prev_frame_buffer;
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
 		downscale_AO_.initialize(dw, dh, false, internal_format);
 		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
 	    }
@@ -307,11 +311,14 @@ namespace GEO {
 	    if(downscale_Z_.initialized()) {
 		downscale_Z_.resize(dw,dh);
 	    } else {
-		GLint prev_frame_buffer;
 		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
 		downscale_Z_.initialize(dw, dh, false, depth_internal_format);
-		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
 	    }
+
+	    #ifndef GEO_OS_EMSCRIPTEN
+	    glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
+	    #endif
+
 	} else {
 	    if(downscale_AO_.initialized()) {
 		downscale_AO_.destroy();
