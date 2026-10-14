@@ -290,7 +290,8 @@ namespace GEO {
 	// Downscale
 	GLuint downscale_program_;
 	index_t downscale_factor_;
-	FrameBufferObject downscale_;
+	FrameBufferObject downscale_Z_;
+	FrameBufferObject downscale_AO_;
 
         // Blur
         FrameBufferObject blur_1_;

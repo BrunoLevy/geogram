@@ -161,14 +161,13 @@ namespace GEO {
 		downscale_program_, "downscale_factor", GLint(downscale_factor_)
 	    );
 	}
-
     }
 
     void AmbientOcclusionImpl::initialize(index_t w, index_t h) {
 
 	// For mac retina displays, systematically downscale, else
 	// SSAO is super slow...
-	if(w > 2000) {
+	if(w > 1024) {
 	    downscale_factor_ = 2;
 	}
 
@@ -204,20 +203,26 @@ namespace GEO {
 	index_t dw = width() / downscale_factor_;
 	index_t dh = height() / downscale_factor_;
 
-        if( !blur_1_.initialize(dw, dh, false, internal_format)) {
+        if( !blur_1_.initialize(w, h, false, internal_format)) {
             Logger::err("SSAO")
                 << "blur_1_ FBO is not initialized" << std::endl;
         }
-        if( !blur_2_.initialize(dw, dh, false, internal_format)) {
+        if( !blur_2_.initialize(w, h, false, internal_format)) {
             Logger::err("SSAO")
                 << "blur_2_ FBO is not initialized" << std::endl;
         }
 
 	if(downscale_factor_ >= 2) {
-	    if( !downscale_.initialize(dw, dh, false, depth_internal_format)) {
+	    if( !downscale_Z_.initialize(dw, dh, false, depth_internal_format)) {
 		Logger::err("SSAO")
-		    << "downscale_ FBO is not initialized" << std::endl;
+		    << "downscale_Z_ FBO is not initialized" << std::endl;
 	    }
+
+	    if( !downscale_AO_.initialize(dw, dh, false, internal_format)) {
+		Logger::err("SSAO")
+		    << "downscale_AO_ FBO is not initialized" << std::endl;
+	    }
+
 	}
 
         // Shader sources are embedded in source code,
@@ -285,22 +290,34 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::resize(index_t width, index_t height) {
-	index_t w = width/downscale_factor_;
-	index_t h = height/downscale_factor_;
-        blur_1_.resize(w,h);
-        blur_2_.resize(w,h);
+	index_t dw = width/downscale_factor_;
+	index_t dh = height/downscale_factor_;
+        blur_1_.resize(width,height);
+        blur_2_.resize(width,height);
 	if(downscale_factor_ >= 2) {
-	    if(downscale_.initialized()) {
-		downscale_.resize(w,h);
+	    if(downscale_AO_.initialized()) {
+		downscale_AO_.resize(dw,dh);
 	    } else {
 		GLint prev_frame_buffer;
 		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
-		downscale_.initialize(w, h, false, depth_internal_format);
+		downscale_AO_.initialize(dw, dh, false, internal_format);
+		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
+	    }
+
+	    if(downscale_Z_.initialized()) {
+		downscale_Z_.resize(dw,dh);
+	    } else {
+		GLint prev_frame_buffer;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_frame_buffer);
+		downscale_Z_.initialize(dw, dh, false, depth_internal_format);
 		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(prev_frame_buffer));
 	    }
 	} else {
-	    if(downscale_.initialized()) {
-		downscale_.destroy();
+	    if(downscale_AO_.initialized()) {
+		downscale_AO_.destroy();
+	    }
+	    if(downscale_Z_.initialized()) {
+		downscale_Z_.destroy();
 	    }
 	}
 
@@ -359,30 +376,45 @@ namespace GEO {
         //  Go back to viewport transform that covers the [-1,1]x[-1,1]
         // normalized device coordinates space.
         glViewport(0, 0, GLsizei(width()), GLsizei(height()));
+
         blur_1_.bind_as_texture();
         draw_unit_textured_quad(TEX_QUAD_RRR1); // expand red channel to (r,g,b)
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         blur_1_.unbind();
+
+	downscale_AO_.unbind();
     }
 
     void AmbientOcclusionImpl::compute_SSAO() {
+	bool downscale = (downscale_factor_ > 1);
 
-	if(downscale_.initialized()) {
-	    downscale_.bind_as_framebuffer();
-	    glActiveTexture(GL_TEXTURE0);
-	    draw_FBO_.bind_depth_buffer_as_texture();
+	if(downscale) {
 	    glViewport(
 		0, 0,
 		GLsizei(width()/downscale_factor_),
 		GLsizei(height()/downscale_factor_)
 	    );
+	} else {
+	    glViewport(0, 0, GLsizei(width()), GLsizei(height()));
+	}
+
+	// Downscale Z buffer
+	if(downscale) {
+	    downscale_Z_.bind_as_framebuffer();
+	    glActiveTexture(GL_TEXTURE0);
+	    draw_FBO_.bind_depth_buffer_as_texture();
 	    glUseProgram(downscale_program_);
 	    draw_unit_textured_quad();
 	    glUseProgram(0);
 	}
 
-        blur_1_.bind_as_framebuffer();
+	if(downscale) {
+	    downscale_AO_.bind_as_framebuffer();
+	} else {
+	    blur_1_.bind_as_framebuffer();
+	}
+
         glClearColor(1.0, 1.0, 1.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -396,8 +428,8 @@ namespace GEO {
         glUniformMatrix4fv(proj_inv_loc_, 1, false, proj_inv_);
 
         glActiveTexture(GL_TEXTURE0);
-	if(downscale_.initialized()) {
-	    downscale_.bind_as_texture();
+	if(downscale) {
+	    downscale_Z_.bind_as_texture();
 	} else {
 	    draw_FBO_.bind_depth_buffer_as_texture();
 	}
@@ -428,9 +460,21 @@ namespace GEO {
 
     void AmbientOcclusionImpl::blur() {
         if(blur_width_ < 1) {
+	    // final texture is expected to be in blur_1_ so copy it
+	    // here if blurring width = 0 (no blurring)
+	    if(downscale_AO_.initialized()) {
+		glViewport(0, 0, GLint(width()), GLint(height()));
+		downscale_AO_.bind_as_texture();
+		blur_1_.bind_as_framebuffer();
+		draw_unit_textured_quad();
+		blur_1_.unbind();
+		downscale_AO_.unbind();
+	    }
             return;
         }
         glDisable(GL_DEPTH_TEST);
+
+	glViewport(0, 0, GLint(width()), GLint(height()));
 
         glActiveTexture(GL_TEXTURE1);
         draw_FBO_.bind_depth_buffer_as_texture();
@@ -440,7 +484,11 @@ namespace GEO {
         blur_2_.bind_as_framebuffer();
         GLSL::set_program_uniform_by_name(blur_program_, "vertical", false);
         glUseProgram(blur_program_);
-        blur_1_.bind_as_texture();
+	if(downscale_AO_.initialized()) {
+	    downscale_AO_.bind_as_texture();
+	} else {
+	    blur_1_.bind_as_texture();
+	}
         draw_unit_textured_quad();
         blur_2_.unbind();
 
