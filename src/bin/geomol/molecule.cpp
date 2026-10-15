@@ -609,48 +609,36 @@ namespace GEO {
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
-	if(cells_[CELL_TYPE_S0].nb_cells() != 0) {
-	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-		draw_spheres_imposters(cells_[CELL_TYPE_S0]);
-	    } else {
-		cells_[CELL_TYPE_S0].draw(mode);
-	    }
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
+	} else {
+	    cells_[CELL_TYPE_S0].draw(mode);
 	}
 
-	if(cells_[CELL_TYPE_H1].nb_cells() != 0) {
-	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-		GLSL::set_program_uniform_by_name(
-		    H_imposters_program_, "cAxisPerp", t1, t2
-		);
-		draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
-	    } else {
-		GLSL::set_program_uniform_by_name(
-		    H_program_, "cAxisPerp", t1, t2
-		);
-		cells_[CELL_TYPE_H1].draw(mode);
-	    }
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cAxisPerp", t1, t2
+	    );
+	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
+	} else {
+	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
+	    cells_[CELL_TYPE_H1].draw(mode);
 	}
 
-	if(cells_[CELL_TYPE_H2].nb_cells() != 0) {
-	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-		GLSL::set_program_uniform_by_name(
-		    H_imposters_program_, "cAxisPerp", t2, t1
-		);
-		draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
-	    } else {
-		GLSL::set_program_uniform_by_name(
-		    H_program_, "cAxisPerp", t2, t1
-		);
-		cells_[CELL_TYPE_H2].draw(mode);
-	    }
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    GLSL::set_program_uniform_by_name(
+		H_imposters_program_, "cAxisPerp", t2, t1
+	    );
+	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
+	} else {
+	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
+	    cells_[CELL_TYPE_H2].draw(mode);
 	}
 
-	if(cells_[CELL_TYPE_S3].nb_cells() != 0) {
-	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-		draw_spheres_imposters(cells_[CELL_TYPE_S3]);
-	    } else {
-		cells_[CELL_TYPE_S3].draw(mode);
-	    }
+	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
+	} else {
+	    cells_[CELL_TYPE_S3].draw(mode);
 	}
 
 	glDisable(GL_CULL_FACE);
@@ -750,7 +738,7 @@ namespace GEO {
 
 
     void Molecule::draw_spheres_imposters(const MixedComplexCells& cells) const {
-	if(!cells.visible()) {
+	if(cells.nb_cells() == 0 || !cells.visible()) {
 	    return;
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
@@ -772,7 +760,7 @@ namespace GEO {
     void Molecule::draw_hyperboloids_imposters(
 	const MixedComplexCells& cells
     ) const {
-	if(!cells.visible()) {
+	if(cells.nb_cells() == 0 || !cells.visible()) {
 	    return;
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
@@ -911,7 +899,7 @@ namespace GEO {
     }
 
     void Molecule::MixedComplexCells::draw(DrawMode mode) const {
-	if(!visible_) {
+	if(!visible_ || nb_cells() == 0) {
 	    return;
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
