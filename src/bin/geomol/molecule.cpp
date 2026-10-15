@@ -300,6 +300,16 @@ namespace GEO {
 	//       for each halfedge around edge (v1,v2)
 	//           generate a quad facet
 	//    generate the two polygonal caps
+	//
+	//   H1 cells equation
+	//   -----------------
+        //   reminder: wi = Ri^2/s  t1 = -1/(1-s)   t2 = 1/s
+	//
+        // 	 c  = radical_point(i,j)
+        //       R2 = |pi - c|^2 - wi
+        //          = |pj - c|^2 - wj
+        //   t1*X^2 + t2*(Y^2+Z^2) = R2
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
 	cells.clear();
 	for(index_t v1: atoms()) {
@@ -311,21 +321,32 @@ namespace GEO {
 		if(!is_atom(v2) || v1 > v2) {
 		    continue;
 		}
-		index_t t  = diagram_->halfedge_t(h0);
-
-		vec3 p1 = mixed_vertex({v1,t});
-		vec3 p2 = mixed_vertex({v2,t});
 
 		vec3 c = diagram_->radical_point(v1,v2);
+		vec3 p1 = atom_pos_[v1];
+		vec3 p2 = atom_pos_[v2];
 		vec3 axis = normalize(p2 - p1);
+		p1 = mix(p1,c,shrink_factor_);
+		p2 = mix(p2,c,shrink_factor_);
 
 		double R2 = distance2(c, diagram_->vertex(v1)) -
 		    diagram_->weight(v1);
 
+		const double t1 = -1.0/(1.0-shrink_factor_);
+		const double t2 =  1.0/shrink_factor_;
+		double X2_1 = dot(p1-c,axis); X2_1 = X2_1*X2_1;
+		double YZ2_1 = (-R2 - t1 * X2_1) / t2;
+		double X2_2 = dot(p2-c,axis); X2_2 = X2_2*X2_2;
+		double YZ2_2 = (-R2 - t1 * X2_2) / t2;
+		if(YZ2_1 < 0 && YZ2_2 < 0) {
+		    continue;
+		}
+		double imposter_radius = ::sqrt(std::max(YZ2_1,YZ2_2));
+
 		cells.begin_H_cell(
 		    c,axis,R2,
-		    atom_pos_[v1], atom_radius(v1),
-		    atom_pos_[v2], atom_radius(v2)
+		    p1, imposter_radius,
+		    p2, imposter_radius
 		);
 
 		// generate the quad facets
@@ -341,6 +362,17 @@ namespace GEO {
 		cells.add_shrunk_power_facet(h, FLIPPED);
 
 		cells.end_cell();
+
+		if(false) {
+		    index_t cc = cells.nb_cells()-1;
+		    cells_[CELL_TYPE_H1].save_cell(
+			cc, String::format("H1_cell_%05u.obj", cc)
+		    );
+
+		    DebugStream dbg("H1_debug",cc);
+		    dbg.add_segment(p1,p2);
+		}
+
 	    }
 	}
     }
