@@ -423,34 +423,50 @@ namespace GEO {
 
 		vec3 p[3][2];
 		vec3 pp[3];
+		// double rmax;
 		for(index_t tlv=0; tlv<3; ++tlv) {
 		    p[tlv][0] = mixed_vertex({v[tlv],t1});
 		    p[tlv][1] = mixed_vertex({v[tlv],t2});
 		    pp[tlv] = atom_pos_[v[tlv]];
+		    // rmax = std::max(rmax, atom_radius(v[tlv]));
 		}
-
-
-		vec3 g = (1.0/3.0)*(pp[0]+pp[1]+pp[2]);
-		double r = std::max(
-		    std::max(
-			distance2(pp[0],g),distance2(pp[1],g)
-		    ),
-		    distance2(pp[2],g)
-		);
-
 
 		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
 		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
 
-		//vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
 		vec3 axis = normalize(cross(pp[2]-pp[0],pp[1]-pp[0]));
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
+
+		double r = std::max(
+		    std::max(
+			distance2(p[0][0],g1),distance2(p[1][0],g1)
+		    ),
+		    distance2(p[2][0],g1)
+		);
+
+
+		const double tt1 = -1.0/(1.0-shrink_factor_);
+		const double tt2 =  1.0/shrink_factor_;
+		double X2_1 = dot(g1-c,axis); X2_1 = X2_1*X2_1;
+		double YZ2_1 = (-R2 - tt2 * X2_1) / tt1;
+		double X2_2 = dot(g2-c,axis); X2_2 = X2_2*X2_2;
+		double YZ2_2 = (-R2 - tt2 * X2_2) / tt1;
+		if(YZ2_1 < 0 && YZ2_2 < 0) {
+		    continue;
+		}
+
+		//double imposter_radius = std::min(
+		// ::sqrt(r), ::sqrt(std::max(YZ2_1,YZ2_2))
+		//); // only if centered on c.
+
+		double imposter_radius = ::sqrt(r);
+
 		cells.begin_H_cell(
 		    c, axis, R2,
-		    (t1_is_real ? g1 : g), ::sqrt(r),
-		    (t2_is_real ? g2 : g), ::sqrt(r)
+		    g1, imposter_radius,
+		    g2, imposter_radius
 		);
 
 		cells.begin_facet();
