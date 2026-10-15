@@ -33,18 +33,34 @@ namespace {
            return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
         }
 
+        // correction factor on both axes for non-square windows
+        vec2 viewport_scaling() {
+            return
+               (GLUP.viewport[3] > GLUP.viewport[2]) ?
+               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
+               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+        }
+
         // clip-space radius of a circle covering the projection
         // of a world-space sphere.
-        // Dmitry Sokolov tutorial: https://github.com/ssloy/glsltuto
-        // Inrial ref: http://reality.cs.ucl.ac.uk/projects/quadrics/pbg06.pdf
-
-        float projected_radius(in vec3 p, in float R) {
+        // Dmitry Sokolov tutorial: https://github.com/ssloy/glsltutorial
+        // ref: http://reality.cs.ucl.ac.uk/projects/quadrics/pbg06.pdf
+        //
+        // center_w: center of the sphere in world coordinates
+        // R_w: radius of the sphere in world coordinates
+        // center_c: center of the projected sphere in clip coordinates
+        // R_c: radius of a disk centered on center_c that covers the projection
+        //      of the sphere.
+        void project_sphere(
+            in vec3 center_w, in float R_w, out vec2 center_c, out float R_c
+        ) {
             // TODO: optimize: directly compute r1,r2,r4
+            // (but the GLSL compiler probably does optimize already)
             mat4 T = mat4(
                1.0, 0.0, 0.0, 0.0,
                0.0, 1.0, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
-               p.x/R, p.y/R, p.z/R, 1.0/R
+               center_w.x/R_w, center_w.y/R_w, center_w.z/R_w, 1.0/R_w
             );
 
             mat4 PMT = GLUP.modelviewprojection_matrix * T;
@@ -58,10 +74,21 @@ namespace {
             float r2Dr2T = dot(r2.xyz,r2.xyz)-r2.w*r2.w;
             float r2Dr4T = dot(r2.xyz,r4.xyz)-r2.w*r4.w;
 
+            center_c = (1.0/r4Dr4T)*vec2(r1Dr4T, r2Dr4T);
+
             float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
             float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
-            return -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
+            R_c = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
+            //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
+
+        float projected_radius(in vec3 center_w, in float R_w) {
+           vec2 center_c;
+           float R_c;
+           project_sphere(center_w,R_w,center_c,R_c);
+           return R_c;
+        }
+
         )"
 	);
     }
@@ -331,18 +358,15 @@ namespace {
 	void main() {
             cell_id = gl_VertexID / 6;
             focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
-            vec3 p = focus_R.xyz;
-            float R = focus_R.w;
-            float qsize = projected_radius(p,R);
+            vec2 center_c;
+            float R_c;
+            project_sphere(focus_R.xyz, focus_R.w, center_c, R_c);
 
-            vec2 scaling =
-               (GLUP.viewport[3] > GLUP.viewport[2]) ?
-               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
-               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
-
-            gl_Position = GLUP.modelviewprojection_matrix*vec4(p,1.0);
-            gl_Position.xy +=
-                scaling*(gl_Position.w*qsize*offsets[gl_VertexID % 6]);
+            gl_Position = vec4(
+               center_c + viewport_scaling()*R_c*offsets[gl_VertexID % 6],
+               0.0,
+               1.0
+            );
 	}
 	)"
 
@@ -458,21 +482,28 @@ namespace {
             vec4 imp1 = texelFetch(cell_imposter_1_TBO,cell_id);
             vec4 imp2 = texelFetch(cell_imposter_2_TBO,cell_id);
 
+            /*
             float qsize = max(
                 projected_radius(imp1.xyz, imp1.w),
                 projected_radius(imp2.xyz, imp2.w)
             );
+            */
 
-            vec2 scaling =
-               (GLUP.viewport[3] > GLUP.viewport[2]) ?
-               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
-               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+            vec2 scaling = viewport_scaling();
 
+            /*
             vec4 UVW1 = GLUP.modelviewprojection_matrix*vec4(imp1.xyz,1.0);
             vec4 UVW2 = GLUP.modelviewprojection_matrix*vec4(imp2.xyz,1.0);
-
             vec2 UV1 = (1.0/UVW1.w)*UVW1.xy;
             vec2 UV2 = (1.0/UVW2.w)*UVW2.xy;
+            */
+
+            vec2 UV1; float R1_c;
+            vec2 UV2; float R2_c;
+            project_sphere(imp1.xyz, imp1.w, UV1, R1_c);
+            project_sphere(imp2.xyz, imp2.w, UV2, R2_c);
+            float qsize = max(R1_c,R2_c);
+
             vec2 H = normalize(UV2-UV1);
             vec2 Hperp = vec2(-H.y,H.x);
 

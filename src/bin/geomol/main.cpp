@@ -115,6 +115,8 @@ namespace {
             SimpleApplication::draw_object_properties();
 	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
 
+	    ImGui::Checkbox("show imps", &molecule_.show_imposters());
+
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {
 		molecule_.atom_size() = double(size);
@@ -139,7 +141,6 @@ namespace {
 		ImGui::Checkbox("raytrace", &molecule_.raytrace());
 		if(molecule_.raytrace()) {
 		    ImGui::Checkbox("imposters", &molecule_.use_imposters());
-		    ImGui::Checkbox("show imps", &molecule_.show_imposters());
 		}
 		ImGui::Checkbox("0-patches", &molecule_.visible(0));
 		ImGui::Checkbox("1-patches", &molecule_.visible(1));

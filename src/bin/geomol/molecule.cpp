@@ -673,7 +673,7 @@ namespace GEO {
 	    S_imposters_program_, "facet_plane_TBO", 0
 	);
 	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "show_imposters", false
+	    S_imposters_program_, "show_imposters", show_imposters_
 	);
 	glupUpdateUniformState();
 	glUseProgram(S_imposters_program_);

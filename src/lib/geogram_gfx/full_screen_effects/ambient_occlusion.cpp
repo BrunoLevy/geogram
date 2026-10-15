@@ -463,7 +463,6 @@ namespace GEO {
 
         blur_1_.unbind();
         draw_FBO_.unbind();
-
         glUseProgram(0);
     }
 
