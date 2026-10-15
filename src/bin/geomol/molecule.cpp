@@ -400,9 +400,6 @@ namespace GEO {
 		    continue;
 		}
 
-		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
-		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
 
 		index_t lv[3] = {
 		    PowerDiagram::tet_facet_lv(lf,0),
@@ -420,33 +417,40 @@ namespace GEO {
 		    continue;
 		}
 
+		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
+		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
+		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
+
 		vec3 p[3][2];
+		vec3 pp[3];
 		for(index_t tlv=0; tlv<3; ++tlv) {
 		    p[tlv][0] = mixed_vertex({v[tlv],t1});
 		    p[tlv][1] = mixed_vertex({v[tlv],t2});
+		    pp[tlv] = atom_pos_[v[tlv]];
 		}
 
-		vec3 g = (1.0/3.0)*(
-		    atom_pos_[lv[0]] + atom_pos_[lv[1]] + atom_pos_[lv[2]]
+
+		vec3 g = (1.0/3.0)*(pp[0]+pp[1]+pp[2]);
+		double r = std::max(
+		    std::max(
+			distance2(pp[0],g),distance2(pp[1],g)
+		    ),
+		    distance2(pp[2],g)
 		);
+
 
 		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
-		double r1 = std::max(
-		    std::max(distance2(p[0][0],g1),distance2(p[1][0],g1)),
-		    distance2(p[2][0],g1)
-		);
-
 		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
-		double r2 = r1; // it is a prism!
 
-		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
+		//vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
+		vec3 axis = normalize(cross(pp[2]-pp[0],pp[1]-pp[0]));
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
 		cells.begin_H_cell(
 		    c, axis, R2,
-		    (t1_is_real ? g1 : g), ::sqrt(r1),
-		    (t2_is_real ? g2 : g), ::sqrt(r2)
+		    (t1_is_real ? g1 : g), ::sqrt(r),
+		    (t2_is_real ? g2 : g), ::sqrt(r)
 		);
 
 		cells.begin_facet();
@@ -605,36 +609,48 @@ namespace GEO {
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
-	} else {
-	    cells_[CELL_TYPE_S0].draw(mode);
+	if(cells_[CELL_TYPE_S0].nb_cells() != 0) {
+	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+		draw_spheres_imposters(cells_[CELL_TYPE_S0]);
+	    } else {
+		cells_[CELL_TYPE_S0].draw(mode);
+	    }
 	}
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t1, t2
-	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
-	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
-	    cells_[CELL_TYPE_H1].draw(mode);
+	if(cells_[CELL_TYPE_H1].nb_cells() != 0) {
+	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+		GLSL::set_program_uniform_by_name(
+		    H_imposters_program_, "cAxisPerp", t1, t2
+		);
+		draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
+	    } else {
+		GLSL::set_program_uniform_by_name(
+		    H_program_, "cAxisPerp", t1, t2
+		);
+		cells_[CELL_TYPE_H1].draw(mode);
+	    }
 	}
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t2, t1
-	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
-	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
-	    cells_[CELL_TYPE_H2].draw(mode);
+	if(cells_[CELL_TYPE_H2].nb_cells() != 0) {
+	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+		GLSL::set_program_uniform_by_name(
+		    H_imposters_program_, "cAxisPerp", t2, t1
+		);
+		draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
+	    } else {
+		GLSL::set_program_uniform_by_name(
+		    H_program_, "cAxisPerp", t2, t1
+		);
+		cells_[CELL_TYPE_H2].draw(mode);
+	    }
 	}
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
-	} else {
-	    cells_[CELL_TYPE_S3].draw(mode);
+	if(cells_[CELL_TYPE_S3].nb_cells() != 0) {
+	    if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+		draw_spheres_imposters(cells_[CELL_TYPE_S3]);
+	    } else {
+		cells_[CELL_TYPE_S3].draw(mode);
+	    }
 	}
 
 	glDisable(GL_CULL_FACE);
