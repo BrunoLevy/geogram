@@ -45,6 +45,13 @@
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
 
+// TODO:
+//  - check -R2 or +R2 ? use same convention everywhere (shaders !)
+//  - S0: OK
+//  - H1: OK (check whether there are patches completely inside surface)
+//  - H2: tighter imposters
+//  - S3: tighter imposters if possible: (shrunk tets, we can probably restrain)
+//
 // Try to obtain tigher cells / tigher imposters
 // using the equation, especially for H2 and H1 cells,
 // but also S3 cells (S0 cells are OK!)
@@ -57,7 +64,7 @@
 // 	 c  = radical_point(i,j)
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
-//   t1*X^2 + t2*(Y^2+Z^2) = R2
+//   t1*X^2 + t2*(Y^2+Z^2) - R2 = 0
 //
 //   H2 cells equation:
 //   ------------------
@@ -65,7 +72,7 @@
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
 //          = |pk - c|^2 - wi
-//   t2*X^2 + t1*(Y^2+Z^2) = R2
+//   t2*X^2 + t1*(Y^2+Z^2) - R2 = 0
 //
 //   S3 cells equation:
 //   ------------------
@@ -308,7 +315,7 @@ namespace GEO {
         // 	 c  = radical_point(i,j)
         //       R2 = |pi - c|^2 - wi
         //          = |pj - c|^2 - wj
-        //   t1*X^2 + t2*(Y^2+Z^2) = R2
+        //   t1*X^2 + t2*(Y^2+Z^2) - R2 = 0 // TODO: check -R2, +R2 ???
 
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
 	cells.clear();
@@ -393,6 +400,10 @@ namespace GEO {
 		    continue;
 		}
 
+		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
+		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
+		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
+
 		index_t lv[3] = {
 		    PowerDiagram::tet_facet_lv(lf,0),
 		    PowerDiagram::tet_facet_lv(lf,1),
@@ -415,6 +426,10 @@ namespace GEO {
 		    p[tlv][1] = mixed_vertex({v[tlv],t2});
 		}
 
+		vec3 g = (1.0/3.0)*(
+		    atom_pos_[lv[0]] + atom_pos_[lv[1]] + atom_pos_[lv[2]]
+		);
+
 		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
 		double r1 = std::max(
 		    std::max(distance2(p[0][0],g1),distance2(p[1][0],g1)),
@@ -430,7 +445,8 @@ namespace GEO {
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
 		cells.begin_H_cell(
 		    c, axis, R2,
-		    g1, ::sqrt(r1), g2, ::sqrt(r2)
+		    (t1_is_real ? g1 : g), ::sqrt(r1),
+		    (t2_is_real ? g2 : g), ::sqrt(r2)
 		);
 
 		cells.begin_facet();
