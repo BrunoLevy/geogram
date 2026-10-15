@@ -81,14 +81,6 @@ namespace {
             R_c = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
-
-        float projected_radius(in vec3 center_w, in float R_w) {
-           vec2 center_c;
-           float R_c;
-           project_sphere(center_w,R_w,center_c,R_c);
-           return R_c;
-        }
-
         )"
 	);
     }
@@ -482,22 +474,7 @@ namespace {
             vec4 imp1 = texelFetch(cell_imposter_1_TBO,cell_id);
             vec4 imp2 = texelFetch(cell_imposter_2_TBO,cell_id);
 
-            /*
-            float qsize = max(
-                projected_radius(imp1.xyz, imp1.w),
-                projected_radius(imp2.xyz, imp2.w)
-            );
-            */
-
             vec2 scaling = viewport_scaling();
-
-            /*
-            vec4 UVW1 = GLUP.modelviewprojection_matrix*vec4(imp1.xyz,1.0);
-            vec4 UVW2 = GLUP.modelviewprojection_matrix*vec4(imp2.xyz,1.0);
-            vec2 UV1 = (1.0/UVW1.w)*UVW1.xy;
-            vec2 UV2 = (1.0/UVW2.w)*UVW2.xy;
-            */
-
             vec2 UV1; float R1_c;
             vec2 UV2; float R2_c;
             project_sphere(imp1.xyz, imp1.w, UV1, R1_c);
