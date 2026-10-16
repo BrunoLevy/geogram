@@ -308,12 +308,27 @@ namespace GEO {
 
 	    void begin_facet() {  } // yes, does nothing, but it's nicer with it.
 
+	    // version to be called when store_mesh_ is set, computes
+	    // clipping planes from mesh facet vertices
 	    void end_facet() {
+		geo_debug_assert(store_mesh_);
 		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
 		auto it = cell_facet_vertex_.rbegin();
 		vec3f p[3] = {*(it+2), *(it+1), *it};
 		vec3f n = cross(p[1]-p[0],p[2]-p[0]);
 		cell_facet_plane_.emplace_back(n,-dot(n,p[0]));
+	    }
+
+	    // version to be called when store_mesh_ is not set, takes
+	    // clipping planes as argument
+	    void add_facet_plane(vec4 P, bool flipped = false) {
+		begin_facet(); // does nothing but in case we change our mind...
+		geo_debug_assert(!store_mesh_);
+		if(flipped) {
+		    P = -P;
+		}
+		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
+		cell_facet_plane_.push_back(vec4f(P));
 	    }
 
 	    void add_vertex_by_point(vec3f p) {
@@ -510,6 +525,8 @@ namespace GEO {
 	    vec3 color_ = {1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
 	    bool visible_ = true;
+
+	    bool store_mesh_ = false;
 	};
 
 	/***********************************************************************/

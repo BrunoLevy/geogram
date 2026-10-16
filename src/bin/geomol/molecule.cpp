@@ -369,17 +369,6 @@ namespace GEO {
 		cells.add_shrunk_power_facet(h, FLIPPED);
 
 		cells.end_cell();
-
-		if(false) {
-		    index_t cc = cells.nb_cells()-1;
-		    cells_[CELL_TYPE_H1].save_cell(
-			cc, String::format("H1_cell_%05u.obj", cc)
-		    );
-
-		    DebugStream dbg("H1_debug",cc);
-		    dbg.add_segment(p1,p2);
-		}
-
 	    }
 	}
     }
@@ -399,6 +388,7 @@ namespace GEO {
 		if(t2 < t1) {
 		    continue;
 		}
+		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
 
 
 		index_t lv[3] = {
@@ -417,9 +407,9 @@ namespace GEO {
 		    continue;
 		}
 
-		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
-		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
+		// bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
+		// index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
+		// bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
 
 		vec3 p[3][2];
 		vec3 pp[3];
@@ -447,6 +437,7 @@ namespace GEO {
 		);
 
 
+		// Discard cells empty of surface.
 		const double tt1 = -1.0/(1.0-shrink_factor_);
 		const double tt2 =  1.0/shrink_factor_;
 		double X2_1 = dot(g1-c,axis); X2_1 = X2_1*X2_1;
@@ -469,6 +460,20 @@ namespace GEO {
 		    g2, imposter_radius
 		);
 
+		index_t h1 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[0], lv[1]);
+		index_t h2 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[1], lv[2]);
+		index_t h3 =
+		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[2], lv[0]);
+
+		cells.add_quad_facet(h1,FLIPPED);
+		cells.add_quad_facet(h2,FLIPPED);
+		cells.add_quad_facet(h3,FLIPPED);
+		cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
+		cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+
+		/*
 		cells.begin_facet();
 		cells.add_vertex_by_point(vec3f(p[0][0]));
 		cells.add_vertex_by_point(vec3f(p[1][0]));
@@ -501,33 +506,9 @@ namespace GEO {
 		cells.add_vertex_by_point(vec3f(p[1][1]));
 		cells.add_vertex_by_point(vec3f(p[2][1]));
 		cells.end_facet();
+		*/
 
 		cells.end_cell();
-
-		if(false) {
-		    index_t cc = cells.nb_cells()-1;
-		    cells_[CELL_TYPE_H2].save_cell(
-			cc, String::format("H2_cell_%05u.obj", cc)
-		    );
-
-		    DebugStream dbg("H2_debug",cc);
-		    vec3 atom[3] = {
-			atom_pos_[v[0]], atom_pos_[v[1]], atom_pos_[v[2]]
-		    };
-		    double rad[3] = {
-			atom_radius(v[0]),atom_radius(v[1]), atom_radius(v[2])
-		    };
-
-		    vec3 g = 0.5*(g1+g2);
-		    double hmin =  std::numeric_limits<double>::max();
-		    double hmax = -std::numeric_limits<double>::max();
-		    for(index_t i=0; i<3; ++i) {
-			double h = dot(atom[i]-g,axis);
-			hmin = std::min(hmin, h-rad[i]);
-			hmax = std::max(hmax, h+rad[i]);
-		    }
-		    dbg.add_segment(g+hmin*axis, g+hmax*axis);
-		}
 	    }
 	}
     }
@@ -584,8 +565,14 @@ namespace GEO {
 	    double R = ::sqrt(R2);
 	    cells.begin_S_cell(c,R);
 
+	    cells.add_shrunk_tet_facet(t,0);
+	    cells.add_shrunk_tet_facet(t,1);
+	    cells.add_shrunk_tet_facet(t,2);
+	    cells.add_shrunk_tet_facet(t,3);
+
 	    // we could instead do cells.add_shrunk_tet_facet(t,0..3) but
 	    // it is slower because it recomputes the shrunk vertices
+	    /*
 	    for(index_t lf=0; lf<4; ++lf) {
 		index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
 		index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
@@ -596,6 +583,7 @@ namespace GEO {
 		cells.add_vertex_by_point(vec3f(p[lv3]));
 		cells.end_facet();
 	    }
+	    */
 
 	    cells.end_cell();
 	}
@@ -967,11 +955,32 @@ namespace GEO {
 	}
     }
 
+    inline vec4 triangle_plane(vec3 p1, vec3 p2, vec3 p3) {
+	vec3 N = normalize(cross(p2-p1, p3-p1));
+	return vec4(N, -dot(N,p1));
+    }
+
     void Molecule::MixedComplexCells::add_shrunk_power_facet(
 	index_t h0, bool flipped
     ) {
+	if(!store_mesh_) {
+	    index_t v1 = diagram().halfedge_v(h0,0);
+	    index_t v2 = diagram().halfedge_v(h0,1);
+	    index_t h = h0;
+	    vec3 p[3];
+	    for(index_t i=0; i<3; ++i) {
+		index_t t = diagram().halfedge_t(h);
+		p[i] = molecule_.mixed_vertex({v1,t});
+		h = diagram().next_halfedge_around_edge(h, v1, v2);
+	    }
+	    add_facet_plane(triangle_plane(p[0],p[1],p[2]), flipped);
+	    return;
+	}
 	if(flipped) {
 	    h0 = diagram().halfedge_flip(h0);
+	}
+	if(!store_mesh_) {
+	    return;
 	}
 	index_t v1 = diagram().halfedge_v(h0,0);
 	index_t v2 = diagram().halfedge_v(h0,1);
@@ -990,6 +999,15 @@ namespace GEO {
 	index_t v2 = diagram().halfedge_v(h,1);
 	index_t t1 = diagram().halfedge_t(h);
 	index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
+	if(!store_mesh_) {
+	    vec4 P = triangle_plane(
+		molecule_.mixed_vertex({v1,t1}),
+		molecule_.mixed_vertex({v1,t2}),
+		molecule_.mixed_vertex({v2,t2})
+	    );
+	    add_facet_plane(P, flipped);
+	    return;
+	}
 	begin_facet();
 	if(flipped) {
 	    add_vertex({v2,t1});
@@ -1011,6 +1029,15 @@ namespace GEO {
 	index_t v1 = diagram().tet_facet_vertex(t, lf, 0);
 	index_t v2 = diagram().tet_facet_vertex(t, lf, 1);
 	index_t v3 = diagram().tet_facet_vertex(t, lf, 2);
+	if(!store_mesh_) {
+	    vec4 P = triangle_plane(
+		molecule_.mixed_vertex({v1,t}),
+		molecule_.mixed_vertex({v2,t}),
+		molecule_.mixed_vertex({v3,t})
+	    );
+	    add_facet_plane(P, flipped);
+	    return;
+	}
 	begin_facet();
 	if(flipped) {
 	    add_vertex({v3,t});
