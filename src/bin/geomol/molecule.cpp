@@ -430,6 +430,7 @@ namespace GEO {
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
 
+		// TODO: fulleren, aspigin, some H2 cells are missing!
 		vec3 g = (1.0/3.0)*(p[0]+p[1]+p[2]);
 		double hh = dot(p[0]-g,axis);
 		double hh1 = hh-atom_rmax;
