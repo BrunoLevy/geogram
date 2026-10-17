@@ -94,11 +94,11 @@ namespace GEO {
     }
 
     Molecule::~Molecule() {
-	if(S_imposters_program_ != 0) {
-	    glDeleteProgram(S_imposters_program_);
+	if(S_program_ != 0) {
+	    glDeleteProgram(S_program_);
 	}
-	if(H_imposters_program_ != 0) {
-	    glDeleteProgram(H_imposters_program_);
+	if(H_program_ != 0) {
+	    glDeleteProgram(H_program_);
 	}
 	if(empty_VAO_ != 0) {
 	    glDeleteVertexArrays(1,&empty_VAO_);
@@ -292,6 +292,8 @@ namespace GEO {
 	}
     }
 
+    // TODO: H1 imposters seem to be too small when window is very anisotropic
+    // (width >>> height), to be understood
     void Molecule::update_H1_cells() {
 	// H1 cells are polygonal prisms aligned with the edges of the
 	// triangulation. They are obtained as follows:
@@ -560,14 +562,10 @@ namespace GEO {
 
 	cells_[CELL_TYPE_S0].draw(mode);
 
-	GLSL::set_program_uniform_by_name(
-	    H_imposters_program_, "cAxisPerp", t1, t2
-	);
+	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
 	cells_[CELL_TYPE_H1].draw(mode);
 
-	GLSL::set_program_uniform_by_name(
-	    H_imposters_program_, "cAxisPerp", t2, t1
-	);
+	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	cells_[CELL_TYPE_H2].draw(mode);
 
 	cells_[CELL_TYPE_S3].draw(mode);
@@ -583,19 +581,15 @@ namespace GEO {
 	    register_geomol_shader_utilities();
 	    first_time=false;
 	}
-	if(S_imposters_program_ == 0) {
-	    S_imposters_program_ = glupCompileProgram(
-		spheres_imposters_source
-	    );
-	    cells_[CELL_TYPE_S0].set_program(S_imposters_program_);
-	    cells_[CELL_TYPE_S3].set_program(S_imposters_program_);
+	if(S_program_ == 0) {
+	    S_program_ = glupCompileProgram(spheres_source);
+	    cells_[CELL_TYPE_S0].set_program(S_program_);
+	    cells_[CELL_TYPE_S3].set_program(S_program_);
 	}
-	if(H_imposters_program_ == 0) {
-	    H_imposters_program_ = glupCompileProgram(
-		hyperboloids_imposters_source
-	    );
-	    cells_[CELL_TYPE_H1].set_program(H_imposters_program_);
-	    cells_[CELL_TYPE_H2].set_program(H_imposters_program_);
+	if(H_program_ == 0) {
+	    H_program_ = glupCompileProgram(hyperboloids_source);
+	    cells_[CELL_TYPE_H1].set_program(H_program_);
+	    cells_[CELL_TYPE_H2].set_program(H_program_);
 	}
 	if(empty_VAO_ == 0) {
 	    glGenVertexArrays(1, &empty_VAO_);
@@ -607,17 +601,13 @@ namespace GEO {
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
 	cells.bind_tbos();
+	GLSL::set_program_uniform_by_name(S_program_, "facet_ptr_TBO", 0);
+	GLSL::set_program_uniform_by_name(S_program_, "facet_plane_TBO", 0);
 	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "facet_ptr_TBO", 0
-	);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "facet_plane_TBO", 0
-	);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "show_imposters", show_imposters_
+	    S_program_, "show_imposters", show_imposters_
 	);
 	glupUpdateUniformState();
-	glUseProgram(S_imposters_program_);
+	glUseProgram(S_program_);
 	glBindVertexArray(empty_VAO_);
 	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
 	glBindVertexArray(0);
@@ -766,28 +756,20 @@ namespace GEO {
 	    glBindVertexArray(0);
 	    glUseProgram(0);
 	    molecule_.nb_triangles_ += 2*nb_cells();
+	    return;
 	}
 
-	/*
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
-	if(mode == DRAW_MODE_MSS) {
-	    // cell equation is sent through vertex tex coord
-	    // and vertex normal, so we need to activate these
-	    // vertex attributes.
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(program_);
+	/* // need to re-wire cells storage and close()
+	if(mode == DRAW_MODE_CELLS) {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t c: *this) {
+		draw_cell(c);
+	    }
+	    glupEnd();
+	    return;
 	}
-	bind_tbos();
-	glupBegin(GLUP_TRIANGLES);
-	for(index_t c: *this) {
-	    draw_cell(c);
-	}
-	glupEnd();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
 	*/
     }
 

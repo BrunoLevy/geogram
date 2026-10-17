@@ -87,7 +87,7 @@ namespace {
 
    /********************************************************************/
 
-    const char* spheres_imposters_source =
+    const char* spheres_source =
         R"(
         //primitive GLUP_TRIANGLES
 	)"
@@ -207,7 +207,7 @@ namespace {
 
    /********************************************************************/
 
-    const char* hyperboloids_imposters_source =
+    const char* hyperboloids_source =
         R"(
         //primitive GLUP_TRIANGLES
 	)"

@@ -540,8 +540,8 @@ namespace GEO {
 
 	bool use_imposters_ = true;
 	bool show_imposters_ = false;
-	GLuint S_imposters_program_ = 0;
-	GLuint H_imposters_program_ = 0;
+	GLuint S_program_ = 0;
+	GLuint H_program_ = 0;
 	GLuint empty_VAO_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells
