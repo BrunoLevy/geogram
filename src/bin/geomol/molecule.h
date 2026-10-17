@@ -181,6 +181,8 @@ namespace GEO {
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
 
 	vec3 mixed_vertex(mixed_vertex_id V) const {
+	    geo_debug_assert(V.first != NO_INDEX);
+	    geo_debug_assert(diagram_->tet_is_finite(V.second));
 	    return mix(atom_pos_[V.first], tet_dual_[V.second], shrink_factor_);
 	}
 
