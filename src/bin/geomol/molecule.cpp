@@ -341,6 +341,7 @@ namespace GEO {
 
 		const double t1 = -1.0/(1.0-shrink_factor_);
 		const double t2 =  1.0/shrink_factor_;
+		// TODO: understand sign of R2 (different from H2 cells???)
 		double X2_1 = dot(p1-c,axis); X2_1 = X2_1*X2_1;
 		double YZ2_1 = (-R2 - t1 * X2_1) / t2;
 		double X2_2 = dot(p2-c,axis); X2_2 = X2_2*X2_2;
@@ -381,7 +382,6 @@ namespace GEO {
 	}
     }
 
-    // TODO: properly handle infinite tets
     void Molecule::update_H2_cells() {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
 	// Their two triangular and three quadrangular facets are explicitly
@@ -398,7 +398,8 @@ namespace GEO {
 		    continue;
 		}
 		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-
+		//bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
+		//bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
 
 		index_t lv[3] = {
 		    PowerDiagram::tet_facet_lv(lf,0),
@@ -416,52 +417,43 @@ namespace GEO {
 		    continue;
 		}
 
-		// bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
-		// index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-		// bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
 
-		vec3 p[3][2];
-		vec3 pp[3];
-		// double rmax;
+		vec3 p[3];
+		double atom_rmax=0.0;
 		for(index_t tlv=0; tlv<3; ++tlv) {
-		    p[tlv][0] = mixed_vertex({v[tlv],t1});
-		    p[tlv][1] = mixed_vertex({v[tlv],t2});
-		    pp[tlv] = atom_pos_[v[tlv]];
-		    // rmax = std::max(rmax, atom_radius(v[tlv]));
+		    p[tlv] = atom_pos_[v[tlv]];
+		    atom_rmax = std::max(atom_rmax, atom_radius(v[tlv]));
 		}
 
-		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
-		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
-
-		vec3 axis = normalize(cross(pp[2]-pp[0],pp[1]-pp[0]));
+		vec3 axis = normalize(cross(p[2]-p[0],p[1]-p[0]));
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
 
-		double r = std::max(
-		    std::max(
-			distance2(p[0][0],g1),distance2(p[1][0],g1)
-		    ),
-		    distance2(p[2][0],g1)
-		);
-
+		vec3 g = (1.0/3.0)*(p[0]+p[1]+p[2]);
+		double hh = dot(p[0]-g,axis);
+		double hh1 = hh-atom_rmax;
+		double hh2 = hh+atom_rmax;
+		vec3 g1 = g + hh1*axis;
+		vec3 g2 = g + hh2*axis;
+		double imposter_radius = 0.0;
+		for(index_t lv=0; lv<3; ++lv) {
+		    double r2 = length2((p[lv]-g)-hh*axis);
+		    imposter_radius = std::max(imposter_radius,r2);
+		}
+		imposter_radius = ::sqrt(imposter_radius);
 
 		// Discard cells empty of surface.
 		const double tt1 = -1.0/(1.0-shrink_factor_);
 		const double tt2 =  1.0/shrink_factor_;
+		// TODO: understand sign of R2! (different from H1 cells???)
 		double X2_1 = dot(g1-c,axis); X2_1 = X2_1*X2_1;
-		double YZ2_1 = (-R2 - tt2 * X2_1) / tt1;
+		double YZ2_1 = (R2 - tt2 * X2_1) / tt1;
 		double X2_2 = dot(g2-c,axis); X2_2 = X2_2*X2_2;
-		double YZ2_2 = (-R2 - tt2 * X2_2) / tt1;
+		double YZ2_2 = (R2 - tt2 * X2_2) / tt1;
 		if(YZ2_1 < 0 && YZ2_2 < 0) {
 		    continue;
 		}
-
-		//double imposter_radius = std::min(
-		// ::sqrt(r), ::sqrt(std::max(YZ2_1,YZ2_2))
-		//); // only if centered on c.
-
-		double imposter_radius = ::sqrt(r);
 
 		cells.begin_H_cell(
 		    c, axis, R2,
@@ -638,44 +630,6 @@ namespace GEO {
     }
 
     void Molecule::draw_atoms() const {
-	/*
-	bool slicing_mode =
-	    glupIsEnabled(GLUP_CLIPPING) &&
-	    glupGetClipMode() == GLUP_CLIP_SLICE_CELLS;
-
-	if(atom_coloring_ == ATOM_COLORING_CONSTANT) {
-	    glupSetColor3fv(
-		GLUP_FRONT_AND_BACK_COLOR, constant_color_.data()
-	    );
-	} else {
-	    glupEnable(GLUP_VERTEX_COLORS);
-	}
-	glupBegin(GLUP_SPHERES);
-	for(index_t v: atoms()) {
-	    double R = atom_radius(v);
-	    vec3 color = atom_color(v);
-	    if(atom_coloring_ == ATOM_COLORING_ATOM) {
-		glupColor3dv(color.data());
-	    } else if(atom_coloring_ == ATOM_COLORING_CHAIN) {
-		index_t i = atom_chain_[v] % nb_colormap_entries;
-		double gray = 1.0;
-		if(!slicing_mode) {
-		    gray = 0.299*color.x + 0.587*color.y + 0.114*color.z;
-		    gray = 0.8 + 0.2*gray;
-		}
-		glupColor3d(
-		    gray*colormap[i][0],
-		    gray*colormap[i][1],
-		    gray*colormap[i][2]
-		);
-	    }
-	    vec3 xyz = atom_pos_[v];
-	    glupVertex4d(xyz[0], xyz[1], xyz[2], R*atom_size_);
-	}
-	glupEnd();
-	glupDisable(GLUP_VERTEX_COLORS);
-	*/
-
 	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
