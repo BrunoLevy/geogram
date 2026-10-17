@@ -167,7 +167,7 @@ namespace GEO {
 					<< std::endl;
 	    }
 	}
-	{
+	if(false) {
 	    Stopwatch W("close",verbose_);
 	    while(close_cells()) {
 		if(verbose_) {
@@ -359,7 +359,15 @@ namespace GEO {
 		// generate the quad facets
 		index_t h = h0;
 		do {
-		    cells.add_quad_facet(h);
+		    index_t t1 = diagram_->halfedge_t(h);
+		    index_t lf = diagram_->halfedge_lf(h);
+		    index_t t2 = diagram_->tet_adjacent(t1,lf);
+		    if(
+			diagram_->tet_is_finite(t1) ||
+			diagram_->tet_is_finite(t2)
+		    ) {
+			cells.add_quad_facet(h);
+		    }
 		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
 		} while(h != h0);
 
@@ -373,6 +381,7 @@ namespace GEO {
 	}
     }
 
+    // TODO: properly handle infinite tets
     void Molecule::update_H2_cells() {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
 	// Their two triangular and three quadrangular facets are explicitly
@@ -964,6 +973,7 @@ namespace GEO {
 	index_t h0, bool flipped
     ) {
 	if(!store_mesh_) {
+	    /*
 	    index_t v1 = diagram().halfedge_v(h0,0);
 	    index_t v2 = diagram().halfedge_v(h0,1);
 	    index_t h = h0;
@@ -974,13 +984,17 @@ namespace GEO {
 		h = diagram().next_halfedge_around_edge(h, v1, v2);
 	    }
 	    add_facet_plane(triangle_plane(p[0],p[1],p[2]), flipped);
+	    */
+	    index_t v1 = diagram().halfedge_v(h0,0);
+	    index_t v2 = diagram().halfedge_v(h0,1);
+	    index_t t = diagram().halfedge_t(h0);
+	    vec3 p = molecule_.mixed_vertex({v1,t});
+	    vec3 N = normalize(diagram().vertex(v2) - diagram().vertex(v1));
+	    add_facet_plane(vec4(N,-dot(N,p)), flipped);
 	    return;
 	}
 	if(flipped) {
 	    h0 = diagram().halfedge_flip(h0);
-	}
-	if(!store_mesh_) {
-	    return;
 	}
 	index_t v1 = diagram().halfedge_v(h0,0);
 	index_t v2 = diagram().halfedge_v(h0,1);
@@ -995,17 +1009,39 @@ namespace GEO {
     }
 
     void Molecule::MixedComplexCells::add_quad_facet(index_t h, bool flipped) {
+	index_t lf1 = diagram().halfedge_lf(h);
 	index_t v1 = diagram().halfedge_v(h,0);
 	index_t v2 = diagram().halfedge_v(h,1);
 	index_t t1 = diagram().halfedge_t(h);
-	index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
+	index_t t2 = diagram().tet_adjacent(t1,lf1);
 	if(!store_mesh_) {
+	    index_t w1 = diagram().tet_facet_vertex(t1,lf1,0);
+	    index_t w2 = diagram().tet_facet_vertex(t1,lf1,1);
+	    index_t w3 = diagram().tet_facet_vertex(t1,lf1,2);
+	    vec3 Nt1 = cross(
+		diagram().vertex(w2)-diagram().vertex(w1),
+		diagram().vertex(w3)-diagram().vertex(w1)
+	    );
+	    vec3 N = cross(
+		Nt1, diagram().vertex(v2)-diagram().vertex(v1)
+	    );
+	    N = normalize(N);
+	    geo_debug_assert(
+		diagram().tet_is_finite(t1) ||
+		diagram().tet_is_finite(t2)
+	    );
+	    vec3 p =
+		diagram().tet_is_finite(t1)     ?
+		molecule_.mixed_vertex({v1,t1}) :
+		molecule_.mixed_vertex({v1,t2}) ;
+	    /*
 	    vec4 P = triangle_plane(
 		molecule_.mixed_vertex({v1,t1}),
 		molecule_.mixed_vertex({v1,t2}),
 		molecule_.mixed_vertex({v2,t2})
 	    );
-	    add_facet_plane(P, flipped);
+	    */
+	    add_facet_plane(vec4(N,-dot(N,p)), flipped);
 	    return;
 	}
 	begin_facet();
