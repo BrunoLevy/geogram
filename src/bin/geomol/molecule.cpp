@@ -385,17 +385,17 @@ namespace GEO {
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
 	cells.clear();
 	for(index_t t1: diagram_->tets()) {
-	    if(!diagram_->tet_is_finite(t1)) {
-		continue;
-	    }
 	    for(index_t lf=0; lf<4; ++lf) {
 		index_t t2 = diagram_->tet_adjacent(t1, lf);
 		if(t2 < t1) {
 		    continue;
 		}
 		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-		//bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
-		//bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
+		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
+		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
+		if(!t1_is_real && !t2_is_real) {
+		    continue;
+		}
 
 		index_t lv[3] = {
 		    PowerDiagram::tet_facet_lv(lf,0),
@@ -468,8 +468,13 @@ namespace GEO {
 		cells.add_quad_facet(h1,FLIPPED);
 		cells.add_quad_facet(h2,FLIPPED);
 		cells.add_quad_facet(h3,FLIPPED);
-		cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
-		cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+
+		if(t1_is_real) {
+		    cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
+		}
+		if(t2_is_real) {
+		    cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+		}
 		cells.end_cell();
 	    }
 	}
