@@ -383,8 +383,7 @@ namespace GEO {
 	    static constexpr GLint CELL_IMPOSTER_1_TEX_UNIT = 8;
 	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
 
-	    // TODOC!
-	    void bind_tbos(GLuint program) const;
+	    void bind_tbos() const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -516,12 +515,6 @@ namespace GEO {
 
 	    bool store_mesh_ = false;
 	};
-
-	/***********************************************************************/
-
-	void draw_spheres_imposters(const MixedComplexCells& cells) const;
-	void draw_hyperboloids_imposters(const MixedComplexCells& cells) const;
-
 
     private:
 	index_t nb_atoms_;

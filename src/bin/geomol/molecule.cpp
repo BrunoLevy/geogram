@@ -558,37 +558,19 @@ namespace GEO {
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
-	} else {
-	    //cells_[CELL_TYPE_S0].draw(mode);
-	}
+	cells_[CELL_TYPE_S0].draw(mode);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t1, t2
-	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
-	} else {
-	    //GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
-	    cells_[CELL_TYPE_H1].draw(mode);
-	}
+	GLSL::set_program_uniform_by_name(
+	    H_imposters_program_, "cAxisPerp", t1, t2
+	);
+	cells_[CELL_TYPE_H1].draw(mode);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t2, t1
-	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
-	} else {
-	    //GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
-	    cells_[CELL_TYPE_H2].draw(mode);
-	}
+	GLSL::set_program_uniform_by_name(
+	    H_imposters_program_, "cAxisPerp", t2, t1
+	);
+	cells_[CELL_TYPE_H2].draw(mode);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
-	} else {
-	    //cells_[CELL_TYPE_S3].draw(mode);
-	}
+	cells_[CELL_TYPE_S3].draw(mode);
 
 	glDisable(GL_CULL_FACE);
     }
@@ -624,7 +606,7 @@ namespace GEO {
 	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_);
+	cells.bind_tbos();
 	GLSL::set_program_uniform_by_name(
 	    S_imposters_program_, "facet_ptr_TBO", 0
 	);
@@ -636,48 +618,6 @@ namespace GEO {
 	);
 	glupUpdateUniformState();
 	glUseProgram(S_imposters_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
-    }
-
-
-    void Molecule::draw_spheres_imposters(const MixedComplexCells& cells) const {
-	if(cells.nb_cells() == 0 || !cells.visible()) {
-	    return;
-	}
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "show_imposters", show_imposters_
-	);
-	glupUpdateUniformState();
-	glUseProgram(S_imposters_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
-    }
-
-
-    void Molecule::draw_hyperboloids_imposters(
-	const MixedComplexCells& cells
-    ) const {
-	if(cells.nb_cells() == 0 || !cells.visible()) {
-	    return;
-	}
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(H_imposters_program_);
-	GLSL::set_program_uniform_by_name(
-	    H_imposters_program_, "show_imposters", show_imposters_
-	);
-	glupUpdateUniformState();
-	glUseProgram(H_imposters_program_);
 	glBindVertexArray(empty_VAO_);
 	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
 	glBindVertexArray(0);
@@ -760,7 +700,7 @@ namespace GEO {
 	cell_imposter_2_tbo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos(GLuint program) const {
+    void Molecule::MixedComplexCells::bind_tbos() const {
 	bool eqn1 = (cell_eqn_1_.size() != 0);
 	bool eqn2 = (cell_eqn_2_.size() != 0);
 	bool imposters = (cell_imposter_1_.size() != 0);
@@ -782,27 +722,27 @@ namespace GEO {
 	    );
 	}
 	GLSL::set_program_uniform_by_name(
-	    program, "facet_ptr_TBO", FACET_PTR_TEX_UNIT
+	    program_, "facet_ptr_TBO", FACET_PTR_TEX_UNIT
 	);
 	GLSL::set_program_uniform_by_name(
-	    program, "facet_plane_TBO", FACET_PLANE_TEX_UNIT
+	    program_, "facet_plane_TBO", FACET_PLANE_TEX_UNIT
 	);
 	if(eqn1) {
 	    GLSL::set_program_uniform_by_name(
-		program, "cell_eqn_1_TBO", CELL_EQN_1_TEX_UNIT
+		program_, "cell_eqn_1_TBO", CELL_EQN_1_TEX_UNIT
 	    );
 	}
 	if(eqn2) {
 	    GLSL::set_program_uniform_by_name(
-		program, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
+		program_, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
 	    );
 	}
 	if(imposters) {
 	    GLSL::set_program_uniform_by_name(
-		program, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
+		program_, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
 	    );
 	    GLSL::set_program_uniform_by_name(
-		program, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
+		program_, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
 	    );
 	}
     }
@@ -811,6 +751,24 @@ namespace GEO {
 	if(!visible_ || nb_cells() == 0) {
 	    return;
 	}
+
+	if(mode == DRAW_MODE_MSS) {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+	    bind_tbos();
+	    GLSL::set_program_uniform_by_name(
+		program_, "show_imposters", molecule_.show_imposters()
+	    );
+	    glupUpdateUniformState();
+	    glUseProgram(program_);
+	    glBindVertexArray(molecule_.empty_VAO_);
+	    glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(nb_cells()));
+	    glBindVertexArray(0);
+	    glUseProgram(0);
+	    molecule_.nb_triangles_ += 2*nb_cells();
+	}
+
+	/*
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
 	if(mode == DRAW_MODE_MSS) {
@@ -821,7 +779,7 @@ namespace GEO {
 	    glupEnable(GLUP_VERTEX_NORMALS);
 	    glupUseProgram(program_);
 	}
-	bind_tbos(program_); // texture buffer object with clipping planes
+	bind_tbos();
 	glupBegin(GLUP_TRIANGLES);
 	for(index_t c: *this) {
 	    draw_cell(c);
@@ -830,6 +788,7 @@ namespace GEO {
 	glupUseProgram(0);
 	glupDisable(GLUP_TEXTURING);
 	glupDisable(GLUP_VERTEX_NORMALS);
+	*/
     }
 
     void Molecule::MixedComplexCells::draw_cell(index_t c) const {
