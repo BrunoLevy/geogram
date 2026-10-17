@@ -276,24 +276,15 @@ namespace GEO {
 	    /*************************************************/
 
 	    void begin_S_cell(vec3 center, double radius) {
-		index_t cell_id = nb_cells();
 		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
-		cell_eqn_2_.emplace_back(0.0f, 0.0f, 0.0f, float(cell_id));
-	    }
-
-	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
-		index_t cell_id = nb_cells();
-		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
-		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
 	    }
 
 	    void begin_H_cell(
 		vec3 center, vec3 axis, double R2,
 		vec3 impos1, double Rimpos1, vec3 impos2, double Rimpos2
 	    ) {
-		index_t cell_id = nb_cells();
 		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
-		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
+		cell_eqn_2_.emplace_back(vec3f(axis), 0.0f);
 		cell_imposter_1_.emplace_back(vec3f(impos1),float(Rimpos1));
 		cell_imposter_2_.emplace_back(vec3f(impos2),float(Rimpos2));
 	    }
@@ -393,10 +384,7 @@ namespace GEO {
 	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
 
 	    // TODOC!
-	    void bind_tbos(
-		GLuint program,
-		bool eqn1=false, bool eqn2=false, bool imposters=false
-	    ) const;
+	    void bind_tbos(GLuint program) const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -556,8 +544,6 @@ namespace GEO {
 	bool draw_mss_ = false;
 	bool raytrace_ = true;
 	bool verbose_ = false;
-	GLuint S_program_ = 0; // GPU program for spheres
-	GLuint H_program_ = 0; // GPU program for hyperboloids
 
 	bool use_imposters_ = true;
 	bool show_imposters_ = false;

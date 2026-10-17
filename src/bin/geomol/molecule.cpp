@@ -94,12 +94,6 @@ namespace GEO {
     }
 
     Molecule::~Molecule() {
-	if(S_program_ != 0) {
-	    glDeleteProgram(S_program_);
-	}
-	if(H_program_ != 0) {
-	    glDeleteProgram(H_program_);
-	}
 	if(S_imposters_program_ != 0) {
 	    glDeleteProgram(S_imposters_program_);
 	}
@@ -567,7 +561,7 @@ namespace GEO {
 	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
 	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
 	} else {
-	    cells_[CELL_TYPE_S0].draw(mode);
+	    //cells_[CELL_TYPE_S0].draw(mode);
 	}
 
 	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
@@ -576,7 +570,7 @@ namespace GEO {
 	    );
 	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
 	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
+	    //GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
 	    cells_[CELL_TYPE_H1].draw(mode);
 	}
 
@@ -586,14 +580,14 @@ namespace GEO {
 	    );
 	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
 	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
+	    //GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	    cells_[CELL_TYPE_H2].draw(mode);
 	}
 
 	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
 	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
 	} else {
-	    cells_[CELL_TYPE_S3].draw(mode);
+	    //cells_[CELL_TYPE_S3].draw(mode);
 	}
 
 	glDisable(GL_CULL_FACE);
@@ -607,23 +601,19 @@ namespace GEO {
 	    register_geomol_shader_utilities();
 	    first_time=false;
 	}
-	if(S_program_ == 0) {
-	    S_program_ = glupCompileProgram(spheres_source);
-	    cells_[CELL_TYPE_S0].set_program(S_program_);
-	    cells_[CELL_TYPE_S3].set_program(S_program_);
-	}
-	if(H_program_ == 0) {
-	    H_program_ = glupCompileProgram(hyperboloids_source);
-	    cells_[CELL_TYPE_H1].set_program(H_program_);
-	    cells_[CELL_TYPE_H2].set_program(H_program_);
-	}
 	if(S_imposters_program_ == 0) {
-	    S_imposters_program_ = glupCompileProgram(spheres_imposters_source);
+	    S_imposters_program_ = glupCompileProgram(
+		spheres_imposters_source
+	    );
+	    cells_[CELL_TYPE_S0].set_program(S_imposters_program_);
+	    cells_[CELL_TYPE_S3].set_program(S_imposters_program_);
 	}
 	if(H_imposters_program_ == 0) {
 	    H_imposters_program_ = glupCompileProgram(
 		hyperboloids_imposters_source
 	    );
+	    cells_[CELL_TYPE_H1].set_program(H_imposters_program_);
+	    cells_[CELL_TYPE_H2].set_program(H_imposters_program_);
 	}
 	if(empty_VAO_ == 0) {
 	    glGenVertexArrays(1, &empty_VAO_);
@@ -634,7 +624,7 @@ namespace GEO {
 	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_, true, false, false);
+	cells.bind_tbos(S_imposters_program_);
 	GLSL::set_program_uniform_by_name(
 	    S_imposters_program_, "facet_ptr_TBO", 0
 	);
@@ -660,7 +650,7 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_,true,false);
+	cells.bind_tbos(S_imposters_program_);
 	GLSL::set_program_uniform_by_name(
 	    S_imposters_program_, "show_imposters", show_imposters_
 	);
@@ -682,7 +672,7 @@ namespace GEO {
 	}
 	glupDisable(GLUP_VERTEX_COLORS);
 	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(H_imposters_program_,true,true,true);
+	cells.bind_tbos(H_imposters_program_);
 	GLSL::set_program_uniform_by_name(
 	    H_imposters_program_, "show_imposters", show_imposters_
 	);
@@ -770,9 +760,11 @@ namespace GEO {
 	cell_imposter_2_tbo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos(
-	GLuint program, bool eqn1, bool eqn2, bool imposters
-    ) const {
+    void Molecule::MixedComplexCells::bind_tbos(GLuint program) const {
+	bool eqn1 = (cell_eqn_1_.size() != 0);
+	bool eqn2 = (cell_eqn_2_.size() != 0);
+	bool imposters = (cell_imposter_1_.size() != 0);
+
 	bind_tbo(cell_facet_ptr_tbo_, cell_facet_ptr_, FACET_PTR_TEX_UNIT);
 	bind_tbo(cell_facet_plane_tbo_, cell_facet_plane_, FACET_PLANE_TEX_UNIT);
 	if(eqn1) {
