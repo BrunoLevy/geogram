@@ -56,6 +56,8 @@
 // using the equation, especially for H2 and H1 cells,
 // but also S3 cells (S0 cells are OK!)
 //
+//   Note: in my notation, I use R2 = |pi-c|^2-wi (used to that in power diag)
+//         rather than the opposite used in the articles
 //   wi = Ri^2/s
 //   t1 = -1/(1-s)   t2 = 1/s
 //
@@ -64,7 +66,7 @@
 // 	 c  = radical_point(i,j)
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
-//   t1*X^2 + t2*(Y^2+Z^2) - R2 = 0
+//   t1*X^2 + t2*(Y^2+Z^2) + R2 = 0
 //
 //   H2 cells equation:
 //   ------------------
@@ -72,7 +74,7 @@
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
 //          = |pk - c|^2 - wi
-//   t2*X^2 + t1*(Y^2+Z^2) - R2 = 0
+//   t2*X^2 + t1*(Y^2+Z^2) + R2 = 0
 //
 //   S3 cells equation:
 //   ------------------
@@ -292,6 +294,27 @@ namespace GEO {
 	}
     }
 
+
+    // Given the quadric equation (zero at center and U along axis):
+    //    alpha U^2 + beta (V^2+W^2) + R2 = 0
+    // The radius along the U axis is given by (when it exists):
+    //    r^2(U) = - (alpha U^2 + R2) / beta
+    std::pair<double,double> Hcell_radius(
+	double alpha, double beta, double R2,
+	double u1, double u2
+    ) {
+	double r2_1 = -(alpha*u1*u1+R2)/beta;
+	double r2_2 = -(alpha*u2*u2+R2)/beta;
+	double r2_min = std::min(r2_1,r2_2);
+	double r2_max = std::max(r2_1,r2_2);
+	if(u1*u2 < 0) {
+	    double r2_0 = -R2/beta;
+	    r2_min = std::min(r2_min,r2_0);
+	    r2_max = std::max(r2_max,r2_0);
+	}
+	return {r2_min, r2_max};
+    }
+
     // TODO: H1 imposters seem to be too small when window is very anisotropic
     // (width >>> height), to be understood
     void Molecule::update_H1_cells() {
@@ -311,7 +334,7 @@ namespace GEO {
         // 	 c  = radical_point(i,j)
         //       R2 = |pi - c|^2 - wi
         //          = |pj - c|^2 - wj
-        //   t1*X^2 + t2*(Y^2+Z^2) - R2 = 0 // TODO: check -R2, +R2 ???
+        //   t1*X^2 + t2*(Y^2+Z^2) + R2 = 0
 
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
 	cells.clear();
@@ -337,21 +360,17 @@ namespace GEO {
 
 		const double t1 = -1.0/(1.0-shrink_factor_);
 		const double t2 =  1.0/shrink_factor_;
-		// TODO: understand sign of R2 (different from H2 cells???)
-		double X2_1 = dot(p1-c,axis); X2_1 = X2_1*X2_1;
-		double YZ2_1 = (-R2 - t1 * X2_1) / t2;
-		double X2_2 = dot(p2-c,axis); X2_2 = X2_2*X2_2;
-		double YZ2_2 = (-R2 - t1 * X2_2) / t2;
-		if(discard_empty_cells_ && YZ2_1 < 0 && YZ2_2 < 0) {
+		double u1 = dot(p1-c,axis);
+		double u2 = dot(p2-c,axis);
+		auto [rmin2, rmax2] = Hcell_radius(t1,t2,R2,u1,u2);
+
+		if(discard_empty_cells_ && rmin2 < 0.0 && rmax2 < 0.0) {
 		    continue;
 		}
-		double imposter_radius = ::sqrt(std::max(YZ2_1,YZ2_2));
 
-		cells.begin_H_cell(
-		    c,axis,R2,
-		    p1, imposter_radius,
-		    p2, imposter_radius
-		);
+		double imposter_r = ::sqrt(rmax2);
+
+		cells.begin_H_cell(c, axis, R2, p1, imposter_r, p2, imposter_r);
 
 		// generate the quad facets
 		index_t h = h0;
@@ -378,41 +397,41 @@ namespace GEO {
 	}
     }
 
+
     void Molecule::update_H2_cells() {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
 	// Their two triangular and three quadrangular facets are explicitly
 	// constructed.
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
 	cells.clear();
-	for(index_t t1: diagram_->tets()) {
-	    for(index_t lf=0; lf<4; ++lf) {
-		index_t t2 = diagram_->tet_adjacent(t1, lf);
-		if(t2 < t1) {
+	for(index_t tet1: diagram_->tets()) {
+	    for(index_t lf1=0; lf1<4; ++lf1) {
+		index_t tet2 = diagram_->tet_adjacent(tet1, lf1);
+		if(tet2 < tet1) {
 		    continue;
 		}
-		index_t lf2 = diagram_->find_tet_adjacent(t2,t1);
-		bool t1_is_real = is_atom(diagram_->tet_vertex(t1,lf));
-		bool t2_is_real = is_atom(diagram_->tet_vertex(t2,lf2));
-		if(!t1_is_real && !t2_is_real) {
+		index_t lf2 = diagram_->find_tet_adjacent(tet2,tet1);
+		bool tet1_is_real = is_atom(diagram_->tet_vertex(tet1,lf1));
+		bool tet2_is_real = is_atom(diagram_->tet_vertex(tet2,lf2));
+		if(!tet1_is_real && !tet2_is_real) {
 		    continue;
 		}
 
 		index_t lv[3] = {
-		    PowerDiagram::tet_facet_lv(lf,0),
-		    PowerDiagram::tet_facet_lv(lf,1),
-		    PowerDiagram::tet_facet_lv(lf,2)
+		    PowerDiagram::tet_facet_lv(lf1,0),
+		    PowerDiagram::tet_facet_lv(lf1,1),
+		    PowerDiagram::tet_facet_lv(lf1,2)
 		};
 
 		index_t v[3] = {
-		    diagram_->tet_vertex(t1,lv[0]),
-		    diagram_->tet_vertex(t1,lv[1]),
-		    diagram_->tet_vertex(t1,lv[2])
+		    diagram_->tet_vertex(tet1,lv[0]),
+		    diagram_->tet_vertex(tet1,lv[1]),
+		    diagram_->tet_vertex(tet1,lv[2])
 		};
 
 		if(!is_atom(v[0]) || !is_atom(v[1]) || !is_atom(v[2])) {
 		    continue;
 		}
-
 
 		vec3 p[3];
 		double atom_rmax=0.0;
@@ -426,54 +445,47 @@ namespace GEO {
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
 
-		// TODO: fulleren, aspigin, some H2 cells are missing!
-		vec3 g = (1.0/3.0)*(p[0]+p[1]+p[2]);
-		double hh = dot(p[0]-g,axis);
-		double hh1 = hh-atom_rmax;
-		double hh2 = hh+atom_rmax;
-		vec3 g1 = g + hh1*axis;
-		vec3 g2 = g + hh2*axis;
-		double imposter_radius = 0.0;
-		for(index_t lv=0; lv<3; ++lv) {
-		    double r2 = length2((p[lv]-g)-hh*axis);
-		    imposter_radius = std::max(imposter_radius,r2);
-		}
-		imposter_radius = ::sqrt(imposter_radius);
+		p[0] = mix(p[0], c, shrink_factor_);
+		p[1] = mix(p[1], c, shrink_factor_);
+		p[2] = mix(p[2], c, shrink_factor_);
 
-		// Discard cells empty of surface.
-		const double tt1 = -1.0/(1.0-shrink_factor_);
-		const double tt2 =  1.0/shrink_factor_;
-		// TODO: understand sign of R2! (different from H1 cells???)
-		double X2_1 = dot(g1-c,axis); X2_1 = X2_1*X2_1;
-		double YZ2_1 = (R2 - tt2 * X2_1) / tt1;
-		double X2_2 = dot(g2-c,axis); X2_2 = X2_2*X2_2;
-		double YZ2_2 = (R2 - tt2 * X2_2) / tt1;
-		if(discard_empty_cells_ && YZ2_1 < 0 && YZ2_2 < 0) {
+		double u1 = -atom_rmax;
+		double u2 = atom_rmax;
+		vec3 g1 = c + u1*axis;
+		vec3 g2 = c + u2*axis;
+		double imposter_r2 = 0.0;
+		for(index_t lv=0; lv<3; ++lv) {
+		    double r2 = length2((p[lv]-c));
+		    imposter_r2 = std::max(imposter_r2,r2);
+		}
+		const double t1 = -1.0/(1.0-shrink_factor_);
+		const double t2 =  1.0/shrink_factor_;
+		auto [rmin2, rmax2] = Hcell_radius(t2,t1,R2,u1,u2);
+		if(discard_empty_cells_ && rmin2 < 0.0 && rmax2 < 0.0) {
 		    continue;
 		}
-
-		cells.begin_H_cell(
-		    c, axis, R2,
-		    g1, imposter_radius,
-		    g2, imposter_radius
-		);
+		if(discard_empty_cells_ && rmin2 > imposter_r2) {
+		    continue;
+		}
+		double imposter_r = ::sqrt(imposter_r2);
+		cells.begin_H_cell(c, axis, R2, g1, imposter_r, g2, imposter_r);
 
 		index_t h1 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[0], lv[1]);
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[0], lv[1]);
 		index_t h2 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[1], lv[2]);
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[1], lv[2]);
 		index_t h3 =
-		    diagram_->make_halfedge_from_t_lv_lv(t1, lv[2], lv[0]);
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[2], lv[0]);
 
 		cells.add_quad_facet(h1,FLIPPED);
 		cells.add_quad_facet(h2,FLIPPED);
 		cells.add_quad_facet(h3,FLIPPED);
 
-		if(t1_is_real) {
-		    cells.add_shrunk_tet_facet(t1,lf,FLIPPED);
+		if(tet1_is_real) {
+		    cells.add_shrunk_tet_facet(tet1,lf1,FLIPPED);
 		}
-		if(t2_is_real) {
-		    cells.add_shrunk_tet_facet(t2,lf2,FLIPPED);
+		if(tet2_is_real) {
+		    cells.add_shrunk_tet_facet(tet2,lf2,FLIPPED);
 		}
 		cells.end_cell();
 	    }

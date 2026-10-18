@@ -118,7 +118,7 @@ namespace {
 	    ImGui::Checkbox("show imps", &molecule_.show_imposters());
 	    ImGui::Checkbox("full imps", &molecule_.full_imposters());
 	    if(
-		ImGui::Checkbox("dic. imps", &molecule_.discard_empty_cells())
+		ImGui::Checkbox("disc. imps", &molecule_.discard_empty_cells())
 	    ) {
 		molecule_.update();
 	    }

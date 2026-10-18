@@ -76,8 +76,9 @@ namespace {
 
             center_c = (1.0/r4Dr4T)*vec2(r1Dr4T, r2Dr4T);
 
-            float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
-            float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
+            float discriminant_x = abs(r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T);
+            float discriminant_y = abs(r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T);
+
             R_c = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
@@ -240,7 +241,7 @@ namespace {
             cell_id = gl_VertexID / 6;
             vec4 focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
             C = focus_R.xyz;
-            R2 = -focus_R.w;
+            R2 = focus_R.w;
             n = texelFetch(cell_eqn_2_TBO,cell_id).xyz;
 
             vec4 imp1 = texelFetch(cell_imposter_1_TBO,cell_id);
@@ -338,7 +339,7 @@ namespace {
             vec3 vXn  = cross(R.V,n);
             float a =      alpha*vDn*vDn   + beta*dot(vXn,vXn)  ;
             float b = 2.0*(alpha*coDn*vDn  + beta*dot(coXn,vXn));
-            float c =      alpha*coDn*coDn + beta*dot(coXn,coXn) - R2;
+            float c =      alpha*coDn*coDn + beta*dot(coXn,coXn) + R2;
             */
 
             // This version from Matthieu's shader, more efficient I think
@@ -349,7 +350,7 @@ namespace {
             float gamma = alpha - beta;            //       v
             float a =      gamma*vDn*vDn   + beta; // *dot(R.V,R.V);
             float b = 2.0*(gamma*coDn*vDn  + beta*dot(R.V, co));
-            float c =      gamma*coDn*coDn + beta*dot(co,co) - R2;
+            float c =      gamma*coDn*coDn + beta*dot(co,co) + R2;
 
             float delta = b*b - 4.0*a*c;
             if(delta < 0.0) {
