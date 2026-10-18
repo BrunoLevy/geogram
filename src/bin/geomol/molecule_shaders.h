@@ -105,6 +105,9 @@ namespace {
         //import <geomol/imposter.h>
 
         uniform samplerBuffer cell_eqn_1_TBO;
+        uniform samplerBuffer cell_imposter_1_TBO;
+        uniform bool replace_imposter;
+
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;
 
@@ -120,9 +123,11 @@ namespace {
 	void main() {
             cell_id = gl_VertexID / 6;
             focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
+            vec4 imp_focus_R = replace_imposter ?
+                               texelFetch(cell_imposter_1_TBO,cell_id) : focus_R;
             vec2 center_c;
             float R_c;
-            project_sphere(focus_R.xyz, focus_R.w, center_c, R_c);
+            project_sphere(imp_focus_R.xyz, imp_focus_R.w, center_c, R_c);
 
             if(full_imposters)
             gl_Position = vec4(offsets[gl_VertexID%6],0.0,1.0);

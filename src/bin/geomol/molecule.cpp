@@ -542,7 +542,15 @@ namespace GEO {
 	    }
 
 	    double R = ::sqrt(R2);
-	    cells.begin_S_cell(c,R);
+
+	    vec3 imp_c = 0.25*(p[0]+p[1]+p[2]+p[3]);
+	    double imp_R2 = 0.0;
+	    for(index_t i=0; i<4; ++i) {
+		imp_R2 = std::max(imp_R2, length2(p[i]-imp_c));
+	    }
+	    double imp_R = ::sqrt(imp_R2);
+
+	    cells.begin_S_cell(c,R,imp_c,imp_R);
 
 	    cells.add_shrunk_tet_facet(t,0);
 	    cells.add_shrunk_tet_facet(t,1);
@@ -585,6 +593,7 @@ namespace GEO {
 	    H_program_, "full_imposters", full_imposters_
 	);
 
+	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
 	cells_[CELL_TYPE_S0].draw(mode);
 
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
@@ -593,6 +602,7 @@ namespace GEO {
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	cells_[CELL_TYPE_H2].draw(mode);
 
+	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", true);
 	cells_[CELL_TYPE_S3].draw(mode);
 
 	glDisable(GL_CULL_FACE);
@@ -631,6 +641,7 @@ namespace GEO {
 	GLSL::set_program_uniform_by_name(
 	    S_program_, "show_imposters", show_imposters_
 	);
+	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
 	glupUpdateUniformState();
 	glUseProgram(S_program_);
 	glBindVertexArray(empty_VAO_);
@@ -718,7 +729,8 @@ namespace GEO {
     void Molecule::MixedComplexCells::bind_tbos() const {
 	bool eqn1 = (cell_eqn_1_.size() != 0);
 	bool eqn2 = (cell_eqn_2_.size() != 0);
-	bool imposters = (cell_imposter_1_.size() != 0);
+	bool imposters1 = (cell_imposter_1_.size() != 0);
+	bool imposters2 = (cell_imposter_2_.size() != 0);
 
 	bind_tbo(cell_facet_ptr_tbo_, cell_facet_ptr_, FACET_PTR_TEX_UNIT);
 	bind_tbo(cell_facet_plane_tbo_, cell_facet_plane_, FACET_PLANE_TEX_UNIT);
@@ -728,10 +740,12 @@ namespace GEO {
 	if(eqn2) {
 	    bind_tbo(cell_eqn_2_tbo_, cell_eqn_2_, CELL_EQN_2_TEX_UNIT);
 	}
-	if(imposters) {
+	if(imposters1) {
 	    bind_tbo(
 		cell_imposter_1_tbo_, cell_imposter_1_, CELL_IMPOSTER_1_TEX_UNIT
 	    );
+	}
+	if(imposters2) {
 	    bind_tbo(
 		cell_imposter_2_tbo_, cell_imposter_2_, CELL_IMPOSTER_2_TEX_UNIT
 	    );
@@ -752,10 +766,12 @@ namespace GEO {
 		program_, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
 	    );
 	}
-	if(imposters) {
+	if(imposters1) {
 	    GLSL::set_program_uniform_by_name(
 		program_, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
 	    );
+	}
+	if(imposters2) {
 	    GLSL::set_program_uniform_by_name(
 		program_, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
 	    );

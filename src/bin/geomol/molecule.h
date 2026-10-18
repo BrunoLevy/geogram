@@ -283,6 +283,16 @@ namespace GEO {
 		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
 	    }
 
+	    void begin_S_cell(
+		vec3 center, double radius,
+		vec3 imp_center, double imp_radius
+	    ) {
+		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
+		cell_imposter_1_.emplace_back(
+		    vec3f(imp_center),float(imp_radius)
+		);
+	    }
+
 	    void begin_H_cell(
 		vec3 center, vec3 axis, double R2,
 		vec3 impos1, double Rimpos1, vec3 impos2, double Rimpos2
