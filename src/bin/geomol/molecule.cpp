@@ -342,7 +342,7 @@ namespace GEO {
 		double YZ2_1 = (-R2 - t1 * X2_1) / t2;
 		double X2_2 = dot(p2-c,axis); X2_2 = X2_2*X2_2;
 		double YZ2_2 = (-R2 - t1 * X2_2) / t2;
-		if(YZ2_1 < 0 && YZ2_2 < 0) {
+		if(discard_empty_cells_ && YZ2_1 < 0 && YZ2_2 < 0) {
 		    continue;
 		}
 		double imposter_radius = ::sqrt(std::max(YZ2_1,YZ2_2));
@@ -448,7 +448,7 @@ namespace GEO {
 		double YZ2_1 = (R2 - tt2 * X2_1) / tt1;
 		double X2_2 = dot(g2-c,axis); X2_2 = X2_2*X2_2;
 		double YZ2_2 = (R2 - tt2 * X2_2) / tt1;
-		if(YZ2_1 < 0 && YZ2_2 < 0) {
+		if(discard_empty_cells_ && YZ2_1 < 0 && YZ2_2 < 0) {
 		    continue;
 		}
 
@@ -525,7 +525,7 @@ namespace GEO {
 		carries_surface = carries_surface || (distance2(c,p[i]) > R2);
 	    }
 
-	    if(!carries_surface) {
+	    if(discard_empty_cells_ && !carries_surface) {
 		continue;
 	    }
 
@@ -564,6 +564,14 @@ namespace GEO {
 
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
+
+	GLSL::set_program_uniform_by_name(
+	    S_program_, "full_imposters", full_imposters_
+	);
+
+	GLSL::set_program_uniform_by_name(
+	    H_program_, "full_imposters", full_imposters_
+	);
 
 	cells_[CELL_TYPE_S0].draw(mode);
 

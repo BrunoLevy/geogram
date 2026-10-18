@@ -81,6 +81,9 @@ namespace {
             R_c = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
+
+        uniform bool full_imposters;
+
         )"
 	);
     }
@@ -120,6 +123,9 @@ namespace {
             float R_c;
             project_sphere(focus_R.xyz, focus_R.w, center_c, R_c);
 
+            if(full_imposters)
+            gl_Position = vec4(offsets[gl_VertexID%6],0.0,1.0);
+            else
             gl_Position = vec4(
                center_c + viewport_scaling()*R_c*offsets[gl_VertexID % 6],
                0.0,
@@ -250,6 +256,24 @@ namespace {
             vec2 H = normalize(UV2-UV1);
             vec2 Hperp = vec2(-H.y,H.x);
 
+            if(full_imposters)
+            switch(gl_VertexID % 6) {
+            case 0:
+            case 3:
+                gl_Position = vec4(-1,-1,0,1);
+                break;
+            case 1:
+                gl_Position = vec4(1,-1,0,1);
+                break;
+            case 2:
+            case 4:
+                gl_Position = vec4(1,1,0,1);
+                break;
+            case 5:
+                gl_Position = vec4(-1,1,0,1);
+                break;
+            }
+            else
             switch(gl_VertexID % 6) {
             case 0:
             case 3:

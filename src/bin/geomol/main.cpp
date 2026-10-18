@@ -116,6 +116,12 @@ namespace {
 	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
 
 	    ImGui::Checkbox("show imps", &molecule_.show_imposters());
+	    ImGui::Checkbox("full imps", &molecule_.full_imposters());
+	    if(
+		ImGui::Checkbox("dic. imps", &molecule_.discard_empty_cells())
+	    ) {
+		molecule_.update();
+	    }
 
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {

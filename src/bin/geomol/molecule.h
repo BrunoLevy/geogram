@@ -121,6 +121,8 @@ namespace GEO {
 
 	bool& use_imposters() { return use_imposters_; }
 	bool& show_imposters() { return show_imposters_; }
+	bool& full_imposters() { return full_imposters_; }
+	bool& discard_empty_cells() { return discard_empty_cells_; }
 
 	/**
 	 * \brief toggle display mixed complex cells by type
@@ -542,6 +544,9 @@ namespace GEO {
 
 	bool use_imposters_ = true;
 	bool show_imposters_ = false;
+	bool full_imposters_ = false; // generate fullscreen quad for each impo
+	bool discard_empty_cells_ = true;
+
 	GLuint S_program_ = 0;
 	GLuint H_program_ = 0;
 	GLuint empty_VAO_ = 0;
