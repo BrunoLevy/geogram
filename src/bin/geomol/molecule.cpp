@@ -368,8 +368,15 @@ namespace GEO {
 
 		cells.begin_H_cell(c, axis, R2, p1, imposter_r, p2, imposter_r);
 
-		// generate the quad facets
+
+		// generate the two polygonal caps
 		index_t h = h0;
+		cells.add_shrunk_power_facet(h, FLIPPED);
+		h = diagram_->halfedge_flip(h);
+		cells.add_shrunk_power_facet(h, FLIPPED);
+
+		// generate the quad facets
+		h = h0;
 		do {
 		    index_t t1 = diagram_->halfedge_t(h);
 		    index_t lf = diagram_->halfedge_lf(h);
@@ -383,10 +390,6 @@ namespace GEO {
 		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
 		} while(h != h0);
 
-		// generate the two polygonal caps
-		cells.add_shrunk_power_facet(h, FLIPPED);
-		h = diagram_->halfedge_flip(h);
-		cells.add_shrunk_power_facet(h, FLIPPED);
 
 		cells.end_cell();
 	    }
@@ -589,16 +592,26 @@ namespace GEO {
 	    H_program_, "full_imposters", full_imposters_
 	);
 
+	bool clip = glupIsEnabled(GLUP_CLIPPING);
+
 	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
+	GLSL::set_program_uniform_by_name(
+	    S_program_, "max_clip_planes", clip ? 1024 : 0
+	);
 	cells_[CELL_TYPE_S0].draw(mode);
 
+	GLSL::set_program_uniform_by_name(
+	    H_program_, "max_clip_planes", clip ? 1024 : 2
+	);
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
 	cells_[CELL_TYPE_H1].draw(mode);
 
+	GLSL::set_program_uniform_by_name(H_program_, "max_clip_planes", 1024);
 	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
 	cells_[CELL_TYPE_H2].draw(mode);
 
-	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", true);
+	GLSL::set_program_uniform_by_name(S_program_, "max_clip_planes", 1024);
+	GLSL::set_program_uniform_by_name(S_program_, "clip_cells", true);
 	cells_[CELL_TYPE_S3].draw(mode);
 
 	glDisable(GL_CULL_FACE);

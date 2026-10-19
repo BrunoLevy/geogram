@@ -11,11 +11,19 @@ namespace {
         uniform isamplerBuffer facet_ptr_TBO;
         uniform samplerBuffer facet_plane_TBO;
         uniform bool show_imposters;
+        uniform int max_clip_planes;
 
         bool in_cell(in vec3 p, in int cell_id) {
+           if(max_clip_planes == 0) {
+              return true;
+           }
+           int c = 0;
            int b = texelFetch(facet_ptr_TBO, cell_id).x;
            int e = texelFetch(facet_ptr_TBO, cell_id+1).x;
-           for(int k=b; k<e; ++k) {
+           for(int k=b; k<e; ++k,++c) {
+              if(c >= max_clip_planes) {
+                 return true;
+              }
               vec4 P = texelFetch(facet_plane_TBO, k);
               if(dot(vec4(p,1.0),P) > 0.0) {
                  return false;

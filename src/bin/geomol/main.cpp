@@ -121,12 +121,6 @@ namespace {
 		    "For debugging shaders: "
 		    "show imposters instead of geometry"
 		);
-		ImGui::Checkbox("full imps", &molecule_.full_imposters());
-		ImGui::SetItemTooltip(
-		    "For debugging shaders: "
-		    "use fullscreen imposters "
-		    "(!! super slow, use at own risk !!)"
-		);
 		if(
 		    ImGui::Checkbox(
 			"skip empty cells", &molecule_.discard_empty_cells()
@@ -138,6 +132,15 @@ namespace {
 		    "For debugging an optimization: "
 		    "early discard empty cells (on by default)"
 		);
+		if(ImGui::TreeNode("Danger zone!!!")) {
+		    ImGui::Checkbox("full imps", &molecule_.full_imposters());
+		    ImGui::SetItemTooltip(
+			"For debugging shaders: "
+			"use fullscreen imposters "
+			"(!! super slow, use at own risk !!)"
+		    );
+		    ImGui::TreePop();
+		}
 		ImGui::TreePop();
 	    }
 
