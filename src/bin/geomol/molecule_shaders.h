@@ -32,6 +32,15 @@ namespace {
            return true;
         }
 
+        bool clipped(in vec3 M) {
+           if(glupIsEnabled(GLUP_CLIPPING)) {
+              if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
+                 return true;
+              }
+           }
+           return false;
+        }
+
         // constant-width edges, using fwidth()
         float voro_edge_factor_adaptive(in float bary) {
            float d = fwidth(bary);
@@ -252,23 +261,14 @@ namespace {
 
            vec3 M = R.O + t*R.V;
 
-           if(!in_cell(M,cell_id)) {
+           if(clipped(M) || !in_cell(M,cell_id)) {
               // Get the other root, still using the high-precision method
               q = b_prime + sqrt_a_delta;
               t = q/a;
               M = R.O + t*R.V;
               sign = sign * -1.0;
-              if(!in_cell(M,cell_id)) {
+              if(clipped(M) || !in_cell(M,cell_id)) {
                   discard;
-              }
-           }
-
-           if(
-              glupIsEnabled(GLUP_CLIPPING) /* &&
-              GLUP.clipping_mode == GLUP_CLIP_STANDARD */
-           ) {
-              if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
-                 discard;
               }
            }
 
@@ -436,22 +436,13 @@ namespace {
             vec3 M = R.O + t * R.V;
             if(t1 > t2) { sign = -1.0; }
 
-            if(!in_cell(M,cell_id)) {
+            if(clipped(M) || !in_cell(M,cell_id)) {
                 t = max(t1,t2);
                 M = R.O + t * R.V;
                 sign = sign * -1.0;
-                if(!in_cell(M,cell_id)) {
+                if(clipped(M) || !in_cell(M,cell_id)) {
                    discard;
                 }
-            }
-
-            if(
-               glupIsEnabled(GLUP_CLIPPING) /* &&
-               GLUP.clipping_mode == GLUP_CLIP_STANDARD */
-            ) {
-               if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
-                  discard;
-               }
             }
 
             glup_update_depth(M);
