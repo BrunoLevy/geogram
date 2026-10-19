@@ -123,7 +123,7 @@ namespace GEO {
 	    atom_type_[v]= atom_type_attr[v];
 	    atom_chain_[v] = index_t(atom_chain_attr[v]);
 	}
-	update();
+	update(true);
 	return true;
     }
 
@@ -136,7 +136,7 @@ namespace GEO {
 	return B;
     }
 
-    void Molecule::update() {
+    void Molecule::update(bool full) {
 	atom_weight_.resize(nb_atoms());
 	atom_pos_.resize(nb_atoms());
 	r_min_ =  Numeric::max_float64();
@@ -149,8 +149,10 @@ namespace GEO {
 	}
 	{
 	    Stopwatch W("delaunay",verbose_);
-	    diagram_ = new PowerDiagram();
-	    diagram_->set_vertices(nb_atoms(), atom_pos_[0].data());
+	    if(full) {
+		diagram_ = new PowerDiagram();
+		diagram_->set_vertices(nb_atoms(), atom_pos_[0].data());
+	    }
 	    diagram_->set_weights(atom_weight_.data());
 	    diagram_->compute();
 	    if(verbose_) {
@@ -261,10 +263,18 @@ namespace GEO {
     }
 
     void Molecule::update_cells() {
-	update_S0_cells();
-	update_H1_cells();
-	update_H2_cells();
-	update_S3_cells();
+        // Clear cell buffers sequentially, because it deallocates OpenGL
+	// buffers, which cannot be done in parallel!
+	for(index_t c=0; c<4; ++c) {
+	    cells_[c].clear();
+	}
+	// For big molecules it may be worth it doing all cell types in parallel.
+	parallel(
+	    [this]{update_S0_cells();},
+	    [this]{update_H1_cells();},
+	    [this]{update_H2_cells();},
+	    [this]{update_S3_cells();}
+	);
     }
 
     void Molecule::update_S0_cells() {
@@ -273,7 +283,6 @@ namespace GEO {
 	//   for each edge incident to the atom in the diagram
 	//      add the polygonal facet obtained by turning around the edge
 	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
-	cells.clear();
 	for(index_t v: atoms()) {
 	    auto incident_edges = diagram_->incident_edges(v);
 	    // skip empty power cell
@@ -333,7 +342,6 @@ namespace GEO {
         //   t1*X^2 + t2*(Y^2+Z^2) + R2 = 0
 
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
-	cells.clear();
 	for(index_t v1: atoms()) {
 	    for(index_t h0: diagram_->incident_edges(v1)) {
 		if(h0 == NO_INDEX) {
@@ -402,7 +410,6 @@ namespace GEO {
 	// Their two triangular and three quadrangular facets are explicitly
 	// constructed.
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
-	cells.clear();
 	for(index_t tet1: diagram_->tets()) {
 	    for(index_t lf1=0; lf1<4; ++lf1) {
 		index_t tet2 = diagram_->tet_adjacent(tet1, lf1);
@@ -495,7 +502,6 @@ namespace GEO {
 	// S3 cells are shrunk tetrahedra.
 	// Their four triangular facets are explicitly constructed.
 	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
-	cells.clear();
 	for(index_t t: diagram_->tets()) {
 
 	    index_t v[4] = {

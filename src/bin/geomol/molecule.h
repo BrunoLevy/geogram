@@ -95,8 +95,10 @@ namespace GEO {
 	/**
 	 * \brief Needs to be called each time the molecule, atom size or
 	 *  shrink factor is changed
+	 * \param[in] full needs to be set if atom positions or atom number
+	 *  changed.
 	 */
-	void update();
+	void update(bool full = false);
 
 	/** \brief one of ATOM_COLORING_CONSTANT, ..._ATOM, ..._CHAIN */
 	AtomColoring& atom_coloring()  { return atom_coloring_; }
