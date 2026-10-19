@@ -115,7 +115,7 @@ namespace {
             SimpleApplication::draw_object_properties();
 	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
 
-	    if(ImGui::TreeNode("debug")) {
+	    if(ImGui::TreeNode("Debug")) {
 		ImGui::Checkbox("show imps", &molecule_.show_imposters());
 		ImGui::SetItemTooltip(
 		    "For debugging shaders: "

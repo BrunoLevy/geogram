@@ -52,10 +52,6 @@
 //  - H2: tighter imposters
 //  - S3: tighter imposters if possible: (shrunk tets, we can probably restrain)
 //
-// Try to obtain tigher cells / tigher imposters
-// using the equation, especially for H2 and H1 cells,
-// but also S3 cells (S0 cells are OK!)
-//
 //   Note: in my notation, I use R2 = |pi-c|^2-wi (used to that in power diag)
 //         rather than the opposite used in the articles
 //   wi = Ri^2/s
