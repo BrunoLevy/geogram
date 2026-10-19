@@ -181,9 +181,8 @@ namespace {
 			"##mesh_color", molecule_.mesh_color().data()
 		    );
 		    ImGui::SameLine();
-		    ImGui::SliderFloat(
-			"##mesh_width", &molecule_.mesh_width(),
-			0.5f, 5.0f, "%.2f"
+		    ImGui::SliderInt(
+			"##mesh_width", &molecule_.mesh_width(), 1, 10
 		    );
 		}
 		ImGui::Text("triangles: %u",molecule_.nb_drawn_triangles());

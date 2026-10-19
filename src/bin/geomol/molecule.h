@@ -112,7 +112,7 @@ namespace GEO {
 
 	bool&         draw_mesh()  { return draw_mesh_; }
 	vec3f&        mesh_color() { return mesh_color_; }
-	float&        mesh_width() { return mesh_width_; }
+	int&          mesh_width() { return mesh_width_; }
 
 	/** \brief draw the molecular skin surface */
 	bool&         draw_mss()       { return draw_mss_; }
@@ -578,7 +578,7 @@ namespace GEO {
 	double atom_size_ = 1.0;
 
 	vec3f mesh_color_ = {0.0f, 0.0f, 0.0f};
-	float mesh_width_ = 1.0;
+	int  mesh_width_ = 1;
 	bool draw_mesh_ = false;
 
 	bool draw_mss_ = false;

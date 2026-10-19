@@ -34,8 +34,19 @@ namespace {
 
         // constant-width edges, using fwidth()
         float voro_edge_factor_adaptive(in float bary) {
-            float d = fwidth(bary);
-            return smoothstep(0.0, d*GLUP.mesh_width, bary);
+           float d = fwidth(bary);
+           // special fix for NVidia boards that do not
+           // evaluate fwidth() well near patch boundaries!
+           if(d == 0.0) {
+              return 0.0;
+           }
+           return smoothstep(0.0, d*GLUP.mesh_width, bary);
+        }
+
+        // replacement version for when voro_edge_factor_adaptive() does
+        // not work well (no longer needed, the fix for NVidia now works)
+        float voro_edge_factor_fixed(in float bary) {
+            return bary < 1.0e-3*GLUP.mesh_width ? 0.0 : 1.0;
         }
 
         // Smoothed minimum using cubic polynomial
@@ -74,7 +85,6 @@ namespace {
            float d = min_dist(cell_id, M);
            return mix(GLUP.mesh_color, color, voro_edge_factor_adaptive(d));
         }
-
         )"
 	);
 

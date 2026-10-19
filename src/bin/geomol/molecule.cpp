@@ -578,7 +578,7 @@ namespace GEO {
 	glEnable(GL_CULL_FACE);
 	if(draw_mesh_) {
 	    glupEnable(GLUP_DRAW_MESH);
-	    glupSetMeshWidth(int(mesh_width_*2.0f));
+	    glupSetMeshWidth(mesh_width_);
 	    glupSetColor4fv(GLUP_MESH_COLOR, mesh_color_.data());
 	}
 
