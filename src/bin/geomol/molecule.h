@@ -279,10 +279,28 @@ namespace GEO {
 
 	    /*************************************************/
 
+	    /**
+	     * \brief Starts creating a sphere cell
+	     * \param[in] center , radius center and radius of the sphere
+	     * \details The imposters is generated from the center and
+	     *  radius of the sphere. Another version of this function,
+	     *  uses the center and radius of the imposter.
+	     */
 	    void begin_S_cell(vec3 center, double radius) {
 		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
 	    }
 
+	    /**
+	     * \brief Starts creating a sphere cell
+	     * \param[in] center , radius center and radius of the sphere
+	     * \param[in] imp_center , imp_radius center and radius of the
+	     *   imposter.
+	     * \details This version of begin_S_cell() takes a different
+	     *   center and radius for the imposter. It is interesting to do
+	     *   so for S3 cells (shrunk tetrahedra), and use a sphere that
+	     *   covers the tetrahedron instead of the actual sphere that
+	     *   can be quite large.
+	     */
 	    void begin_S_cell(
 		vec3 center, double radius,
 		vec3 imp_center, double imp_radius
@@ -293,6 +311,12 @@ namespace GEO {
 		);
 	    }
 
+	    /**
+	     * \brief Starts creating a hyperboloid sphere
+	     * \param[in] center , axis , R2 parameters of the hyperboloid
+	     * \param[in] impos1 , Rimpos1 , impos2 , Rimpos2 a cone imposter
+	     *  that covers the cell
+	     */
 	    void begin_H_cell(
 		vec3 center, vec3 axis, double R2,
 		vec3 impos1, double Rimpos1, vec3 impos2, double Rimpos2
@@ -324,6 +348,14 @@ namespace GEO {
 		cell_facet_plane_.emplace_back(n,-dot(n,p[0]));
 	    }
 
+	    void add_vertex_by_point(vec3f p) {
+		cell_facet_vertex_.push_back(p);
+	    }
+
+	    void add_vertex(mixed_vertex_id V) {
+		add_vertex_by_point(vec3f(molecule_.mixed_vertex(V)));
+	    }
+
 	    // version to be called when store_mesh_ is not set, takes
 	    // clipping planes as argument
 	    void add_facet_plane(vec4 P, bool flipped = false) {
@@ -334,14 +366,6 @@ namespace GEO {
 		}
 		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
 		cell_facet_plane_.push_back(vec4f(P));
-	    }
-
-	    void add_vertex_by_point(vec3f p) {
-		cell_facet_vertex_.push_back(p);
-	    }
-
-	    void add_vertex(mixed_vertex_id V) {
-		add_vertex_by_point(vec3f(molecule_.mixed_vertex(V)));
 	    }
 
 	    /*************************************************/
