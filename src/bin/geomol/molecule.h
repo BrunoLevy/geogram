@@ -57,7 +57,8 @@ namespace GEO {
     public:
 
 	enum AtomColoring {
-	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
+	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM,
+	    ATOM_COLORING_CHAIN, ATOM_COLORING_PATCH
 	};
 
 	enum MixedCellType {
@@ -108,6 +109,10 @@ namespace GEO {
 
 	/** \brief the color for ATOM_COLORING_CONSTANT */
 	vec3f&        constant_color() { return constant_color_; }
+
+	bool&         draw_mesh()  { return draw_mesh_; }
+	vec3f&        mesh_color() { return mesh_color_; }
+	float&        mesh_width() { return mesh_width_; }
 
 	/** \brief draw the molecular skin surface */
 	bool&         draw_mss()       { return draw_mss_; }
@@ -571,6 +576,10 @@ namespace GEO {
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	double atom_size_ = 1.0;
+
+	vec3f mesh_color_ = {0.0f, 0.0f, 0.0f};
+	float mesh_width_ = 1.0;
+	bool draw_mesh_ = false;
 
 	bool draw_mss_ = false;
 	bool raytrace_ = true;

@@ -31,6 +31,50 @@ namespace {
            }
            return true;
         }
+
+        // constant-width edges, using fwidth()
+        float voro_edge_factor_adaptive(in float bary) {
+            float d = fwidth(bary);
+            return smoothstep(0.0, d*GLUP.mesh_width, bary);
+        }
+
+        // Smoothed minimum using cubic polynomial
+        // See https://iquilezles.org/articles/smin/
+        float smin( float a, float b, float k) {
+            k *= 6.0;
+            float h = max( k-abs(a-b), 0.0 )/k;
+            return min( a, b ) - h*h*h*k*(1.0/6.0);
+        }
+
+        // Compute minimum distance to all clipping planes
+        // \param[in] cell_id index of the cell (to fetch clipping planes)
+        // \param[in] M world-space coordinates of intersection point
+        // \return smoothed minimum distance to cell's clipping planes
+        float min_dist(in int cell_id, in vec3 M) {
+           float result = 1e6;
+           int b = texelFetch(facet_ptr_TBO, cell_id).x;
+           int e = texelFetch(facet_ptr_TBO, cell_id+1).x;
+           for(int k=b; k<e; ++k) {
+              vec4 P = texelFetch(facet_plane_TBO, k);
+              float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
+              result = smin(result, this_dist, GLUP.mesh_width/1000.0);
+           }
+           return result;
+        }
+
+        // super-imposes the mesh if GLUP_DRAW_MESH is active
+        // \param[in] color input color (from shaded surface)
+        // \param[in] cell_id index of the cell (to fetch clipping planes)
+        // \param[in] M world-space coordinates of intersection point
+        // \return input color modified by mesh color if near to clip planes
+        vec4 show_mesh(in vec4 color, in int cell_id, in vec3 M) {
+           if(!glupIsEnabled(GLUP_DRAW_MESH)) {
+              return color;
+           }
+           float d = min_dist(cell_id, M);
+           return mix(GLUP.mesh_color, color, voro_edge_factor_adaptive(d));
+        }
+
         )"
 	);
 
@@ -41,12 +85,14 @@ namespace {
            return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
         }
 
-        // correction factor on both axes for non-square windows
+        // Correction factor on both axes for non-square windows
+        // Obtained by computing how a normal vector is transformed
+        // from window space to normalized clip space, that is, by the
+        // *transpose* normalized clip space to window space matrix.
         vec2 viewport_scaling() {
-            return vec2(1.0, 1.0); // to be understood
-              // (GLUP.viewport[3] > GLUP.viewport[2]) ?
-              // vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
-              // vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+            float W = GLUP.viewport[2];
+            float H = GLUP.viewport[3];
+            return vec2(2.0*H/(W+H),2.0*W/(W+H));
         }
 
         // clip-space radius of a circle covering the projection
@@ -222,6 +268,7 @@ namespace {
                vec3 N = sign*normalize(GLUP.normal_matrix*(M-C));
                result = glup_lighting(result, N);
            }
+           result = show_mesh(result, cell_id, M);
            glup_FragColor = result;
 	}
 	)";
@@ -408,6 +455,7 @@ namespace {
                result = glup_lighting(result, N);
             }
 
+            result = show_mesh(result, cell_id, M);
             glup_FragColor = result;
 
         }

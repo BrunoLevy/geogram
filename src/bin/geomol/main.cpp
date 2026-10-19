@@ -151,7 +151,7 @@ namespace {
 	    }
 	    ImGui::Combo(
 		"color", (int*)&molecule_.atom_coloring(),
-		"constant\0atom\0chain\0\0"
+		"constant\0atom\0chain\0patch\0\0"
 	    );
 	    if(molecule_.atom_coloring() == Molecule::ATOM_COLORING_CONSTANT) {
 		ImGui::ColorEdit3WithPalette(
@@ -175,6 +175,17 @@ namespace {
 		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
+		ImGui::Checkbox("mesh",&molecule_.draw_mesh());
+		if(molecule_.draw_mesh()) {
+		    ImGui::ColorEdit3WithPalette(
+			"##mesh_color", molecule_.mesh_color().data()
+		    );
+		    ImGui::SameLine();
+		    ImGui::SliderFloat(
+			"##mesh_width", &molecule_.mesh_width(),
+			0.5f, 5.0f, "%.2f"
+		    );
+		}
 		ImGui::Text("triangles: %u",molecule_.nb_drawn_triangles());
 	    }
         }
