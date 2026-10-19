@@ -35,10 +35,10 @@ namespace {
 
         // correction factor on both axes for non-square windows
         vec2 viewport_scaling() {
-            return
-               (GLUP.viewport[3] > GLUP.viewport[2]) ?
-               vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
-               vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
+            return vec2(1.0, 1.0); // to be understood
+              // (GLUP.viewport[3] > GLUP.viewport[2]) ?
+              // vec2(1.0,GLUP.viewport[2] / GLUP.viewport[3]) :
+              // vec2(GLUP.viewport[3] / GLUP.viewport[2],1.0) ;
         }
 
         // clip-space radius of a circle covering the projection

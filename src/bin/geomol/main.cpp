@@ -115,12 +115,30 @@ namespace {
             SimpleApplication::draw_object_properties();
 	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
 
-	    ImGui::Checkbox("show imps", &molecule_.show_imposters());
-	    ImGui::Checkbox("full imps", &molecule_.full_imposters());
-	    if(
-		ImGui::Checkbox("disc. imps", &molecule_.discard_empty_cells())
-	    ) {
-		molecule_.update();
+	    if(ImGui::TreeNode("debug")) {
+		ImGui::Checkbox("show imps", &molecule_.show_imposters());
+		ImGui::SetItemTooltip(
+		    "For debugging shaders: "
+		    "show imposters instead of geometry"
+		);
+		ImGui::Checkbox("full imps", &molecule_.full_imposters());
+		ImGui::SetItemTooltip(
+		    "For debugging shaders: "
+		    "use fullscreen imposters "
+		    "(!! super slow, use at own risk !!)"
+		);
+		if(
+		    ImGui::Checkbox(
+			"skip empty cells", &molecule_.discard_empty_cells()
+		    )
+		) {
+		    molecule_.update();
+		}
+		ImGui::SetItemTooltip(
+		    "For debugging an optimization: "
+		    "early discard empty cells (on by default)"
+		);
+		ImGui::TreePop();
 	    }
 
 	    float size = float(molecule_.atom_size());
