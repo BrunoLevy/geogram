@@ -47,7 +47,7 @@
 #include <vector>
 #include <typeinfo>
 
-#define GEO_TBO_SUPPORTED
+// #define GEO_TBO_SUPPORTED
 
 namespace GEO {
 
@@ -145,6 +145,8 @@ namespace GEO {
 		glGenTextures(1, &TBO_);
 	    }
 	    glBindTexture(GL_TEXTURE_2D, TBO_);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	    GLsizei width = GLsizei(nb);
 	    GLsizei height = 1;
 	    if(nb > 1024) {

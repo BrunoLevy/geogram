@@ -21,7 +21,7 @@ namespace {
           #define glup_Buffer sampler2D
           #define glup_iBuffer isampler2D
           #define glup_fetch(B,idx) \
-              texelFetch(B,ivec2(idx/textureSize(B,0).x,idx%textureSize(B,0).x),0)
+              texelFetch(B,ivec2(idx%textureSize(B,0).x,idx/textureSize(B,0).x),0)
           )"
         );
 #endif
