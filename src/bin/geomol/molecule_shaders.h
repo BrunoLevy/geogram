@@ -1,4 +1,5 @@
 
+#include "TBO.h"
 #include <geogram_gfx/basic/GLSL.h>
 
 
@@ -6,10 +7,29 @@ namespace {
 
     void register_geomol_shader_utilities() {
 
+#ifdef GEO_TBO_SUPPORTED
+	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
+          R"(
+          #define glup_Buffer samplerBuffer
+          #define glup_iBuffer isamplerBuffer
+          #define glup_fetch(B,idx) texelFetch(B,idx)
+          )"
+        );
+#else
+	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
+          R"(
+          #define glup_Buffer sampler2D
+          #define glup_iBuffer isampler2D
+          #define glup_fetch(B,idx) \
+              texelFetch(B,ivec2(idx/textureSize(B,0).x,idx%textureSize(B,0).x),0)
+          )"
+        );
+#endif
+
 	GEO::GLSL::register_GLSL_include_file("geomol/clipping.h",
         R"(
-        uniform isamplerBuffer facet_ptr_TBO;
-        uniform samplerBuffer facet_plane_TBO;
+        uniform glup_iBuffer facet_ptr_TBO;
+        uniform glup_Buffer facet_plane_TBO;
         uniform bool show_imposters;
         uniform int max_clip_planes;
 
@@ -28,13 +48,13 @@ namespace {
               return true;
            }
            int c = 0;
-           int b = texelFetch(facet_ptr_TBO, cell_id).x;
-           int e = texelFetch(facet_ptr_TBO, cell_id+1).x;
+           int b = glup_fetch(facet_ptr_TBO, cell_id).x;
+           int e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
            for(int k=b; k<e; ++k,++c) {
               if(c >= max_clip_planes) {
                  return true;
               }
-              vec4 P = texelFetch(facet_plane_TBO, k);
+              vec4 P = glup_fetch(facet_plane_TBO, k);
               if(dot(vec4(p,1.0),P) > 0.0) {
                  return false;
               }
@@ -80,10 +100,10 @@ namespace {
         // \return smoothed minimum distance to cell's clipping planes
         float min_dist(in int cell_id, in vec3 M) {
            float result = 1e6;
-           int b = texelFetch(facet_ptr_TBO, cell_id).x;
-           int e = texelFetch(facet_ptr_TBO, cell_id+1).x;
+           int b = glup_fetch(facet_ptr_TBO, cell_id).x;
+           int e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
            for(int k=b; k<e; ++k) {
-              vec4 P = texelFetch(facet_plane_TBO, k);
+              vec4 P = glup_fetch(facet_plane_TBO, k);
               float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
               result = smin(result, this_dist, GLUP.mesh_width/1000.0);
            }
@@ -188,10 +208,11 @@ namespace {
 	//import <GLUP/stdglup.h>
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
+        //import <geomol/buffers.h>
         //import <geomol/imposter.h>
 
-        uniform samplerBuffer cell_eqn_1_TBO;
-        uniform samplerBuffer cell_imposter_1_TBO;
+        uniform glup_Buffer cell_eqn_1_TBO;
+        uniform glup_Buffer cell_imposter_1_TBO;
         uniform bool replace_imposter;
 
         glup_flat glup_out vec4 focus_R;
@@ -208,9 +229,9 @@ namespace {
 
 	void main() {
             cell_id = gl_VertexID / 6;
-            focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
+            focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
             vec4 imp_focus_R = replace_imposter ?
-                               texelFetch(cell_imposter_1_TBO,cell_id) : focus_R;
+                               glup_fetch(cell_imposter_1_TBO,cell_id) : focus_R;
             vec2 center_c;
             float R_c;
             project_sphere(imp_focus_R.xyz, imp_focus_R.w, center_c, R_c);
@@ -236,6 +257,7 @@ namespace {
         //import <GLUP/current_profile/primitive.h>
         //import <GLUP/fragment_shader_utils.h>
         //import <GLUP/fragment_ray_tracing.h>
+        //import <geomol/buffers.h>
         //import <geomol/clipping.h>
 
         glup_flat glup_in vec4 focus_R;
@@ -309,12 +331,13 @@ namespace {
 	//import <GLUP/stdglup.h>
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
+        //import <geomol/buffers.h>
         //import <geomol/imposter.h>
 
-        uniform samplerBuffer cell_eqn_1_TBO;
-        uniform samplerBuffer cell_eqn_2_TBO;
-        uniform samplerBuffer cell_imposter_1_TBO;
-        uniform samplerBuffer cell_imposter_2_TBO;
+        uniform glup_Buffer cell_eqn_1_TBO;
+        uniform glup_Buffer cell_eqn_2_TBO;
+        uniform glup_Buffer cell_imposter_1_TBO;
+        uniform glup_Buffer cell_imposter_2_TBO;
 
         glup_flat glup_out vec3  C;  // focus
         glup_flat glup_out vec3  n;  // axis
@@ -323,13 +346,13 @@ namespace {
 
 	void main() {
             cell_id = gl_VertexID / 6;
-            vec4 focus_R = texelFetch(cell_eqn_1_TBO,cell_id);
+            vec4 focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
             C = focus_R.xyz;
             R2 = focus_R.w;
-            n = texelFetch(cell_eqn_2_TBO,cell_id).xyz;
+            n = glup_fetch(cell_eqn_2_TBO,cell_id).xyz;
 
-            vec4 imp1 = texelFetch(cell_imposter_1_TBO,cell_id);
-            vec4 imp2 = texelFetch(cell_imposter_2_TBO,cell_id);
+            vec4 imp1 = glup_fetch(cell_imposter_1_TBO,cell_id);
+            vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
 
             vec2 scaling = viewport_scaling();
             vec2 UV1; float R1_c;
@@ -388,6 +411,7 @@ namespace {
         //import <GLUP/current_profile/primitive.h>
         //import <GLUP/fragment_shader_utils.h>
         //import <GLUP/fragment_ray_tracing.h>
+        //import <geomol/buffers.h>
         //import <geomol/clipping.h>
 
         uniform vec2 cAxisPerp;

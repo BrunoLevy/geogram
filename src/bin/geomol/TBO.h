@@ -47,6 +47,8 @@
 #include <vector>
 #include <typeinfo>
 
+#define GEO_TBO_SUPPORTED
+
 namespace GEO {
 
     /**
@@ -99,12 +101,8 @@ namespace GEO {
 	    reset();
 	}
 
-	GLuint VBO() const {
-	    return VBO_;
-	}
-
-	GLuint TBO() const {
-	    return TBO_;
+	bool initialized() const {
+	    return TBO_ != 0;
 	}
 
 	void reset() {
@@ -116,6 +114,10 @@ namespace GEO {
 		glDeleteBuffers(1,&VBO_);
 		VBO_ = 0;
 	    }
+#ifndef GEO_TBO_SUPPORTED
+	    width_ = 0;
+	    height_ = 0;
+#endif
 	}
 
 	// Note: there should be an active texture unit when calling this
@@ -123,6 +125,7 @@ namespace GEO {
 	template <class T> void create_or_update(
 	    index_t nb, const T* data
 	) {
+#ifdef GEO_TBO_SUPPORTED
 	    if(max_TBO_size_ == 0) {
 		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
 	    }
@@ -135,8 +138,67 @@ namespace GEO {
 	    if(TBO_ == 0) {
 		glGenTextures(1, &TBO_);
 		glBindTexture(GL_TEXTURE_BUFFER, TBO_);
-		glTexBuffer(GL_TEXTURE_BUFFER, format(T()), VBO_);
+		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
 	    }
+#else
+	    if(TBO_ == 0) {
+		glGenTextures(1, &TBO_);
+	    }
+	    glBindTexture(GL_TEXTURE_2D, TBO_);
+	    GLsizei width = GLsizei(nb);
+	    GLsizei height = 1;
+	    if(nb > 1024) {
+		width = GLsizei(::sqrt(nb));
+		height = GLsizei(nb) / width;
+		while(width*height < GLsizei(nb)) {
+		    ++height;
+		}
+	    }
+	    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	    if(width_ != width || height_ != height) {
+		glTexImage2D(
+		    GL_TEXTURE_2D,
+		    0, // level
+		    GLint(internal_format(T())),
+		    width, height,
+		    0, // border
+		    format(T()), type(T()),
+		    nullptr
+		);
+		width_ = width;
+		height_ = height;
+	    }
+	    if(GLsizei(nb) == width*height) {
+		glTexSubImage2D(
+		    GL_TEXTURE_2D,
+		    0,    // level
+		    0, 0, // xoffset, yoffset
+		    width, height,
+		    format(T()), type(T()),
+		    data
+		);
+	    } else {
+		// If texture's last row is slightly larger than input
+		// data, avoid reading past the end of data by transfering
+		// the (partial) last row:
+		glTexSubImage2D(
+		    GL_TEXTURE_2D,
+		    0,                      // level
+		    0, 0,                   // xoffset, yoffset
+		    width, height-1,        // width, height
+		    format(T()), type(T()),
+		    data
+		);
+		glTexSubImage2D(
+		    GL_TEXTURE_2D,
+		    0,                        // level
+		    0, height-1,              // xoffset, yoffset
+		    (GLsizei(nb) % width), 1, // width, height
+		    format(T()), type(T()),
+		    data + (height-1)*width
+		);
+	    }
+#endif
 	}
 
 
@@ -149,27 +211,58 @@ namespace GEO {
 	}
 
 	void bind(GLuint texture_unit) {
+#ifdef GEO_TBO_SUPPORTED
 	    geo_debug_assert(VBO_ != 0 && TBO_ != 0);
 	    glActiveTexture(texture_unit);
 	    glBindTexture(GL_TEXTURE_BUFFER, TBO_);
+#else
+	    geo_debug_assert(TBO_ != 0);
+	    glActiveTexture(texture_unit);
+	    glBindTexture(GL_TEXTURE_2D, TBO_);
+#endif
 	}
 
     protected:
 	// Just to map geogram types to OpenGL storage
-	static GLuint format(uint32_t) { return GL_R32UI;   }
-	static GLuint format(int32_t)  { return GL_R32I;    }
-	static GLuint format(vec2i)    { return GL_RG32I;   }
-	static GLuint format(vec3i)    { return GL_RGB32I;  }
-	static GLuint format(vec4i)    { return GL_RGBA32I; }
-	static GLuint format(float)    { return GL_R32F;    }
-	static GLuint format(vec2f)    { return GL_RG32F;   }
-	static GLuint format(vec3f)    { return GL_RGB32F;  }
-	static GLuint format(vec4f)    { return GL_RGBA32F; }
+	static GLuint internal_format(uint32_t) { return GL_R32UI;   }
+	static GLuint internal_format(int32_t)  { return GL_R32I;    }
+	static GLuint internal_format(vec2i)    { return GL_RG32I;   }
+	static GLuint internal_format(vec3i)    { return GL_RGB32I;  }
+	static GLuint internal_format(vec4i)    { return GL_RGBA32I; }
+	static GLuint internal_format(float)    { return GL_R32F;    }
+	static GLuint internal_format(vec2f)    { return GL_RG32F;   }
+	static GLuint internal_format(vec3f)    { return GL_RGB32F;  }
+	static GLuint internal_format(vec4f)    { return GL_RGBA32F; }
+
+	static GLuint format(uint32_t) { return GL_RED_INTEGER;  }
+	static GLuint format(int32_t)  { return GL_RED_INTEGER;  }
+	static GLuint format(vec2i)    { return GL_RG_INTEGER;   }
+	static GLuint format(vec3i)    { return GL_RGB_INTEGER;  }
+	static GLuint format(vec4i)    { return GL_RGBA_INTEGER; }
+	static GLuint format(float)    { return GL_RED;          }
+	static GLuint format(vec2f)    { return GL_RG;           }
+	static GLuint format(vec3f)    { return GL_RGB;          }
+	static GLuint format(vec4f)    { return GL_RGBA;         }
+
+	static GLuint type(uint32_t)   { return GL_UNSIGNED_INT; }
+	static GLuint type(int32_t)    { return GL_INT;          }
+	static GLuint type(vec2i)      { return GL_INT;          }
+	static GLuint type(vec3i)      { return GL_INT;          }
+	static GLuint type(vec4i)      { return GL_INT;          }
+	static GLuint type(float)      { return GL_FLOAT;        }
+	static GLuint type(vec2f)      { return GL_FLOAT;        }
+	static GLuint type(vec3f)      { return GL_FLOAT;        }
+	static GLuint type(vec4f)      { return GL_FLOAT;        }
+
 
     private:
 	GLuint VBO_;
 	GLuint TBO_;
 	static GLint max_TBO_size_; // in texels.
+#ifndef GEO_TBO_SUPPORTED
+	GLsizei width_ = 0;
+	GLsizei height_ = 0;
+#endif
     };
 }
 

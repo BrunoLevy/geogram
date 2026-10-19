@@ -500,7 +500,7 @@ namespace GEO {
 	    ) {
 		GLenum unit = GLenum(GL_TEXTURE0 + texture_unit);
 		glActiveTexture(unit);
-		if(tbo.TBO() == 0) {
+		if(!tbo.initialized()) {
 		    tbo.create_or_update(V);
 		}
 		tbo.bind(unit);
