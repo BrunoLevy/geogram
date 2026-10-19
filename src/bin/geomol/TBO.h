@@ -47,7 +47,7 @@
 #include <vector>
 #include <typeinfo>
 
-// #define GEO_TBO_SUPPORTED
+#define GEO_TBO_SUPPORTED
 
 namespace GEO {
 
