@@ -211,13 +211,6 @@ namespace GEO {
 
 	/***********************************************************************/
 
-	/**
-	 * \brief Draws the atoms as spheres.
-	 */
-	void draw_atoms() const;
-
-	/***********************************************************************/
-
 	double atom_radius(index_t v) const {
 	    return atom_size_*atom_radius_from_type(atom_type_[v]);
 	}

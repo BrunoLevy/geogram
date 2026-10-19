@@ -209,8 +209,9 @@ namespace {
                 );
                 ImGui::Separator();
                 ImGui::Text(
-                    "  Molecular Skin Surface by Matthieu Chavent\n"
-                    "\n"
+                    "Molecular Skin Surface\n"
+		    "Initial version by Matthieu Chavent\n"
+                    "Optimizations by Bruno Levy\n"
                 );
                 ImGui::Separator();
                 ImGui::Text("\n");

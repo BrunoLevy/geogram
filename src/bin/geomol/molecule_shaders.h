@@ -13,6 +13,16 @@ namespace {
         uniform bool show_imposters;
         uniform int max_clip_planes;
 
+        // \brief Tests whether a point is inside a cell of the mixed complex
+        // \details max_clip_planes (a uniform) determines the maximum number
+        //   of tested clipping planes. For optimization purposes, clipping
+        //   can be complitely deactivated for S0 cells, and limited to the
+        //   first two clipping planes for H1 cells.
+        // \param[in] p the world-space coordinates of the point
+        // \param[in] cell_id the index of the cell to be displayed (typically
+        //   gl_vertexID divided by number of vertices per imposter)
+        // \retval true if the point is inside the convex cell
+        // \retval false otherwise
         bool in_cell(in vec3 p, in int cell_id) {
            if(max_clip_planes == 0) {
               return true;
@@ -32,6 +42,10 @@ namespace {
            return true;
         }
 
+        // \brief Tests whether a point is clipped-out by the user clipping plane
+        // \param[in] M world-space coordinates of the point
+        // \retval true if clipping is active and the point is clipped-out
+        // \retval false otherwise
         bool clipped(in vec3 M) {
            if(glupIsEnabled(GLUP_CLIPPING)) {
               if(dot(vec4(M,1.0),GLUP.world_clip_plane) < 0.0) {
@@ -52,12 +66,6 @@ namespace {
            return smoothstep(0.0, d*GLUP.mesh_width, bary);
         }
 
-        // replacement version for when voro_edge_factor_adaptive() does
-        // not work well (no longer needed, the fix for NVidia now works)
-        float voro_edge_factor_fixed(in float bary) {
-            return bary < 1.0e-3*GLUP.mesh_width ? 0.0 : 1.0;
-        }
-
         // Smoothed minimum using cubic polynomial
         // See https://iquilezles.org/articles/smin/
         float smin( float a, float b, float k) {
@@ -76,6 +84,11 @@ namespace {
            int e = texelFetch(facet_ptr_TBO, cell_id+1).x;
            for(int k=b; k<e; ++k) {
               vec4 P = texelFetch(facet_plane_TBO, k);
+              float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
+              result = smin(result, this_dist, GLUP.mesh_width/1000.0);
+           }
+           if(glupIsEnabled(GLUP_CLIPPING)) {
+              vec4 P = GLUP.world_clip_plane;
               float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
               result = smin(result, this_dist, GLUP.mesh_width/1000.0);
            }

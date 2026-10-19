@@ -571,11 +571,6 @@ namespace GEO {
     void Molecule::draw() {
 	create_shaders_if_needed();
 
-	if(!draw_mss_) {
-	    draw_atoms();
-	    return;
-	}
-
 	// All the rest of this function is for drawing
 	// the molecular skin surface
 	nb_triangles_ = 0;
@@ -604,6 +599,7 @@ namespace GEO {
 	);
 
 	bool clip=glupIsEnabled(GLUP_CLIPPING) || glupIsEnabled(GLUP_DRAW_MESH);
+	clip = clip && draw_mss_;
 
 	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
 	GLSL::set_program_uniform_by_name(
@@ -611,19 +607,21 @@ namespace GEO {
 	);
 	cells_[CELL_TYPE_S0].draw(mode);
 
-	GLSL::set_program_uniform_by_name(
-	    H_program_, "max_clip_planes", clip ? 1024 : 2
-	);
-	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
-	cells_[CELL_TYPE_H1].draw(mode);
+	if(draw_mss_) {
+	    GLSL::set_program_uniform_by_name(
+		H_program_, "max_clip_planes", clip ? 1024 : 2
+	    );
+	    GLSL::set_program_uniform_by_name(H_program_,"cAxisPerp", t1, t2);
+	    cells_[CELL_TYPE_H1].draw(mode);
 
-	GLSL::set_program_uniform_by_name(H_program_, "max_clip_planes", 1024);
-	GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
-	cells_[CELL_TYPE_H2].draw(mode);
+	    GLSL::set_program_uniform_by_name(H_program_,"max_clip_planes",1024);
+	    GLSL::set_program_uniform_by_name(H_program_,"cAxisPerp", t2, t1);
+	    cells_[CELL_TYPE_H2].draw(mode);
 
-	GLSL::set_program_uniform_by_name(S_program_, "max_clip_planes", 1024);
-	GLSL::set_program_uniform_by_name(S_program_, "clip_cells", true);
-	cells_[CELL_TYPE_S3].draw(mode);
+	    GLSL::set_program_uniform_by_name(S_program_,"max_clip_planes",1024);
+	    GLSL::set_program_uniform_by_name(S_program_,"clip_cells", true);
+	    cells_[CELL_TYPE_S3].draw(mode);
+	}
 
 	glDisable(GL_CULL_FACE);
 	glupDisable(GLUP_DRAW_MESH);
@@ -650,26 +648,6 @@ namespace GEO {
 	if(empty_VAO_ == 0) {
 	    glGenVertexArrays(1, &empty_VAO_);
 	}
-    }
-
-    void Molecule::draw_atoms() const {
-	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos();
-	GLSL::set_program_uniform_by_name(S_program_, "facet_ptr_TBO", 0);
-	GLSL::set_program_uniform_by_name(S_program_, "facet_plane_TBO", 0);
-	GLSL::set_program_uniform_by_name(
-	    S_program_, "show_imposters", show_imposters_
-	);
-	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
-	glupUpdateUniformState();
-	glUseProgram(S_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
     }
 
     /************************************************************************/
