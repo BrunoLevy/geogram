@@ -732,7 +732,7 @@ namespace GEO {
         GLint GEOGRAM_GFX_API get_uniform_variable_offset(
             GLuint program, const char* varname
         ) {
-#ifndef GEO_GL_150
+#ifndef GEO_GL_140
             geo_argused(program);
             geo_argused(varname);
             return -1;
@@ -759,7 +759,7 @@ namespace GEO {
         size_t get_uniform_variable_array_stride(
             GLuint program, const char* varname
         ) {
-#ifndef GEO_GL_150
+#ifndef GEO_GL_140
             geo_argused(program);
             geo_argused(varname);
             return size_t(-1);
@@ -840,7 +840,7 @@ namespace GEO {
                 }
             }
 
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
             {
                 GLint active_uniform_blocks;
                 glGetProgramiv(

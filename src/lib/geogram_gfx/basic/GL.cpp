@@ -731,9 +731,7 @@ namespace GEO {
             GL_TEXTURE_2D, 0,
             GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba
         );
-#ifndef __EMSCRIPTEN__
         glGenerateMipmap(GL_TEXTURE_2D);
-#endif
         free(rgba);
     }
 

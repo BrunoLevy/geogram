@@ -496,7 +496,7 @@ namespace GEO {
                 return false ;
             }
             glUseProgram(shader_id);
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
             glUniform1ui(location, val) ;
 #else
             glUniform1i(location, GLint(val)) ;

@@ -373,34 +373,34 @@ namespace {
                 switch(gl_VertexID % 6) {
                 case 0:
                 case 3:
-                    gl_Position = vec4(-1,-1,0,1);
+                    gl_Position = vec4(-1.0,-1.0,0.0,1.0);
                     break;
                 case 1:
-                    gl_Position = vec4(1,-1,0,1);
+                    gl_Position = vec4(1.0,-1.0,0.0,1.0);
                     break;
                 case 2:
                 case 4:
-                    gl_Position = vec4(1,1,0,1);
+                    gl_Position = vec4(1.0,1.0,0.0,1.0);
                     break;
                 case 5:
-                    gl_Position = vec4(-1,1,0,1);
+                    gl_Position = vec4(-1.0,1.0,0.0,1.0);
                     break;
                 }
             } else {
                 switch(gl_VertexID % 6) {
                 case 0:
                 case 3:
-                    gl_Position = vec4(UV1 + qsize*scaling*(-H -Hperp),0,1);
+                    gl_Position = vec4(UV1 + qsize*scaling*(-H -Hperp),0.0,1.0);
                     break;
                 case 1:
-                    gl_Position = vec4(UV2 + qsize*scaling*( H -Hperp),0,1);
+                    gl_Position = vec4(UV2 + qsize*scaling*( H -Hperp),0.0,1.0);
                     break;
                 case 2:
                 case 4:
-                    gl_Position = vec4(UV2 + qsize*scaling*( H +Hperp),0,1);
+                    gl_Position = vec4(UV2 + qsize*scaling*( H +Hperp),0.0,1.0);
                     break;
                 case 5:
-                    gl_Position = vec4(UV1 + qsize*scaling*(-H +Hperp),0,1);
+                    gl_Position = vec4(UV1 + qsize*scaling*(-H +Hperp),0.0,1.0);
                     break;
                 };
             }
@@ -473,7 +473,7 @@ namespace {
             float sq = sqrt(delta);
             float t1 = (-b - sq) / (2.0*a);
             float t2 = (-b + sq) / (2.0*a);
-            float sign = 1;
+            float sign = 1.0;
             float t = min(t1,t2);
             vec3 M = R.O + t * R.V;
             if(t1 > t2) { sign = -1.0; }
@@ -500,7 +500,6 @@ namespace {
 
             result = show_mesh(result, cell_id, M);
             glup_FragColor = result;
-
         }
 	)";
 }

@@ -1193,7 +1193,7 @@ namespace GLUP {
      );
 
      GEO::GLSL::register_GLSL_include_file("GLUPGLSL/state.h",
-        "layout(shared) \n"
+        "layout(std140) \n"
         "    uniform GLUPStateBlock { \n"
         " \n"
         "    bool vertex_colors_enabled; \n"
@@ -1252,10 +1252,13 @@ namespace GLUP {
         "// 1D textures are not supported by all OpenGL implementations \n"
         "uniform sampler2D       texture1Dsampler; \n"
         "uniform sampler2D       texture2Dsampler; \n"
-        "uniform sampler3D       texture3Dsampler; \n"
         " \n"
-        "#define GLUP_PRIMITIVE_FILTER \n"
-        "uniform usamplerBuffer  texturePrimitiveFiltersampler; \n"
+        "#ifndef GLUP_NO_TEXTURE_3D \n"
+        "uniform sampler3D       texture3Dsampler; \n"
+        "#endif \n"
+        " \n"
+        "//#define GLUP_PRIMITIVE_FILTER \n"
+        "//uniform usamplerBuffer  texturePrimitiveFiltersampler; \n"
      );
 
      GEO::GLSL::register_GLSL_include_file("GLUPGLSL/points_vertex_shader.h",

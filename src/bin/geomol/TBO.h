@@ -69,7 +69,7 @@ namespace GEO {
      *  to some data stored in a Vertex Buffer Object.
      *  The Texture Buffer Object is manipulated through an OpenGL texture ID,
      *  returned by TBO(), that can be bound to a texture unit and accessed
-     *  through texelFetch() or itexelTetch() in shaders.
+     *  through texelFetch() in shaders.
      *  The TextureBufferObject class manages a Vertex Buffer Object / Texture
      *  Buffer Object pair.
      *

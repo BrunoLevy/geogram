@@ -131,10 +131,11 @@ namespace GLUP {
     /******************* pseudo-files ******************************/
 
     static void OES_extensions(std::vector<GLSL::Source>& sources) {
+	geo_argused(sources);
         // To be checked: seems that these functionalities are
         // standard with OpenGL ES 3.0 and greater (which we
         // imply because we use here in/out instead of attribute)
-#ifndef GEO_OS_ANDROID
+#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
         sources.push_back(
             "#ifdef GL_ES\n"
             "  #extension GL_OES_texture_3D : enable \n"
@@ -157,6 +158,15 @@ namespace GLUP {
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #elif defined(GEO_OS_APPLE)
         sources.push_back("#version 150\n");
+#elif defined(GEO_OS_EMSCRIPTEN)
+        sources.push_back("#version 300 es\n");
+        sources.push_back("precision highp float;\n");
+        sources.push_back("precision highp int;\n");
+	sources.push_back("precision highp sampler2D;\n");
+	sources.push_back("precision highp isampler2D;\n");
+	sources.push_back("precision highp usampler2D;\n");
+        sources.push_back("precision highp sampler3D;\n");
+        sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #else
         sources.push_back("#version 150 core\n");
 #endif
@@ -175,15 +185,26 @@ namespace GLUP {
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #elif defined(GEO_OS_APPLE)
         sources.push_back("#version 150\n");
+#elif defined(GEO_OS_EMSCRIPTEN)
+        sources.push_back("#version 300 es\n");
+        sources.push_back("precision highp float;\n");
+        sources.push_back("precision highp int;\n");
+	sources.push_back("precision highp sampler2D;\n");
+	sources.push_back("precision highp isampler2D;\n");
+	sources.push_back("precision highp usampler2D;\n");
+	sources.push_back("precision highp sampler3D;\n");
+        sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #else
         sources.push_back("#version 150 core\n");
 #endif
 
         sources.push_back(
             "#define GLUP_FRAGMENT_SHADER\n"
+#ifndef GEO_OS_EMSCRIPTEN
             "#ifndef GL_ES\n"
             "#extension GL_ARB_conservative_depth : enable\n"
             "#endif\n"
+#endif
         );
 
         OES_extensions(sources);

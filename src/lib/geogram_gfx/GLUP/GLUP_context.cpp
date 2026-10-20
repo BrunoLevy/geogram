@@ -561,7 +561,7 @@ namespace GLUP {
             primitive_info_[prim].VAO == 0;
     }
 
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
     /**
      * \brief Creates a GLSL vertex program that uses all the variables
      *  of the uniform state.
@@ -625,8 +625,7 @@ namespace GLUP {
         matrices_dirty_=true;
         uniform_binding_point_=1;
 
-#ifdef GEO_GL_150
-
+#ifdef GEO_GL_140
         // A minimalistic GLSL program that uses the GLUP context.
         // It is there just to use GLSL introspection API to lookup
         // the offsets of GLUP context state variables.
@@ -638,12 +637,17 @@ namespace GLUP {
         //  create_vertex_program_that_uses_all_UBO_variables()
 
         static const char* shader_source_header_ =
-#ifdef GEO_OS_ANDROID
+#if defined(GEO_OS_ANDROID)
             "#version 300 es\n"
             "precision highp float;\n"
             "precision lowp sampler3D;\n" ;
+#elif defined(GEO_OS_EMSCRIPTEN)
+	    "#version 300 es\n"
+	    "precision highp float;\n"
+	    "precision highp int;\n"
+	    "precision highp sampler3D;\n" ;
 #else
-        "#version 150 core\n" ;
+            "#version 150 core\n" ;
 #endif
 
         static const char* fragment_shader_source_ =
@@ -651,6 +655,8 @@ namespace GLUP {
             "void main() {                           \n"
             "   colorOut = vec4(1.0, 1.0, 1.0, 1.0); \n"
             "}                                       \n";
+
+	Logger::out("GLUP140") << "Compile vert shader" << std::endl;
 
         GLuint GLUP_vertex_shader = GLSL::compile_shader(
             GL_VERTEX_SHADER,
@@ -660,6 +666,8 @@ namespace GLUP {
             nullptr
         );
 
+	Logger::out("GLUP140") << "Compile frag shader" << std::endl;
+
         GLuint GLUP_fragment_shader = GLSL::compile_shader(
             GL_FRAGMENT_SHADER,
             shader_source_header_,
@@ -667,16 +675,22 @@ namespace GLUP {
             nullptr
         );
 
+	Logger::out("GLUP140") << "Create prog" << std::endl;
+
         default_program_ = GLSL::create_program_from_shaders(
             GLUP_vertex_shader,
             GLUP_fragment_shader,
             nullptr
         );
 
+	Logger::out("GLUP140") << "Get UBO" << std::endl;
+
         // Get UBO size
 
         GLuint UBO_index =
             glGetUniformBlockIndex(default_program_, "GLUPStateBlock");
+
+	Logger::out("GLUP140") << "UBO_index=" << UBO_index << std::endl;
 
         glUniformBlockBinding(
             default_program_, UBO_index, uniform_binding_point_
@@ -689,6 +703,8 @@ namespace GLUP {
         );
 
         // Create UBO
+
+	Logger::out("GLUP140") << "Create UBO" << std::endl;
 
         uniform_buffer_data_ = new Memory::byte[size_t(uniform_buffer_size_)];
         Memory::clear(uniform_buffer_data_, size_t(uniform_buffer_size_));
@@ -708,14 +724,24 @@ namespace GLUP {
         );
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-#endif
+#endif // GEO_GL_140
+
+	Logger::out("GLUP140") << "Setup state vars" << std::endl;
 
         setup_state_variables();
+
+	Logger::out("GLUP140") << "Setup imm buffers" << std::endl;
+
         setup_immediate_buffers();
+
+	Logger::out("GLUP140") << "Setup toggles" << std::endl;
 
         //  Indicate that all toggle states should be
         // read from the state (default mode, superseded later).
         setup_shaders_source_for_toggles(0,~0);
+
+	Logger::out("GLUP140") << "Setup primitives" << std::endl;
+
         setup_primitives();
     }
 
@@ -895,11 +921,12 @@ namespace GLUP {
         GLint offset = GLSL::get_uniform_variable_offset(
             default_program_, name.c_str()
         );
+	Logger::out("GLUP") << name_in << "-> offset=" << offset << std::endl;
         return uniform_buffer_data_ + offset;
     }
 
     void Context::bind_uniform_state(GLuint program) {
-#ifndef GEO_GL_150
+#ifndef GEO_GL_140
         geo_argused(program);
 #else
         GLuint UBO_index = glGetUniformBlockIndex(
@@ -1320,7 +1347,7 @@ namespace GLUP {
     }
 
     void Context::update_base_picking_id(GLint new_value) {
-#ifndef GEO_GL_150
+#ifndef GEO_GL_140
         geo_argused(new_value);
 #else
         Memory::pointer address = uniform_state_.base_picking_id.address();
@@ -1329,7 +1356,7 @@ namespace GLUP {
         glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_);
         glBufferSubData(
             GL_UNIFORM_BUFFER,
-            offset,
+            GLintptr(offset),
             sizeof(int),
             address
         );
@@ -1347,7 +1374,7 @@ namespace GLUP {
         if(lighting_dirty_) {
             update_lighting();
         }
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
 #ifdef GL_CLIP_DISTANCE0
         if(!use_ES_profile_) {
             if(uniform_state_.toggle[GLUP_CLIPPING].get()) {

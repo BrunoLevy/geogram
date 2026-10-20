@@ -317,7 +317,7 @@ namespace GEO {
     //    alpha U^2 + beta (V^2+W^2) + R2 = 0
     // The radius along the U axis is given by (when it exists):
     //    r^2(U) = - (alpha U^2 + R2) / beta
-    std::pair<double,double> Hcell_radius(
+    inline std::pair<double,double> Hcell_radius(
 	double alpha, double beta, double R2,
 	double u1, double u2
     ) {
@@ -399,12 +399,12 @@ namespace GEO {
 		// generate the quad facets
 		h = h0;
 		do {
-		    index_t t1 = diagram_->halfedge_t(h);
+		    index_t tt1 = diagram_->halfedge_t(h);
 		    index_t lf = diagram_->halfedge_lf(h);
-		    index_t t2 = diagram_->tet_adjacent(t1,lf);
+		    index_t tt2 = diagram_->tet_adjacent(tt1,lf);
 		    if(
-			diagram_->tet_is_finite(t1) ||
-			diagram_->tet_is_finite(t2)
+			diagram_->tet_is_finite(tt1) ||
+			diagram_->tet_is_finite(tt2)
 		    ) {
 			cells.add_quad_facet(h);
 		    }
@@ -585,6 +585,16 @@ namespace GEO {
 	if(nb_atoms() == 0) {
 	    return;
 	}
+
+	/*
+	glupBegin(GLUP_SPHERES);
+	for(index_t i=0; i<nb_atoms(); ++i) {
+	    glupVertex(vec4(atom_pos_[i], atom_radius(i)));
+	}
+	glupEnd();
+	return;
+	*/
+
 	create_shaders_if_needed();
 
 	// All the rest of this function is for drawing
@@ -650,16 +660,19 @@ namespace GEO {
 	    first_time=false;
 	}
 	if(S_program_ == 0) {
+	    Logger::out("geomol") << "Compiling S program" << std::endl;
 	    S_program_ = glupCompileProgram(spheres_source);
 	    cells_[CELL_TYPE_S0].set_program(S_program_);
 	    cells_[CELL_TYPE_S3].set_program(S_program_);
 	}
 	if(H_program_ == 0) {
+	    Logger::out("geomol") << "Compiling H program" << std::endl;
 	    H_program_ = glupCompileProgram(hyperboloids_source);
 	    cells_[CELL_TYPE_H1].set_program(H_program_);
 	    cells_[CELL_TYPE_H2].set_program(H_program_);
 	}
 	if(empty_VAO_ == 0) {
+	    Logger::out("geomol") << "Creating empty VAO" << std::endl;
 	    glGenVertexArrays(1, &empty_VAO_);
 	}
     }

@@ -1,4 +1,4 @@
-layout(shared)
+layout(std140)
     uniform GLUPStateBlock {
 
     bool vertex_colors_enabled;
@@ -57,7 +57,10 @@ layout(shared)
 // 1D textures are not supported by all OpenGL implementations
 uniform sampler2D       texture1Dsampler;
 uniform sampler2D       texture2Dsampler;
-uniform sampler3D       texture3Dsampler;
 
-#define GLUP_PRIMITIVE_FILTER
-uniform usamplerBuffer  texturePrimitiveFiltersampler;
+#ifndef GLUP_NO_TEXTURE_3D
+uniform sampler3D       texture3Dsampler;
+#endif
+
+//#define GLUP_PRIMITIVE_FILTER
+//uniform usamplerBuffer  texturePrimitiveFiltersampler;
