@@ -1999,7 +1999,7 @@ void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
         }
 
     } else {
-#ifdef GEO_OS_EMSCRIPTEN
+#ifdef GEO_OS_EMSCRIPTEN_XXX // [HERE]
         glGenVertexArraysOES(n, arrays);
 #else
         if(!glGenVertexArrays) {

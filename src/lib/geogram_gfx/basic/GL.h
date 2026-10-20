@@ -52,9 +52,9 @@
 #  define GLFW_INCLUDE_ES2
 #  include <GLFW/glfw3.h>
 #  define GL_GLEXT_PROTOTYPES
-// #  include <GLES2/gl2ext.h>
+// #  include <GLES2/gl2ext.h> // [HERE]
 #  include <GLES3/gl3.h>
-#  define GL_INVALID_INDEX GLuint(-1)
+// #  define GL_INVALID_INDEX GLuint(-1) // [HERE]
 typedef double GLdouble;
 #  define glGenVertexArrays glGenVertexArraysOES
 #  define glBindVertexArray glBindVertexArrayOES
