@@ -59,7 +59,7 @@ namespace GEO {
 	    if(max_texture_size_ == 0) {
 		GEO::Logger::out("TBO") << "Emulating TBO with texture"
 					<< std::endl;
-		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_texture_size_);
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);
 		GEO::Logger::out("TBO") << "Max texture size: "
 					<< max_texture_size_
 					<< " pixels" << std::endl;
