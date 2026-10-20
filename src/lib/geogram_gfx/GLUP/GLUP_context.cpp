@@ -656,8 +656,6 @@ namespace GLUP {
             "   colorOut = vec4(1.0, 1.0, 1.0, 1.0); \n"
             "}                                       \n";
 
-	Logger::out("GLUP140") << "Compile vert shader" << std::endl;
-
         GLuint GLUP_vertex_shader = GLSL::compile_shader(
             GL_VERTEX_SHADER,
             shader_source_header_,
@@ -666,8 +664,6 @@ namespace GLUP {
             nullptr
         );
 
-	Logger::out("GLUP140") << "Compile frag shader" << std::endl;
-
         GLuint GLUP_fragment_shader = GLSL::compile_shader(
             GL_FRAGMENT_SHADER,
             shader_source_header_,
@@ -675,22 +671,16 @@ namespace GLUP {
             nullptr
         );
 
-	Logger::out("GLUP140") << "Create prog" << std::endl;
-
         default_program_ = GLSL::create_program_from_shaders(
             GLUP_vertex_shader,
             GLUP_fragment_shader,
             nullptr
         );
 
-	Logger::out("GLUP140") << "Get UBO" << std::endl;
-
         // Get UBO size
 
         GLuint UBO_index =
             glGetUniformBlockIndex(default_program_, "GLUPStateBlock");
-
-	Logger::out("GLUP140") << "UBO_index=" << UBO_index << std::endl;
 
         glUniformBlockBinding(
             default_program_, UBO_index, uniform_binding_point_
@@ -703,8 +693,6 @@ namespace GLUP {
         );
 
         // Create UBO
-
-	Logger::out("GLUP140") << "Create UBO" << std::endl;
 
         uniform_buffer_data_ = new Memory::byte[size_t(uniform_buffer_size_)];
         Memory::clear(uniform_buffer_data_, size_t(uniform_buffer_size_));
@@ -726,22 +714,11 @@ namespace GLUP {
 
 #endif // GEO_GL_140
 
-	Logger::out("GLUP140") << "Setup state vars" << std::endl;
-
         setup_state_variables();
-
-	Logger::out("GLUP140") << "Setup imm buffers" << std::endl;
-
         setup_immediate_buffers();
-
-	Logger::out("GLUP140") << "Setup toggles" << std::endl;
-
         //  Indicate that all toggle states should be
         // read from the state (default mode, superseded later).
         setup_shaders_source_for_toggles(0,~0);
-
-	Logger::out("GLUP140") << "Setup primitives" << std::endl;
-
         setup_primitives();
     }
 
