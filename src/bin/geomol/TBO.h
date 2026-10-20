@@ -44,6 +44,7 @@
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
 #include <geogram/basic/memory.h>
+#include <geogram/basic/logger.h>
 #include <vector>
 #include <typeinfo>
 
@@ -122,10 +123,9 @@ namespace GEO {
 
 	// Note: there should be an active texture unit when calling this
 	// function the 1st time.
-	template <class T> void create_or_update(
-	    index_t nb, const T* data
-	) {
+	template <class T> void create_or_update(index_t nb, const T* data) {
 #ifdef GEO_TBO_SUPPORTED
+	    GEO::Logger::out("TBO") << "Using true TBO" << std::endl;
 	    if(max_TBO_size_ == 0) {
 		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
 	    }
@@ -141,6 +141,7 @@ namespace GEO {
 		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
 	    }
 #else
+	    GEO::Logger::out("TBO") << "Emulating TBO with texture" << std::endl;
 	    if(TBO_ == 0) {
 		glGenTextures(1, &TBO_);
 	    }
@@ -202,7 +203,6 @@ namespace GEO {
 	    }
 #endif
 	}
-
 
 	template <class T> void create_or_update(const std::vector<T>& v) {
 	    create_or_update(index_t(v.size()), v.data());
