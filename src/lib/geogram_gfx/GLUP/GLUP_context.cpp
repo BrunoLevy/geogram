@@ -898,7 +898,6 @@ namespace GLUP {
         GLint offset = GLSL::get_uniform_variable_offset(
             default_program_, name.c_str()
         );
-	Logger::out("GLUP") << name_in << "-> offset=" << offset << std::endl;
         return uniform_buffer_data_ + offset;
     }
 
