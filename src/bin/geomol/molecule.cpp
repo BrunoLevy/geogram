@@ -89,6 +89,19 @@ namespace GEO {
 	cells_[CELL_TYPE_H1].set_color({1.0, 1.0, 0.0});
 	cells_[CELL_TYPE_H2].set_color({1.0, 0.0, 1.0});
 	cells_[CELL_TYPE_S3].set_color({1.0, 0.0, 0.0});
+
+	atom_pos_.push_back({0.0, 0.0, 0.0});
+	atom_pos_.push_back({1.0, 0.0, 0.0});
+	atom_pos_.push_back({0.0, 1.0, 0.0});
+	atom_pos_.push_back({0.0, 0.0, 1.0});
+	atom_pos_.push_back({0.0, 1.0, 1.0});
+	atom_pos_.push_back({1.0, 0.0, 1.0});
+	atom_pos_.push_back({1.0, 1.0, 0.0});
+	atom_pos_.push_back({1.0, 1.0, 1.0});
+	nb_atoms_ = atom_pos_.size();
+	atom_type_.assign(nb_atoms_,'C');
+	atom_chain_.assign(nb_atoms_,0);
+	update(true);
     }
 
     Molecule::~Molecule() {

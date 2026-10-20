@@ -50,7 +50,7 @@ namespace {
     class GeoMolApplication : public SimpleApplication {
     public:
         GeoMolApplication() : SimpleApplication("GeoMol") {
-            set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
+            set_region_of_interest(-1.0, -1.0, -1.0, 2.0, 2.0, 2.0);
 	    lighting_ = false;
 	    effect_ = 1;
 	    full_screen_effect_ = new AmbientOcclusionImpl();
