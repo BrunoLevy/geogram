@@ -52,13 +52,15 @@
 #  define GLFW_INCLUDE_ES2
 #  include <GLFW/glfw3.h>
 #  define GL_GLEXT_PROTOTYPES
-#  include <GLES2/gl2ext.h>
+// #  include <GLES2/gl2ext.h>
+#  include <GLES3/gl3.h>
 #  define GL_INVALID_INDEX GLuint(-1)
 typedef double GLdouble;
 #  define glGenVertexArrays glGenVertexArraysOES
 #  define glBindVertexArray glBindVertexArrayOES
 #  define glDeleteVertexArrays glDeleteVertexArraysOES
 #  define GEO_GL_ES2
+#  define GEO_GL_140
 #  define GEO_GL_NO_DOUBLES
 #elif defined(GEO_OS_ANDROID)
 #  include <GLES3/gl3.h>
