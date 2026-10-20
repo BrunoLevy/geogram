@@ -75,6 +75,9 @@ namespace GEO {
 	 */
 	bool load(const std::string& filename);
 
+
+	void initialize_demo();
+
 	/**
 	 * \brief Gets the number of atoms in this molecule
 	 */

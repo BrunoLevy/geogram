@@ -569,6 +569,9 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::draw() {
+	if(nb_atoms() == 0) {
+	    return;
+	}
 	create_shaders_if_needed();
 
 	// All the rest of this function is for drawing
