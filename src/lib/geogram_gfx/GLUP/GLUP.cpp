@@ -2018,7 +2018,7 @@ void glupDeleteVertexArrays(GLUPsizei n, const GLUPuint *arrays) {
             GLUP::VAO_allocator.delete_VAO(arrays[i]);
         }
     } else {
-#if defined(GEO_OS_EMSCRIPTEN)
+#if defined(GEO_OS_EMSCRIPTEN_XXX) // [HERE]
         glDeleteVertexArraysOES(n, arrays);
 #else
         if(!glDeleteVertexArrays) {
@@ -2047,7 +2047,7 @@ void glupBindVertexArray(GLUPuint array) {
             }
         }
     } else {
-#if defined(GEO_OS_EMSCRIPTEN)
+#if defined(GEO_OS_EMSCRIPTEN_XXX) // [HERE]
         glBindVertexArrayOES(array);
 #else
         if(!glBindVertexArray) {
