@@ -48,7 +48,11 @@
 #include <vector>
 #include <typeinfo>
 
-// #define GEO_TBO_SUPPORTED
+//#define GEO_TBO_SUPPORTED
+
+#if defined(GEO_TBO_SUPPORTED) && defined(GEO_OS_EMSCRIPTEN)
+#undef GEO_TBO_SUPPORTED
+#endif
 
 namespace GEO {
 
@@ -95,7 +99,7 @@ namespace GEO {
      */
     class TextureBufferObject {
     public:
-        TextureBufferObject() : VBO_(0), TBO_(0) {
+        TextureBufferObject() {
 	}
 
 	~TextureBufferObject() {
@@ -124,11 +128,8 @@ namespace GEO {
 	// Note: there should be an active texture unit when calling this
 	// function the 1st time.
 	template <class T> void create_or_update(index_t nb, const T* data) {
+	    initialize(); // gets max TBO size or max texture size
 #ifdef GEO_TBO_SUPPORTED
-	    GEO::Logger::out("TBO") << "Using true TBO" << std::endl;
-	    if(max_TBO_size_ == 0) {
-		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
-	    }
 	    geo_assert(GLint(nb) < max_TBO_size_);
 	    update_or_check_buffer_object(
 		VBO_, GL_ARRAY_BUFFER,
@@ -141,7 +142,6 @@ namespace GEO {
 		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
 	    }
 #else
-	    GEO::Logger::out("TBO") << "Emulating TBO with texture" << std::endl;
 	    if(TBO_ == 0) {
 		glGenTextures(1, &TBO_);
 	    }
@@ -263,8 +263,8 @@ namespace GEO {
 
 
     private:
-	GLuint TBO_;
-	GLuint VBO_;
+	GLuint TBO_ = 0;
+	GLuint VBO_ = 0;
 #ifdef GEO_TBO_SUPPORTED
 	static GLint max_TBO_size_; // in texels.
 #else

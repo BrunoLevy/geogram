@@ -40,9 +40,30 @@
 #include "TBO.h"
 
 namespace GEO {
+
+#ifdef GEO_TBO_SUPPORTED
     GLint TextureBufferObject::max_TBO_size_ = 0;
+#else
     GLint TextureBufferObject::max_texture_size_ = 0;
+#endif
 
     void TextureBufferObject::initialize() {
+#ifdef GEO_TBO_SUPPORTED
+	    if(max_TBO_size_ == 0) {
+		GEO::Logger::out("TBO") << "Using true TBO" << std::endl;
+		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
+		GEO::Logger::out("TBO") << "Max TBO size: " << max_TBO_size_
+					<< " pixels" << std::endl;
+	    }
+#else
+	    if(max_texture_size_ == 0) {
+		GEO::Logger::out("TBO") << "Emulating TBO with texture"
+					<< std::endl;
+		glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_texture_size_);
+		GEO::Logger::out("TBO") << "Max texture size: "
+					<< max_texture_size_
+					<< " pixels" << std::endl;
+	    }
+#endif
     }
 }
