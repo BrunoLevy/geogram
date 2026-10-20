@@ -583,9 +583,7 @@ namespace GEO {
 	    glupSetColor4fv(GLUP_MESH_COLOR, mesh_color_.data());
 	}
 
-	MixedComplexCells::DrawMode mode =
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-        	      : MixedComplexCells::DRAW_MODE_CELLS;
+	MixedComplexCells::DrawMode mode = MixedComplexCells::DRAW_MODE_MSS;
 
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);

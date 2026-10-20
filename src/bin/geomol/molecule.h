@@ -119,14 +119,9 @@ namespace GEO {
 	/** \brief draw the molecular skin surface */
 	bool&         draw_mss()       { return draw_mss_; }
 
-	/** \brief molecular skin surface or draw complex if not set */
-	bool&         raytrace()       { return raytrace_; }
-
 	/** \brief displays some statistics when updaring */
 	bool&         verbose()        { return verbose_; }
 
-
-	bool& use_imposters() { return use_imposters_; }
 	bool& show_imposters() { return show_imposters_; }
 	bool& full_imposters() { return full_imposters_; }
 	bool& discard_empty_cells() { return discard_empty_cells_; }
@@ -577,10 +572,8 @@ namespace GEO {
 	bool draw_mesh_ = false;
 
 	bool draw_mss_ = false;
-	bool raytrace_ = true;
 	bool verbose_ = false;
 
-	bool use_imposters_ = true;
 	bool show_imposters_ = false;
 	bool full_imposters_ = false; // generate fullscreen quad for each impo
 	bool discard_empty_cells_ = true;

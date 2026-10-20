@@ -10,25 +10,30 @@ namespace {
 #ifdef GEO_TBO_SUPPORTED
 	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
           R"(
-          #define glup_Buffer samplerBuffer
+          #define glup_Buffer  samplerBuffer
           #define glup_iBuffer isamplerBuffer
-          #define glup_fetch(B,idx) texelFetch(B,idx)
+          #define glup_uBuffer usamplerBuffer
+          #define glup_fetch(B,idx) texelFetch(B,int(idx))
           )"
         );
 #else
 	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
           R"(
-          #define glup_Buffer sampler2D
+          #define glup_Buffer  sampler2D
           #define glup_iBuffer isampler2D
+          #define glup_uBuffer usampler2D
           #define glup_fetch(B,idx) \
-              texelFetch(B,ivec2(idx%textureSize(B,0).x,idx/textureSize(B,0).x),0)
+             texelFetch(B,ivec2( \
+                int(idx)%textureSize(B,0).x, \
+                int(idx)/textureSize(B,0).x  \
+             ),0)
           )"
         );
 #endif
 
 	GEO::GLSL::register_GLSL_include_file("geomol/clipping.h",
         R"(
-        uniform glup_iBuffer facet_ptr_TBO;
+        uniform glup_uBuffer facet_ptr_TBO;
         uniform glup_Buffer facet_plane_TBO;
         uniform bool show_imposters;
         uniform int max_clip_planes;
@@ -48,9 +53,9 @@ namespace {
               return true;
            }
            int c = 0;
-           int b = glup_fetch(facet_ptr_TBO, cell_id).x;
-           int e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
-           for(int k=b; k<e; ++k,++c) {
+           uint b = glup_fetch(facet_ptr_TBO, cell_id).x;
+           uint e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
+           for(uint k=b; k<e; ++k,++c) {
               if(c >= max_clip_planes) {
                  return true;
               }
@@ -100,9 +105,9 @@ namespace {
         // \return smoothed minimum distance to cell's clipping planes
         float min_dist(in int cell_id, in vec3 M) {
            float result = 1e6;
-           int b = glup_fetch(facet_ptr_TBO, cell_id).x;
-           int e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
-           for(int k=b; k<e; ++k) {
+           uint b = glup_fetch(facet_ptr_TBO, cell_id).x;
+           uint e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
+           for(uint k=b; k<e; ++k) {
               vec4 P = glup_fetch(facet_plane_TBO, k);
               float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
               result = smin(result, this_dist, GLUP.mesh_width/1000.0);

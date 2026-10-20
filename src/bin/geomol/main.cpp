@@ -165,10 +165,6 @@ namespace {
 		    molecule_.shrink_factor() = double(sf);
 		    molecule_.update();
 		}
-		ImGui::Checkbox("raytrace", &molecule_.raytrace());
-		if(molecule_.raytrace()) {
-		    ImGui::Checkbox("imposters", &molecule_.use_imposters());
-		}
 		ImGui::Checkbox("0-patches", &molecule_.visible(0));
 		ImGui::Checkbox("1-patches", &molecule_.visible(1));
 		ImGui::Checkbox("2-patches", &molecule_.visible(2));
