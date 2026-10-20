@@ -56,9 +56,9 @@
 #  include <GLES3/gl3.h>
 // #  define GL_INVALID_INDEX GLuint(-1) // [HERE]
 typedef double GLdouble;
-#  define glGenVertexArrays glGenVertexArraysOES
-#  define glBindVertexArray glBindVertexArrayOES
-#  define glDeleteVertexArrays glDeleteVertexArraysOES
+// #  define glGenVertexArrays glGenVertexArraysOES // [HERE]
+// #  define glBindVertexArray glBindVertexArrayOES // [HERE]
+// #  define glDeleteVertexArrays glDeleteVertexArraysOES // [HERE]
 #  define GEO_GL_ES2
 #  define GEO_GL_140
 #  define GEO_GL_NO_DOUBLES
