@@ -50,8 +50,11 @@
 
 //#define GEO_TBO_SUPPORTED
 
-#if defined(GEO_TBO_SUPPORTED) && defined(GEO_OS_EMSCRIPTEN)
-#undef GEO_TBO_SUPPORTED
+#ifdef GEO_OS_EMSCRIPTEN
+#include <GLES3/gl3.h>
+   #ifdef GEO_TBO_SUPPORTED
+   #undef GEO_TBO_SUPPORTED
+   #endif
 #endif
 
 namespace GEO {
