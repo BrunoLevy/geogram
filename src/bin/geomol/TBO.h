@@ -225,6 +225,11 @@ namespace GEO {
 	}
 
     protected:
+	/**
+	 * \brief Queries max tbo size and max texture size
+	 */
+	static void initialize();
+
 	// Just to map geogram types to OpenGL storage
 	static GLuint internal_format(uint32_t) { return GL_R32UI;   }
 	static GLuint internal_format(int32_t)  { return GL_R32I;    }
@@ -258,10 +263,12 @@ namespace GEO {
 
 
     private:
-	GLuint VBO_;
 	GLuint TBO_;
+	GLuint VBO_;
+#ifdef GEO_TBO_SUPPORTED
 	static GLint max_TBO_size_; // in texels.
-#ifndef GEO_TBO_SUPPORTED
+#else
+	static GLint max_texture_size_; // in texels.
 	GLsizei width_ = 0;
 	GLsizei height_ = 0;
 #endif

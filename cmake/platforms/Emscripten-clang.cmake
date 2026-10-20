@@ -80,7 +80,7 @@ add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-argumen
 add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
 
 # Disable automatic generation of FMAs (would break exact
-# predicates). 
+# predicates).
 add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
 add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
@@ -103,7 +103,7 @@ endif()
 #       the name in EXPORTED_FUNCTIONS).
 set(EM_COMMON_FLAGS
   -sUSE_GLFW=3
-# -sUSE_WEBGL2=1 -DGEO_WEBGL2
+  -sUSE_WEBGL2=1 -DGEO_WEBGL2
   -sTOTAL_MEMORY=268435456
   -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
   -sEXPORTED_RUNTIME_METHODS='["ccall"]'

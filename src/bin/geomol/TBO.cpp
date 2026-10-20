@@ -41,4 +41,8 @@
 
 namespace GEO {
     GLint TextureBufferObject::max_TBO_size_ = 0;
+    GLint TextureBufferObject::max_texture_size_ = 0;
+
+    void TextureBufferObject::initialize() {
+    }
 }
