@@ -229,7 +229,7 @@ namespace GEO {
         //1.30              3.0
         //1.40              3.1
         //1.50              3.2
-        //3.30              3.3
+        //3.30              3.3 <- synchronized numerotation here and after
         //4.00              4.0
         //4.10              4.1
         //4.20              4.2

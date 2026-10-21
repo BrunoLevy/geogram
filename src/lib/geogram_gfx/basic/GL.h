@@ -47,13 +47,12 @@
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/api/defs.h>
 
-
 #if defined(GEO_OS_EMSCRIPTEN)
 #  define GLFW_INCLUDE_ES2
 #  include <GLFW/glfw3.h>
 #  define GL_GLEXT_PROTOTYPES
 #  include <GLES3/gl3.h>
-typedef double GLdouble;
+   typedef double GLdouble;
 #  define GEO_GL_ES2
 #  define GEO_GL_140
 #  define GEO_GL_NO_DOUBLES
