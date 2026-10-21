@@ -909,9 +909,7 @@ namespace GLUP {
             program, "GLUPStateBlock"
         );
         if(UBO_index != GL_INVALID_INDEX) {
-            glUniformBlockBinding(
-                program, UBO_index, uniform_binding_point_
-            );
+            glUniformBlockBinding(program, UBO_index, uniform_binding_point_);
         }
 #endif
     }

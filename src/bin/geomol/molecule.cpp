@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/debug_stream.h>
+#include <geogram/basic/geometry_nd.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
 
@@ -422,6 +423,15 @@ namespace GEO {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
 	// Their two triangular and three quadrangular facets are explicitly
 	// constructed.
+	//
+        //   H2 cells equation:
+        //   ------------------
+        // 	 c = radical_point(i,j,k)
+        //       R2 = |pi - c|^2 - wi
+        //          = |pj - c|^2 - wj
+        //          = |pk - c|^2 - wi
+        //   t2*X^2 + t1*(Y^2+Z^2) + R2 = 0
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
 	for(index_t tet1: diagram_->tets()) {
 	    for(index_t lf1=0; lf1<4; ++lf1) {
@@ -514,6 +524,13 @@ namespace GEO {
     void Molecule::update_S3_cells() {
 	// S3 cells are shrunk tetrahedra.
 	// Their four triangular facets are explicitly constructed.
+        //   S3 cells equation:
+        //   ------------------
+        //      c  = radical_point(i,j,k,l)
+        //      R2 = (|pi - c|^2 - wi)*(1-s)
+        //         = ...
+        //         = (|pl - c|^2 - wl)*(1-s)
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
 	for(index_t t: diagram_->tets()) {
 
@@ -559,9 +576,31 @@ namespace GEO {
 		continue;
 	    }
 
+	    // Center of imposter
+	    vec3 imp_c = 0.25*(p[0]+p[1]+p[2]+p[3]);
+
+	    // If tet is completely outside sphere then tet is solid
+	    carries_surface = false;
+	    for(index_t lf=0; lf<4; ++lf) {
+		vec3 p1 = p[diagram_->tet_facet_lv(lf,0)];
+		vec3 p2 = p[diagram_->tet_facet_lv(lf,1)];
+		vec3 p3 = p[diagram_->tet_facet_lv(lf,2)];
+		double d2 = Geom::point_triangle_squared_distance(
+		    imp_c, p1, p2, p3
+		);
+		if(d2 < R2) {
+		    carries_surface = true;
+		    break;
+		}
+	    }
+
+	    if(discard_empty_cells_ && !carries_surface) {
+		continue;
+	    }
+
 	    double R = ::sqrt(R2);
 
-	    vec3 imp_c = 0.25*(p[0]+p[1]+p[2]+p[3]);
+	    // radius of imposter
 	    double imp_R2 = 0.0;
 	    for(index_t i=0; i<4; ++i) {
 		imp_R2 = std::max(imp_R2, length2(p[i]-imp_c));
@@ -585,15 +624,6 @@ namespace GEO {
 	if(nb_atoms() == 0) {
 	    return;
 	}
-
-	/*
-	glupBegin(GLUP_SPHERES);
-	for(index_t i=0; i<nb_atoms(); ++i) {
-	    glupVertex(vec4(atom_pos_[i], atom_radius(i)));
-	}
-	glupEnd();
-	return;
-	*/
 
 	create_shaders_if_needed();
 
@@ -642,6 +672,9 @@ namespace GEO {
 	    GLSL::set_program_uniform_by_name(H_program_,"cAxisPerp", t2, t1);
 	    cells_[CELL_TYPE_H2].draw(mode);
 
+	    GLSL::set_program_uniform_by_name(
+		S_program_, "replace_imposter", true
+	    );
 	    GLSL::set_program_uniform_by_name(S_program_,"max_clip_planes",1024);
 	    GLSL::set_program_uniform_by_name(S_program_,"clip_cells", true);
 	    cells_[CELL_TYPE_S3].draw(mode);
