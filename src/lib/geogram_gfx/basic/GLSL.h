@@ -52,6 +52,23 @@ namespace GEO {
 
     namespace GLSL {
 
+
+	/**
+	 * \brief Removes all trailing nullptr entries in
+	 *  a vector of strings
+	 * \param[in,out] v the vector of strings to be stripped
+	 */
+	inline void strip_trailing_null_entries(std::vector<const char*>& v) {
+	    auto last = std::find_if(
+		v.rbegin(), v.rend(),
+		[](const char* p) { return p != nullptr; }
+	    );
+	    v.erase(last.base(), v.end());
+	    for(auto p: v) {
+		geo_assert(p != nullptr);
+	    }
+	}
+
         /**
          * \brief Initializes some GLSL functions and objects.
          * \details Called by GEO::Graphics::initialize()
@@ -256,8 +273,7 @@ namespace GEO {
          * \brief Compiles a program from shader sources.
          * \param[in] provider a pointer to an object that implements
 	 *   the PseudoFileProvider interface (typically a GLUP Context)
-         * \param[in] shader1 , shader2 , shader3 , shader4 , shader5 ,
-	 *  shader6 up to six shader sources definition.
+         * \param[in] shaders list of shader sources definition.
 	 *  Each shader source definition should begin
          *  with //stage STAGE where STAGE is one of GL_VERTEX_SHADER,
 	 *  GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESSELLATION_SHADER,
@@ -267,11 +283,29 @@ namespace GEO {
          */
         GLuint GEOGRAM_GFX_API compile_program_with_includes_no_link(
             PseudoFileProvider* provider,
-            const char* shader1, const char* shader2 = nullptr,
-	    const char* shader3 = nullptr, const char* shader4 = nullptr,
-	    const char* shader5 = nullptr, const char* shader6 = nullptr
+	    const std::vector<const char*>& shaders
         );
 
+        /**
+         * \brief Compiles a program from shader sources.
+         * \param[in] provider a pointer to an object that implements
+	 *   the PseudoFileProvider interface (typically a GLUP Context)
+         * \param[in] shaders list of shader sources definition.
+	 *  Each shader source definition should begin
+         *  with //stage STAGE where STAGE is one of GL_VERTEX_SHADER,
+	 *  GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESSELLATION_SHADER,
+	 *  GL_TESS_EVALUATION_SHADER
+         * \return the OpenGL opaque Id of the created program object
+         * \throw GLSLCompileError if the shaders could not be compiled
+         */
+	template <typename... Args> inline
+	GLuint compile_program_with_includes_no_link(
+	    PseudoFileProvider* provider, Args... shaders
+	) {
+	    std::vector<const char*> shaders_vec { shaders... };
+	    strip_trailing_null_entries(shaders_vec);
+	    return compile_program_with_includes_no_link(provider, shaders_vec);
+	}
 
         /************************************************************/
 
@@ -298,6 +332,7 @@ namespace GEO {
             GLenum target, const char** sources, index_t nb_sources
         );
 
+
         /**
          * \brief Compiles a shader for a specific target.
          * \details One can split the source of the shader into
@@ -311,39 +346,43 @@ namespace GEO {
          *  (one of GL_COMPUTE_SHADER,
          *   GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER,
          *   GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER)
-         * \param[in] source1 , source2 , ... ASCII strings that will be
-         *  concatened to form the source of the shader. It needs to be
-         *  terminated by 0.
+         * \param[in] sources a vector of pointers to ASCII strings
+         *   that contain the source of the shader
+         * \return the OpenGL opaque Id of the created shader object
+         * \throw GLSLCompileError if the shader could not be compiled
+         */
+        GLuint GEOGRAM_GFX_API compile_shader(
+            GLenum target, const std::vector<const char*>& sources
+        );
+
+
+        /**
+         * \brief Compiles a shader for a specific target.
+         * \details One can split the source of the shader into
+         *  different strings, one of them being used for library
+         *  functions common to different shaders.
+         *  It may seem more natural to generate a shader object with library
+         *  functions, but OpenGL documentation does not recommend
+         *  to do so (and it did not seem to work). Errors are detected and
+         *  displayed to std::err.
+         * \param[in] target the OpenGL shader target
+         *  (one of GL_COMPUTE_SHADER,
+         *   GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER,
+         *   GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER)
+         * \param[in] args ASCII strings that will be
+         *  concatened to form the source of the shader.
          * \return the OpenGL opaque Id of the created shader object
          * \throw GLSLCompileError if the shader could not be compiled
          * \note Could have been implemented using varargs, but I had
          *  problems with it (crashes that I could not fix), and it is
          *  not recommended anyway (does not have typechecking).
          */
-        GLuint GEOGRAM_GFX_API compile_shader(
-            GLenum target,
-            const char* source1,
-            const char* source2,
-            const char* source3 = nullptr,
-            const char* source4 = nullptr,
-            const char* source5 = nullptr,
-            const char* source6 = nullptr,
-            const char* source7 = nullptr,
-            const char* source8 = nullptr,
-            const char* source9 = nullptr,
-            const char* source10 = nullptr,
-            const char* source11 = nullptr,
-            const char* source12 = nullptr,
-            const char* source13 = nullptr,
-            const char* source14 = nullptr,
-            const char* source15 = nullptr,
-            const char* source16 = nullptr,
-            const char* source17 = nullptr,
-            const char* source18 = nullptr,
-            const char* source19 = nullptr,
-            const char* source20 = nullptr
-        );
-
+	template <typename... Args> inline
+	GLuint compile_shader(GLenum target, Args... args) {
+	    std::vector<const char*> args_vec { args... };
+	    strip_trailing_null_entries(args_vec);
+	    return compile_shader(target, args_vec);
+	}
 
         /**
          * \brief Links a program.

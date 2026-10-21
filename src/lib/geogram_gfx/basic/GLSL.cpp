@@ -425,91 +425,15 @@ namespace GEO {
             return s_handle;
         }
 
-        GLuint compile_shader(
-            GLenum target,
-            const char* source1,
-            const char* source2,
-            const char* source3,
-            const char* source4,
-            const char* source5,
-            const char* source6,
-            const char* source7,
-            const char* source8,
-            const char* source9,
-            const char* source10,
-            const char* source11,
-            const char* source12,
-            const char* source13,
-            const char* source14,
-            const char* source15,
-            const char* source16,
-            const char* source17,
-            const char* source18,
-            const char* source19,
-            const char* source20
-        ) {
-            vector<const char*> sources;
-            geo_assert(source1 != nullptr);
-            if(source1 != nullptr) {
-                sources.push_back(source1);
-            }
-            if(source2 != nullptr) {
-                sources.push_back(source2);
-            }
-            if(source3 != nullptr) {
-                sources.push_back(source3);
-            }
-            if(source4 != nullptr) {
-                sources.push_back(source4);
-            }
-            if(source5 != nullptr) {
-                sources.push_back(source5);
-            }
-            if(source6 != nullptr) {
-                sources.push_back(source6);
-            }
-            if(source7 != nullptr) {
-                sources.push_back(source7);
-            }
-            if(source8 != nullptr) {
-                sources.push_back(source8);
-            }
-            if(source9 != nullptr) {
-                sources.push_back(source9);
-            }
-            if(source10 != nullptr) {
-                sources.push_back(source10);
-            }
-            if(source11 != nullptr) {
-                sources.push_back(source11);
-            }
-            if(source12 != nullptr) {
-                sources.push_back(source12);
-            }
-            if(source13 != nullptr) {
-                sources.push_back(source13);
-            }
-            if(source14 != nullptr) {
-                sources.push_back(source14);
-            }
-            if(source15 != nullptr) {
-                sources.push_back(source15);
-            }
-            if(source16 != nullptr) {
-                sources.push_back(source16);
-            }
-            if(source17 != nullptr) {
-                sources.push_back(source17);
-            }
-            if(source18 != nullptr) {
-                sources.push_back(source18);
-            }
-            if(source19 != nullptr) {
-                sources.push_back(source19);
-            }
-            if(source20 != nullptr) {
-                sources.push_back(source20);
-            }
+	GLuint compile_shader(
+	    GLenum target, const std::vector<const char*>& sources
+	) {
+	    const char** psources = const_cast<const char**>(&sources[0]);
+	    index_t nsources = index_t(sources.size());
+
+	    for(index_t i=0; i<nsources; ++i) {
+		geo_assert(sources[i] != nullptr);
+	    }
 
             if(CmdLine::get_arg_bool("dbg:gfx")) {
                 std::ofstream out("last_shader.glsl");
@@ -521,14 +445,10 @@ namespace GEO {
                 Logger::out("GLSL") << "===== Shader source ===="
                                     << std::endl;
 
-                dump_program_source_with_line_numbers(
-                    &sources[0], sources.size()
-                );
+                dump_program_source_with_line_numbers(psources, nsources);
             }
-
-            return compile_shader(target, &sources[0], sources.size());
-        }
-
+            return compile_shader(target, psources, nsources);
+	}
 
         void link_program(GLuint program) {
             link_program_and_check_status(program);
@@ -1112,7 +1032,8 @@ namespace GEO {
                 }
 
                 std::ofstream out(filename.c_str());
-                Logger::out("GLSLdbg") << "Saving shader " << filename << std::endl;
+                Logger::out("GLSLdbg") << "Saving shader "
+				       << filename << std::endl;
                 for(index_t i=0; i<sources_texts.size(); ++i) {
                     out << sources_texts[i];
                 }
@@ -1126,36 +1047,9 @@ namespace GEO {
 
         GLuint compile_program_with_includes_no_link(
             PseudoFileProvider* provider,
-            const char* shader1, const char* shader2, const char* shader3,
-            const char* shader4, const char* shader5, const char* shader6
+	    const std::vector<const char*>& sources
         ) {
-            std::vector<const char*> sources;
-
             GLuint program = glCreateProgram();
-
-            if(shader1 != nullptr) {
-                sources.push_back(shader1);
-            }
-
-            if(shader2 != nullptr) {
-                sources.push_back(shader2);
-            }
-
-            if(shader3 != nullptr) {
-                sources.push_back(shader3);
-            }
-
-            if(shader4 != nullptr) {
-                sources.push_back(shader4);
-            }
-
-            if(shader5 != nullptr) {
-                sources.push_back(shader5);
-            }
-
-            if(shader6 != nullptr) {
-                sources.push_back(shader6);
-            }
 
             for(size_t i=0; i<sources.size(); ++i) {
                 const char* p1 = strstr(sources[i], "//stage ");
