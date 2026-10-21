@@ -91,17 +91,27 @@ namespace GEO {
 	cells_[CELL_TYPE_H2].set_color({1.0, 0.0, 1.0});
 	cells_[CELL_TYPE_S3].set_color({1.0, 0.0, 0.0});
 
-	atom_pos_.push_back({0.0, 0.0, 0.0});
-	atom_pos_.push_back({1.0, 0.0, 0.0});
-	atom_pos_.push_back({0.0, 1.0, 0.0});
-	atom_pos_.push_back({0.0, 0.0, 1.0});
-	atom_pos_.push_back({0.0, 1.0, 1.0});
-	atom_pos_.push_back({1.0, 0.0, 1.0});
-	atom_pos_.push_back({1.0, 1.0, 0.0});
-	atom_pos_.push_back({1.0, 1.0, 1.0});
+	// Create an interesting shape to have something to see
+	// when no command line argument is specified.
+	atom_pos_.push_back({ 0.0,  0.0,  0.0});
+	atom_pos_.push_back({ 1.0,  0.0,  0.0});
+	atom_pos_.push_back({ 0.0,  1.0,  0.0});
+	atom_pos_.push_back({ 0.0,  0.0,  1.0});
+	atom_pos_.push_back({ 0.0,  1.0,  1.0});
+	atom_pos_.push_back({ 1.0,  0.0,  1.0});
+	atom_pos_.push_back({ 1.0,  1.0,  0.0});
+	atom_pos_.push_back({ 1.0,  1.0,  1.0});
+	atom_pos_.push_back({-0.5,  0.5,  0.5});
+	atom_pos_.push_back({ 0.5, -0.5,  0.5});
+	atom_pos_.push_back({ 0.5,  0.5, -0.5});
+	atom_pos_.push_back({ 1.5,  0.5,  0.5});
+	atom_pos_.push_back({ 0.5,  1.5,  0.5});
+	atom_pos_.push_back({ 0.5,  0.5,  1.5});
+
 	nb_atoms_ = atom_pos_.size();
-	atom_type_.assign(nb_atoms_,'C');
+	atom_type_.assign(nb_atoms_,'H');
 	atom_chain_.assign(nb_atoms_,0);
+
 	update(true);
     }
 
@@ -316,7 +326,9 @@ namespace GEO {
 
     // Given the quadric equation (zero at center and U along axis):
     //    alpha U^2 + beta (V^2+W^2) + R2 = 0
-    // The radius along the U axis is given by (when it exists):
+    // This function computes the radius r^2(U) along the U axis
+    //   defined by: V^2+W^2 = r^2(U)
+    // r^2(U) is given by (when it exists, that is, r^2(U) > 0):
     //    r^2(U) = - (alpha U^2 + R2) / beta
     inline std::pair<double,double> Hcell_radius(
 	double alpha, double beta, double R2,
@@ -334,8 +346,6 @@ namespace GEO {
 	return {r2_min, r2_max};
     }
 
-    // TODO: H1 imposters seem to be too small when window is very anisotropic
-    // (width >>> height), to be understood
     void Molecule::update_H1_cells() {
 	// H1 cells are polygonal prisms aligned with the edges of the
 	// triangulation. They are obtained as follows:
@@ -418,6 +428,34 @@ namespace GEO {
 	}
     }
 
+    inline void Hcell_restrict(
+	double alpha, double beta, double R2,
+	double& u1, double& u2
+    ) {
+	double r2_1 = -(alpha*u1*u1+R2)/beta;
+	double r2_2 = -(alpha*u2*u2+R2)/beta;
+	geo_assert(r2_1 >= 0 || r2_2 >= 0);
+	double u = -R2/alpha;
+	// 1-sheeted hyperboloid, cannot nibble!
+	if(u < 0) {
+	    return;
+	}
+	u = ::sqrt(u);
+	if(u < std::min(u1,u2) || u > std::max(u1,u2)) {
+	    u = -u;
+	}
+	if(u < std::min(u1,u2) || u > std::max(u1,u2)) {
+	    return;
+	}
+	if(r2_1 < 0 && r2_2 >= 0) {
+	    // u1 in gap, replace with u
+	    u1 = u;
+	} else if(r2_1 >= 0 && r2_2 < 0) {
+	    // u2 in gap, replace with u
+	    u2 = u;
+	}
+    }
+
 
     void Molecule::update_H2_cells() {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
@@ -469,7 +507,7 @@ namespace GEO {
 		    atom_rmax = std::max(atom_rmax, atom_radius(v[tlv]));
 		}
 
-		vec3 axis = normalize(cross(p[2]-p[0],p[1]-p[0]));
+		vec3 axis = normalize(cross(p[1]-p[0],p[2]-p[0]));
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
@@ -480,8 +518,25 @@ namespace GEO {
 
 		double u1 = -atom_rmax;
 		double u2 = atom_rmax;
-		vec3 g1 = c + u1*axis;
-		vec3 g2 = c + u2*axis;
+
+		// "nibble" [u1,u2] if there is matter in the direction of tet1
+		// (negative direction along axis)
+		if(tet1_is_real) {
+		    double u = dot(mixed_vertex({v[0],tet1})-c,axis);
+		    if(u < 0) {
+			u1 = std::max(u1,u);
+		    }
+		}
+
+		// "nibble" [u1,u2] if there is matter in the direction of tet2
+		// (positive direction along axis)
+		if(tet2_is_real) {
+		    double u = dot(mixed_vertex({v[0],tet2})-c,axis);
+		    if(u > 0) {
+			u2 = std::min(u2,u);
+		    }
+		}
+
 		double imposter_r2 = 0.0;
 		for(index_t lv=0; lv<3; ++lv) {
 		    double r2 = length2((p[lv]-c));
@@ -496,6 +551,14 @@ namespace GEO {
 		if(discard_empty_cells_ && rmin2 > imposter_r2) {
 		    continue;
 		}
+
+		// If we have a 2-sheeted hyperboloid, and if one of u1,u2 is
+		// in the gap, we can nibble the [u1,u2] interval (remove the
+		// gap)
+		Hcell_restrict(t2,t1,R2,u1,u2);
+
+		vec3 g1 = c + u1*axis;
+		vec3 g2 = c + u2*axis;
 		double imposter_r = ::sqrt(imposter_r2);
 		cells.begin_H_cell(c, axis, R2, g1, imposter_r, g2, imposter_r);
 
