@@ -132,6 +132,26 @@ namespace {
            float d = min_dist(cell_id, M);
            return mix(GLUP.mesh_color, color, voro_edge_factor_adaptive(d));
         }
+
+        // draw imposter instead of raytracing quadric
+        // \param[in] C center of the quadric
+        void draw_imposter(in vec3 C) {
+           if(glupIsEnabled(GLUP_CLIPPING)) {
+              // x,y coordinates of current fragment
+              vec2 frag_xy_c = 2.0*gl_FragCoord.xy / vec2(
+                   GLUP.viewport[2], GLUP.viewport[3]
+              ) + vec2(-1.0,-1.0);
+              // copy z from quadric's center, transformed in clip space
+              vec4 C_c = GLUP.modelviewprojection_matrix*vec4(C,1.0);
+              vec4 frag_c = vec4(frag_xy_c, C_c.z/C_c.w, 1.0);
+              if(dot(frag_c,GLUP.clip_clip_plane) < 0.0) {
+                 discard;
+              }
+           }
+           glup_FragColor = GLUP.front_color;
+           glup_update_depth(C);
+        }
+
         )"
 	);
 
@@ -270,8 +290,7 @@ namespace {
 
 	void main() {
            if(show_imposters) {
-              glup_FragColor = GLUP.front_color;
-              glup_update_depth(focus_R.xyz);
+              draw_imposter(focus_R.xyz);
               return;
            }
            vec3 C = focus_R.xyz;
@@ -428,8 +447,7 @@ namespace {
 	void main() {
 
             if(show_imposters) {
-               glup_FragColor = GLUP.front_color;
-               glup_update_depth(C);
+               draw_imposter(C);
                return;
             }
 

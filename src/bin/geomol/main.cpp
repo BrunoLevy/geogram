@@ -229,7 +229,7 @@ namespace {
         }
 
         std::string supported_read_file_extensions() override {
-            return "pdb";
+            return "pdb;xyz";
         }
 
         std::string supported_write_file_extensions() override {

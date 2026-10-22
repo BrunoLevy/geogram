@@ -47,9 +47,8 @@
 #include "molecule_shaders.h"
 
 // TODO:
-//  - check -R2 or +R2 ? use same convention everywhere (shaders !)
 //  - S0: OK
-//  - H1: OK (check whether there are patches completely inside surface)
+//  - H1: OK (try to use two imposters for 2-sheeted patches)
 //  - H2: tighter imposters
 //  - S3: tighter imposters if possible: (shrunk tets, we can probably restrain)
 //
@@ -136,16 +135,19 @@ namespace GEO {
 	atom_pos_.resize(nb_atoms_);
 	atom_type_.resize(nb_atoms_);
 	atom_chain_.resize(nb_atoms_);
-	Attribute<char> atom_type_attr(
+	Attribute<char> atom_type_attr;
+	atom_type_attr.bind_if_is_defined(
 	    M.vertices.attributes(), "atom_type"
 	);
-	Attribute<char> atom_chain_attr (
+	Attribute<char> atom_chain_attr;
+	atom_chain_attr.bind_if_is_defined(
 	    M.vertices.attributes(), "chain_id"
 	);
 	for(index_t v: M.vertices) {
 	    atom_pos_[v] = M.vertices.point(v);
-	    atom_type_[v]= atom_type_attr[v];
-	    atom_chain_[v] = index_t(atom_chain_attr[v]);
+	    atom_type_[v]= atom_type_attr.is_bound() ? atom_type_attr[v] : 'C';
+	    atom_chain_[v] =
+		atom_chain_attr.is_bound() ? index_t(atom_chain_attr[v]) : 0;
 	}
 	update(true);
 	return true;
@@ -326,7 +328,7 @@ namespace GEO {
 
     // Given the quadric equation (zero at center and U along axis):
     //    alpha U^2 + beta (V^2+W^2) + R2 = 0
-    // This function computes the radius r^2(U) along the U axis
+    // This function computes the min and max radius r^2(U) along the U axis
     //   defined by: V^2+W^2 = r^2(U)
     // r^2(U) is given by (when it exists, that is, r^2(U) > 0):
     //    r^2(U) = - (alpha U^2 + R2) / beta
@@ -428,6 +430,15 @@ namespace GEO {
 	}
     }
 
+    // Given the quadric equation (zero at center and U along axis):
+    //    alpha U^2 + beta (V^2+W^2) + R2 = 0
+    // this function restricts an interval [u1,u2] along the U direction
+    // If the quadric is a dual-sheeted hyperboloid, the interval is replaced
+    // with:
+    // - [u,u2] if u1 is in the empty space (r2(u1)<0)
+    // - [u1,u] if u2 is in the empty space (r2(u2)<0)
+    // where u is defined by r2(u)=0
+
     inline void Hcell_restrict(
 	double alpha, double beta, double R2,
 	double& u1, double& u2
@@ -447,13 +458,23 @@ namespace GEO {
 	if(u < std::min(u1,u2) || u > std::max(u1,u2)) {
 	    return;
 	}
+	//bool nibbled = false;
+	//std::cerr << "[ " << u1 << "," << u2 << "] ";
+	//std::cerr << "   ( " << r2_1 << "," << r2_2 << ") ";
 	if(r2_1 < 0 && r2_2 >= 0) {
 	    // u1 in gap, replace with u
 	    u1 = u;
+	    //nibbled = true;
 	} else if(r2_1 >= 0 && r2_2 < 0) {
 	    // u2 in gap, replace with u
 	    u2 = u;
+	    //nibbled = true;
 	}
+	//if(nibbled) {
+	//    std::cerr << "  ->  [ " << u1 << "," << u2 << "]" << std::endl;
+	//} else {
+	//    std::cerr << "  kept as is" << std::endl;
+	//}
     }
 
 
