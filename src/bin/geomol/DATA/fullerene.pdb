@@ -1,0 +1,71 @@
+REMARK   fullerene C60 -- from the WebGPU skin-surface prototype
+REMARK   (fullerene.json).  60 carbons, van der Waals radius 1.70 A,
+REMARK   exactly geomol's table, so leave the radius scale at 1.00.
+REMARK
+REMARK   Note: a hollow shell of identical atoms is the WORST case for
+REMARK   the red cavity spheres -- most of its Delaunay tetrahedra are
+REMARK   slivers whose circumcentre falls far outside them, so the
+REMARK   cavity sphere misses the cell that should cut it.  Only 5 of
+REMARK   24 cavity cells show anything at s = 0.5.  Use propofol or
+REMARK   aspirin to judge the cavity patches.
+ATOM      1  C1  LIG A   1      -3.495   0.003  -0.723  1.00  1.70           C
+ATOM      2  C2  LIG A   1      -3.504  -0.005   0.710  1.00  1.70           C
+ATOM      3  C3  LIG A   1      -3.049  -1.152  -1.445  1.00  1.70           C
+ATOM      4  C4  LIG A   1      -3.056  -1.160   1.444  1.00  1.70           C
+ATOM      5  C5  LIG A   1      -3.049   1.156  -1.440  1.00  1.70           C
+ATOM      6  C6  LIG A   1      -3.043   1.152   1.435  1.00  1.70           C
+ATOM      7  C7  LIG A   1      -2.624  -2.343  -0.738  1.00  1.70           C
+ATOM      8  C8  LIG A   1      -2.607  -2.343   0.723  1.00  1.70           C
+ATOM      9  C9  LIG A   1      -2.603   2.328  -0.745  1.00  1.70           C
+ATOM     10  C10 LIG A   1      -2.610   2.329   0.721  1.00  1.70           C
+ATOM     11  C11 LIG A   1      -2.345  -0.725  -2.615  1.00  1.70           C
+ATOM     12  C12 LIG A   1      -2.338  -0.709   2.597  1.00  1.70           C
+ATOM     13  C13 LIG A   1      -2.330   0.729  -2.611  1.00  1.70           C
+ATOM     14  C14 LIG A   1      -2.331   0.721   2.606  1.00  1.70           C
+ATOM     15  C15 LIG A   1      -1.452  -3.049  -1.151  1.00  1.70           C
+ATOM     16  C16 LIG A   1      -1.455  -3.041   1.166  1.00  1.70           C
+ATOM     17  C17 LIG A   1      -1.446   3.070  -1.157  1.00  1.70           C
+ATOM     18  C18 LIG A   1      -1.452   3.051   1.171  1.00  1.70           C
+ATOM     19  C19 LIG A   1      -1.167  -1.433  -3.051  1.00  1.70           C
+ATOM     20  C20 LIG A   1      -1.158  -1.426   3.043  1.00  1.70           C
+ATOM     21  C21 LIG A   1      -1.163   1.435  -3.049  1.00  1.70           C
+ATOM     22  C22 LIG A   1      -1.177   1.434   3.048  1.00  1.70           C
+ATOM     23  C23 LIG A   1      -0.711  -3.484  -0.013  1.00  1.70           C
+ATOM     24  C24 LIG A   1      -0.728  -2.599  -2.350  1.00  1.70           C
+ATOM     25  C25 LIG A   1      -0.725  -2.606   2.343  1.00  1.70           C
+ATOM     26  C26 LIG A   1      -0.713   2.602  -2.334  1.00  1.70           C
+ATOM     27  C27 LIG A   1      -0.723   2.620   2.326  1.00  1.70           C
+ATOM     28  C28 LIG A   1      -0.723   3.498  -0.001  1.00  1.70           C
+ATOM     29  C29 LIG A   1      -0.002  -0.731  -3.495  1.00  1.70           C
+ATOM     30  C30 LIG A   1      -0.004  -0.708   3.501  1.00  1.70           C
+ATOM     31  C31 LIG A   1      -0.000   0.727  -3.498  1.00  1.70           C
+ATOM     32  C32 LIG A   1       0.011   0.720   3.501  1.00  1.70           C
+ATOM     33  C33 LIG A   1       0.707  -3.491  -0.017  1.00  1.70           C
+ATOM     34  C34 LIG A   1       0.700  -2.608  -2.339  1.00  1.70           C
+ATOM     35  C35 LIG A   1       0.722  -2.583   2.322  1.00  1.70           C
+ATOM     36  C36 LIG A   1       0.714   2.607  -2.325  1.00  1.70           C
+ATOM     37  C37 LIG A   1       0.718   2.603   2.337  1.00  1.70           C
+ATOM     38  C38 LIG A   1       0.725   3.485  -0.001  1.00  1.70           C
+ATOM     39  C39 LIG A   1       1.165  -1.451  -3.047  1.00  1.70           C
+ATOM     40  C40 LIG A   1       1.156  -1.430   3.052  1.00  1.70           C
+ATOM     41  C41 LIG A   1       1.166   1.434  -3.051  1.00  1.70           C
+ATOM     42  C42 LIG A   1       1.145   1.429   3.054  1.00  1.70           C
+ATOM     43  C43 LIG A   1       1.419  -3.042  -1.182  1.00  1.70           C
+ATOM     44  C44 LIG A   1       1.448  -3.058   1.173  1.00  1.70           C
+ATOM     45  C45 LIG A   1       1.441   3.035  -1.152  1.00  1.70           C
+ATOM     46  C46 LIG A   1       1.454   3.049   1.162  1.00  1.70           C
+ATOM     47  C47 LIG A   1       2.328  -0.730  -2.594  1.00  1.70           C
+ATOM     48  C48 LIG A   1       2.325  -0.721   2.597  1.00  1.70           C
+ATOM     49  C49 LIG A   1       2.324   0.707  -2.592  1.00  1.70           C
+ATOM     50  C50 LIG A   1       2.328   0.730   2.605  1.00  1.70           C
+ATOM     51  C51 LIG A   1       2.598  -2.333  -0.726  1.00  1.70           C
+ATOM     52  C52 LIG A   1       2.605  -2.334   0.717  1.00  1.70           C
+ATOM     53  C53 LIG A   1       2.591   2.322  -0.703  1.00  1.70           C
+ATOM     54  C54 LIG A   1       2.598   2.319   0.723  1.00  1.70           C
+ATOM     55  C55 LIG A   1       3.064  -1.180  -1.442  1.00  1.70           C
+ATOM     56  C56 LIG A   1       3.044  -1.183   1.447  1.00  1.70           C
+ATOM     57  C57 LIG A   1       3.050   1.166  -1.448  1.00  1.70           C
+ATOM     58  C58 LIG A   1       3.055   1.160   1.439  1.00  1.70           C
+ATOM     59  C59 LIG A   1       3.484  -0.012  -0.707  1.00  1.70           C
+ATOM     60  C60 LIG A   1       3.490   0.003   0.720  1.00  1.70           C
+END

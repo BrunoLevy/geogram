@@ -1,0 +1,35 @@
+REMARK   propofol -- from the WebGPU skin-surface prototype (propofol.json).
+REMARK   31 atoms, van der Waals radii C 1.70, O 1.52, H 1.20 A --
+REMARK   exactly geomol's table, so leave the radius scale at 1.00.
+ATOM      1  C1  LIG A   1      -0.211  -0.461   0.134  1.00  1.70           C
+ATOM      2  C2  LIG A   1       0.830  -0.901  -0.676  1.00  1.70           C
+ATOM      3  C3  LIG A   1       1.505  -1.187   0.505  1.00  1.70           C
+ATOM      4  C4  LIG A   1       1.245  -0.522   1.698  1.00  1.70           C
+ATOM      5  C5  LIG A   1      -0.031  -0.047   1.980  1.00  1.70           C
+ATOM      6  C6  LIG A   1      -0.888   0.405   0.984  1.00  1.70           C
+ATOM      7  O1  LIG A   1      -0.921  -1.605   0.326  1.00  1.52           O
+ATOM      8  H1  LIG A   1      -1.502  -2.370   0.319  1.00  1.20           H
+ATOM      9  H2  LIG A   1       2.248  -1.892   0.846  1.00  1.20           H
+ATOM     10  H3  LIG A   1       2.055  -0.361   2.394  1.00  1.20           H
+ATOM     11  H4  LIG A   1      -0.061  -0.223   3.045  1.00  1.20           H
+ATOM     12  C7  LIG A   1       1.312  -1.045  -2.099  1.00  1.70           C
+ATOM     13  C8  LIG A   1       1.650  -2.381  -2.766  1.00  1.70           C
+ATOM     14  C9  LIG A   1       2.112   0.241  -2.321  1.00  1.70           C
+ATOM     15  H5  LIG A   1       0.337  -0.736  -2.503  1.00  1.20           H
+ATOM     16  H6  LIG A   1       0.623  -2.503  -3.142  1.00  1.20           H
+ATOM     17  H7  LIG A   1       2.410  -1.901  -3.397  1.00  1.20           H
+ATOM     18  H8  LIG A   1       1.935  -2.819  -1.803  1.00  1.20           H
+ATOM     19  H9  LIG A   1       2.858  -0.068  -1.572  1.00  1.20           H
+ATOM     20  H10 LIG A   1       2.265  -0.008  -3.379  1.00  1.20           H
+ATOM     21  H11 LIG A   1       1.257   0.856  -2.020  1.00  1.20           H
+ATOM     22  C10 LIG A   1      -1.930   1.460   1.269  1.00  1.70           C
+ATOM     23  C11 LIG A   1      -1.364   2.546   0.350  1.00  1.70           C
+ATOM     24  C12 LIG A   1      -2.744   1.710   2.541  1.00  1.70           C
+ATOM     25  H12 LIG A   1      -2.656   0.983   0.594  1.00  1.20           H
+ATOM     26  H13 LIG A   1      -1.376   1.856  -0.508  1.00  1.20           H
+ATOM     27  H14 LIG A   1      -2.230   3.194   0.543  1.00  1.20           H
+ATOM     28  H15 LIG A   1      -0.464   2.635   0.968  1.00  1.20           H
+ATOM     29  H16 LIG A   1      -1.839   1.626   3.163  1.00  1.20           H
+ATOM     30  H17 LIG A   1      -3.064   2.694   2.172  1.00  1.20           H
+ATOM     31  H18 LIG A   1      -3.361   0.826   2.351  1.00  1.20           H
+END
