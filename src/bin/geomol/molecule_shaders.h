@@ -216,6 +216,16 @@ namespace {
 
         uniform bool full_imposters;
 
+        // imposter offset in function of (vertex id modulo 6)
+        const vec2 imposter_offset[6] = vec2[](
+            vec2(-1.0, -1.0),
+            vec2( 1.0, -1.0),
+            vec2( 1.0,  1.0),
+            vec2(-1.0, -1.0),
+            vec2( 1.0,  1.0),
+            vec2(-1.0,  1.0)
+        );
+
         )"
 	);
     }
@@ -243,15 +253,6 @@ namespace {
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;
 
-        const vec2 offsets[6] = vec2[](
-            vec2(-1.0, -1.0),
-            vec2( 1.0, -1.0),
-            vec2( 1.0,  1.0),
-            vec2(-1.0, -1.0),
-            vec2( 1.0,  1.0),
-            vec2(-1.0,  1.0)
-        );
-
 	void main() {
             cell_id = gl_VertexID / 6;
             focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
@@ -261,14 +262,11 @@ namespace {
             float R_c;
             project_sphere(imp_focus_R.xyz, imp_focus_R.w, center_c, R_c);
 
+            vec2 offset = imposter_offset[gl_VertexID%6];
             if(full_imposters) {
-               gl_Position = vec4(offsets[gl_VertexID%6],0.0,1.0);
+               gl_Position=vec4(offset,0.0,1.0);
             } else {
-               gl_Position = vec4(
-                  center_c + viewport_scaling()*R_c*offsets[gl_VertexID % 6],
-                  0.0,
-                  1.0
-               );
+               gl_Position=vec4(center_c+viewport_scaling()*R_c*offset,0.0,1.0);
             }
 	}
 	)"
@@ -387,41 +385,14 @@ namespace {
 
             vec2 H = normalize(UV2-UV1);
             vec2 Hperp = vec2(-H.y,H.x);
+            vec2 offset = imposter_offset[gl_VertexID % 6];
 
             if(full_imposters) {
-                switch(gl_VertexID % 6) {
-                case 0:
-                case 3:
-                    gl_Position = vec4(-1.0,-1.0,0.0,1.0);
-                    break;
-                case 1:
-                    gl_Position = vec4(1.0,-1.0,0.0,1.0);
-                    break;
-                case 2:
-                case 4:
-                    gl_Position = vec4(1.0,1.0,0.0,1.0);
-                    break;
-                case 5:
-                    gl_Position = vec4(-1.0,1.0,0.0,1.0);
-                    break;
-                }
+               gl_Position = vec4(offset,0.0,1.0);
             } else {
-                switch(gl_VertexID % 6) {
-                case 0:
-                case 3:
-                    gl_Position = vec4(UV1 + qsize*scaling*(-H -Hperp),0.0,1.0);
-                    break;
-                case 1:
-                    gl_Position = vec4(UV2 + qsize*scaling*( H -Hperp),0.0,1.0);
-                    break;
-                case 2:
-                case 4:
-                    gl_Position = vec4(UV2 + qsize*scaling*( H +Hperp),0.0,1.0);
-                    break;
-                case 5:
-                    gl_Position = vec4(UV1 + qsize*scaling*(-H +Hperp),0.0,1.0);
-                    break;
-                };
+               vec2 origin = mix(UV1,UV2,0.5*(offset.x+1));
+               offset = qsize*scaling*(mat2(H,Hperp)*offset);
+               gl_Position = vec4(origin+offset,0.0,1.0);
             }
 	}
 	)"

@@ -136,18 +136,14 @@ namespace GEO {
 	atom_type_.resize(nb_atoms_);
 	atom_chain_.resize(nb_atoms_);
 	Attribute<char> atom_type_attr;
-	atom_type_attr.bind_if_is_defined(
-	    M.vertices.attributes(), "atom_type"
-	);
+	atom_type_attr.bind_if_is_defined(M.vertices.attributes(), "atom_type") ;
 	Attribute<char> atom_chain_attr;
-	atom_chain_attr.bind_if_is_defined(
-	    M.vertices.attributes(), "chain_id"
-	);
+	atom_chain_attr.bind_if_is_defined(M.vertices.attributes(), "chain_id") ;
 	for(index_t v: M.vertices) {
 	    atom_pos_[v] = M.vertices.point(v);
-	    atom_type_[v]= atom_type_attr.is_bound() ? atom_type_attr[v] : 'C';
+	    atom_type_[v] = atom_type_attr.is_bound() ? atom_type_attr[v] : 'C' ;
 	    atom_chain_[v] =
-		atom_chain_attr.is_bound() ? index_t(atom_chain_attr[v]) : 0;
+		atom_chain_attr.is_bound() ? index_t(atom_chain_attr[v]) : 0 ;
 	}
 	update(true);
 	return true;
