@@ -193,7 +193,9 @@ namespace {
             // This looks suboptimal, but all these zeroes and ones product
             // are (probably) optimized-out by the GLSL compiler, that is
             // especially good at this game (and extracting the rows of PMT
-            // directly would be less legible).
+            // directly would be less legible), and anyway, a back-of-the
+            // enveloppe calculation shows that it would gain not that much.
+
             mat4 T = mat4(
                1.0, 0.0, 0.0, 0.0,
                0.0, 1.0, 0.0, 0.0,
@@ -238,10 +240,6 @@ namespace {
    /********************************************************************/
 
     const char* spheres_source =
-        R"(
-        //primitive GLUP_TRIANGLES
-	)"
-
         R"(
         //stage GL_VERTEX_SHADER
         //import <GLUP/current_profile/vertex_shader_preamble.h>
@@ -350,10 +348,6 @@ namespace {
    /********************************************************************/
 
     const char* hyperboloids_source =
-        R"(
-        //primitive GLUP_TRIANGLES
-	)"
-
         R"(
         //stage GL_VERTEX_SHADER
         //import <GLUP/current_profile/vertex_shader_preamble.h>

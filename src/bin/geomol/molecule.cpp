@@ -434,43 +434,53 @@ namespace GEO {
     // - [u,u2] if u1 is in the empty space (r2(u1)<0)
     // - [u1,u] if u2 is in the empty space (r2(u2)<0)
     // where u is defined by r2(u)=0
+    // r2max: radius of the imposter (needs to be centered on the quadric's axis)
 
     inline void Hcell_restrict(
-	double alpha, double beta, double R2,
+	double alpha, double beta, double R2, double r2_max,
 	double& u1, double& u2
     ) {
 	double r2_1 = -(alpha*u1*u1+R2)/beta;
 	double r2_2 = -(alpha*u2*u2+R2)/beta;
-	geo_assert(r2_1 >= 0 || r2_2 >= 0);
+
+	geo_assert(u2 >= u1);
+	// cell should bnot be completely empty
+	geo_assert(r2_1 >= 0.0 || r2_2 >= 0.0);
+
 	double u = -R2/alpha;
-	// 1-sheeted hyperboloid, cannot nibble!
-	if(u < 0) {
-	    return;
+
+	// if u > 0, it is a 2-sheeted hyperboloid, and we try
+	// nibbling the empty space (between the two sheets) if
+	// [u1,u2] straddles it
+	if(u > 0) {
+	    u = ::sqrt(u);
+	    if(u < u1 || u > u2) {
+		u = -u;
+	    }
+	    if(u >= u1 && u <= u2) {
+		if(r2_1 < 0 && r2_2 >= 0) {
+		    u1 = u;
+		    r2_1 = 0.0;
+		} else if(r2_1 >= 0 && r2_2 < 0) {
+		    u2 = u;
+		    r2_2 = 0.0;
+		}
+	    }
 	}
-	u = ::sqrt(u);
-	if(u < std::min(u1,u2) || u > std::max(u1,u2)) {
-	    u = -u;
+
+	if(r2_1 > r2_max || r2_2 > r2_max) {
+	    double u = -(beta * r2_max + R2) / alpha;
+	    double uu1 = std::min(-u,u);
+	    double uu2 = std::max(-u,u);
+	    if(r2_1 > r2_max && uu1 >= u1 && uu1 <= u2) {
+		u1 = uu1;
+		r2_1 = r2_max;
+	    }
+	    if(r2_2 > r2_max && uu2 >= u1 && uu2 <= u2) {
+		u2 = uu2;
+		r2_2 = r2_max;
+	    }
 	}
-	if(u < std::min(u1,u2) || u > std::max(u1,u2)) {
-	    return;
-	}
-	//bool nibbled = false;
-	//std::cerr << "[ " << u1 << "," << u2 << "] ";
-	//std::cerr << "   ( " << r2_1 << "," << r2_2 << ") ";
-	if(r2_1 < 0 && r2_2 >= 0) {
-	    // u1 in gap, replace with u
-	    u1 = u;
-	    //nibbled = true;
-	} else if(r2_1 >= 0 && r2_2 < 0) {
-	    // u2 in gap, replace with u
-	    u2 = u;
-	    //nibbled = true;
-	}
-	//if(nibbled) {
-	//    std::cerr << "  ->  [ " << u1 << "," << u2 << "]" << std::endl;
-	//} else {
-	//    std::cerr << "  kept as is" << std::endl;
-	//}
     }
 
 
@@ -572,7 +582,7 @@ namespace GEO {
 		// If we have a 2-sheeted hyperboloid, and if one of u1,u2 is
 		// in the gap, we can nibble the [u1,u2] interval (remove the
 		// gap)
-		Hcell_restrict(t2,t1,R2,u1,u2);
+		Hcell_restrict(t2,t1,R2,imposter_r2,u1,u2);
 
 		vec3 g1 = c + u1*axis;
 		vec3 g2 = c + u2*axis;

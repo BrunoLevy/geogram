@@ -40,6 +40,7 @@
 #include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
 #include <geogram/basic/command_line.h>
+#include <geogram/basic/stopwatch.h>
 #include "molecule.h"
 
 namespace {
@@ -183,6 +184,10 @@ namespace {
 		}
 		ImGui::Text("triangles: %u",molecule_.nb_drawn_triangles());
 	    }
+	    if(animate()) {
+		double fps = double(frame_) / (Stopwatch::now() - start_time_);
+		ImGui::Text("FPS: %f",fps);
+	    }
         }
 
         void draw_application_menus() override {
@@ -194,6 +199,15 @@ namespace {
 		glupClipMode(GLUP_CLIP_STANDARD);
 		molecule_.draw();
 		glupClipMode(GLUP_CLIP_SLICE_CELLS);
+	    }
+	    if(animate()) {
+		if(frame_ == 0) {
+		    start_time_ = Stopwatch::now();
+		}
+		++frame_;
+		if(frame_ == 200) {
+		    frame_ = 0;
+		}
 	    }
         }
 
@@ -250,6 +264,8 @@ namespace {
 
     private:
 	Molecule molecule_;
+	double start_time_ = 0.0;
+	index_t frame_ = 0;
     };
 }
 
