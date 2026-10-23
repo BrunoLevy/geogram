@@ -7,6 +7,9 @@ namespace {
 
     void register_geomol_shader_utilities() {
 
+          // Portable abstraction of "buffers", that can be implemented as:
+          // - a TBO (Texture Buffer Object) if GEO_TBO_SUPPORTED is defined
+          // - or an integer or floating-point texture otherwise
 #ifdef GEO_TBO_SUPPORTED
 	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
           R"(
@@ -22,16 +25,18 @@ namespace {
           #define glup_Buffer  sampler2D
           #define glup_iBuffer isampler2D
           #define glup_uBuffer usampler2D
-          #define glup_fetch(B,idx) \
-             texelFetch(B,ivec2( \
-                int(idx)%textureSize(B,0).x, \
-                int(idx)/textureSize(B,0).x  \
-             ),0)
+          #define glup_fetch(B,idx) texelFetch(B,ivec2( \
+                     int(idx)%textureSize(B,0).x, \
+                     int(idx)/textureSize(B,0).x  \
+                  ),0)
           )"
         );
 #endif
 
-	GEO::GLSL::register_GLSL_include_file("geomol/clipping.h",
+        // Utilities for fragment shaders:
+        // - clipping by cells and clipping by user clip plane
+        // - drawing mesh (exploiting distance to planes and its derivative)
+	GEO::GLSL::register_GLSL_include_file("geomol/fragment_shader_utils.h",
         R"(
         uniform glup_uBuffer facet_ptr_TBO;
         uniform glup_Buffer facet_plane_TBO;
@@ -45,7 +50,7 @@ namespace {
         //   first two clipping planes for H1 cells.
         // \param[in] p the world-space coordinates of the point
         // \param[in] cell_id the index of the cell to be displayed (typically
-        //   gl_vertexID divided by number of vertices per imposter)
+        //   gl_vertexID divided by number of vertices per imposter, that is, 6)
         // \retval true if the point is inside the convex cell
         // \retval false otherwise
         bool in_cell(in vec3 p, in int cell_id) {
@@ -133,7 +138,7 @@ namespace {
            return mix(GLUP.mesh_color, color, voro_edge_factor_adaptive(d));
         }
 
-        // draw imposter instead of raytracing quadric
+        // draw imposter instead of raytracing quadric, for debugging purposes
         // \param[in] C center of the quadric
         void draw_imposter(in vec3 C) {
            if(glupIsEnabled(GLUP_CLIPPING)) {
@@ -155,7 +160,7 @@ namespace {
         )"
 	);
 
-	GEO::GLSL::register_GLSL_include_file("geomol/imposter.h",
+	GEO::GLSL::register_GLSL_include_file("geomol/vertex_shader_utils.h",
 	R"(
 
         vec4 row(in mat4 M, in int i) {
@@ -175,7 +180,7 @@ namespace {
         // clip-space radius of a circle covering the projection
         // of a world-space sphere.
         // Dmitry Sokolov tutorial: https://github.com/ssloy/glsltutorial
-        // ref: http://reality.cs.ucl.ac.uk/projects/quadrics/pbg06.pdf
+        // initial ref: http://reality.cs.ucl.ac.uk/projects/quadrics/pbg06.pdf
         //
         // center_w: center of the sphere in world coordinates
         // R_w: radius of the sphere in world coordinates
@@ -185,8 +190,10 @@ namespace {
         void project_sphere(
             in vec3 center_w, in float R_w, out vec2 center_c, out float R_c
         ) {
-            // TODO: optimize: directly compute r1,r2,r4
-            // (but the GLSL compiler probably does optimize already)
+            // This looks suboptimal, but all these zeroes and ones product
+            // are (probably) optimized-out by the GLSL compiler, that is
+            // especially good at this game (and extracting the rows of PMT
+            // directly would be less legible).
             mat4 T = mat4(
                1.0, 0.0, 0.0, 0.0,
                0.0, 1.0, 0.0, 0.0,
@@ -214,16 +221,14 @@ namespace {
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
 
+        // For debugging purpose: if set, draw imposters that fill the
+        // entire screen
         uniform bool full_imposters;
 
         // imposter offset in function of (vertex id modulo 6)
         const vec2 imposter_offset[6] = vec2[](
-            vec2(-1.0, -1.0),
-            vec2( 1.0, -1.0),
-            vec2( 1.0,  1.0),
-            vec2(-1.0, -1.0),
-            vec2( 1.0,  1.0),
-            vec2(-1.0,  1.0)
+            vec2(-1.0, -1.0), vec2( 1.0, -1.0), vec2( 1.0,  1.0),
+            vec2(-1.0, -1.0), vec2( 1.0,  1.0), vec2(-1.0,  1.0)
         );
 
         )"
@@ -244,7 +249,7 @@ namespace {
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
         //import <geomol/buffers.h>
-        //import <geomol/imposter.h>
+        //import <geomol/vertex_shader_utils.h>
 
         uniform glup_Buffer cell_eqn_1_TBO;
         uniform glup_Buffer cell_imposter_1_TBO;
@@ -281,7 +286,7 @@ namespace {
         //import <GLUP/fragment_shader_utils.h>
         //import <GLUP/fragment_ray_tracing.h>
         //import <geomol/buffers.h>
-        //import <geomol/clipping.h>
+        //import <geomol/fragment_shader_utils.h>
 
         glup_flat glup_in vec4 focus_R;
         glup_flat glup_in int cell_id;
@@ -311,15 +316,17 @@ namespace {
                discard;
            }
 	   // Original article: q = b_prime + sign(b_prime)*sqrt(a*delta)
-	   // Don't know why they do that, here we know we want t1
+	   // Don't know why they do that, here we know we want t1 first
            float sqrt_a_delta = sqrt(a*delta);
 	   float q = b_prime - sqrt_a_delta;
 	   float t = q/a;
 
            vec3 M = R.O + t*R.V;
 
+           // If intersection is outside cell or clipped out, get second
+           // intersection.
            if(clipped(M) || !in_cell(M,cell_id)) {
-              // Get the other root, still using the high-precision method
+              // Get second intersection
               q = b_prime + sqrt_a_delta;
               t = q/a;
               M = R.O + t*R.V;
@@ -354,7 +361,7 @@ namespace {
 	//import <GLUPGLSL/state.h>
 	//import <GLUP/current_profile/toggles.h>
         //import <geomol/buffers.h>
-        //import <geomol/imposter.h>
+        //import <geomol/vertex_shader_utils.h>
 
         uniform glup_Buffer cell_eqn_1_TBO;
         uniform glup_Buffer cell_eqn_2_TBO;
@@ -407,7 +414,7 @@ namespace {
         //import <GLUP/fragment_shader_utils.h>
         //import <GLUP/fragment_ray_tracing.h>
         //import <geomol/buffers.h>
-        //import <geomol/clipping.h>
+        //import <geomol/fragment_shader_utils.h>
 
         uniform vec2 cAxisPerp;
         glup_flat glup_in vec3  C;  // focus
@@ -467,6 +474,8 @@ namespace {
             vec3 M = R.O + t * R.V;
             if(t1 > t2) { sign = -1.0; }
 
+            // If intersection is outside cell or clipped out, get second
+            // intersection.
             if(clipped(M) || !in_cell(M,cell_id)) {
                 t = max(t1,t2);
                 M = R.O + t * R.V;
