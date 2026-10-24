@@ -469,6 +469,14 @@ namespace GEO {
 	}
 
 	if(r2_1 > r2_max || r2_2 > r2_max) {
+
+	    // cell completely inside quadric
+	    if(r2_1 > r2_max && r2_2 > r2_max && u1*u2 > 0) {
+		u1 = 0.0;
+		u2 = 0.0;
+		return;
+	    }
+
 	    double u = -(beta * r2_max + R2) / alpha;
 	    double uu1 = std::min(-u,u);
 	    double uu2 = std::max(-u,u);
@@ -582,7 +590,13 @@ namespace GEO {
 		// If we have a 2-sheeted hyperboloid, and if one of u1,u2 is
 		// in the gap, we can nibble the [u1,u2] interval (remove the
 		// gap)
-		Hcell_restrict(t2,t1,R2,imposter_r2,u1,u2);
+		if(discard_empty_cells_) {
+		    Hcell_restrict(t2,t1,R2,imposter_r2,u1,u2);
+		    if(u1 == 0.0 && u2 == 0.0) {
+			continue;
+		    }
+		}
+
 
 		vec3 g1 = c + u1*axis;
 		vec3 g2 = c + u2*axis;

@@ -36,6 +36,7 @@ namespace {
         // Utilities for fragment shaders:
         // - clipping by cells and clipping by user clip plane
         // - drawing mesh (exploiting distance to planes and its derivative)
+	// - drawing imposter (for debugging)
 	GEO::GLSL::register_GLSL_include_file("geomol/fragment_shader_utils.h",
         R"(
         uniform glup_uBuffer facet_ptr_TBO;
@@ -163,8 +164,16 @@ namespace {
 	GEO::GLSL::register_GLSL_include_file("geomol/vertex_shader_utils.h",
 	R"(
 
-        vec4 row(in mat4 M, in int i) {
+        // Gets the ith row of a 4x4 matrix
+        vec4 row4x4(in mat4 M, in int i) {
            return vec4(M[0][i], M[1][i], M[2][i], M[3][i]);
+        }
+
+        // Gets the ith row of a 4x3 matrix (called mat3x4, because
+        // GLSL is column-major, even for types;  mat3x4 has 3 columns
+        // and 4 rows).
+        vec3 row3x4(in mat3x4 M, in int i) {
+           return vec3(M[0][i], M[1][i], M[2][i]);
         }
 
         // Correction factor on both axes for non-square windows
@@ -191,11 +200,10 @@ namespace {
             in vec3 center_w, in float R_w, out vec2 center_c, out float R_c
         ) {
             // This looks suboptimal, but all these zeroes and ones product
-            // are (probably) optimized-out by the GLSL compiler, that is
-            // especially good at this game (and extracting the rows of PMT
-            // directly would be less legible), and anyway, a back-of-the
-            // enveloppe calculation shows that it would gain not that much.
-
+            // are (probably) optimized-out by the GLSL compiler (at least
+            // I hope so, to be verified...)
+            // Important reminder: GLSL constructs matrices in column major
+            // order ! (each time I'm confused by that !)
             mat4 T = mat4(
                1.0, 0.0, 0.0, 0.0,
                0.0, 1.0, 0.0, 0.0,
@@ -204,9 +212,9 @@ namespace {
             );
 
             mat4 PMT = GLUP.modelviewprojection_matrix * T;
-            vec4 r1 = row(PMT,0);
-            vec4 r2 = row(PMT,1);
-            vec4 r4 = row(PMT,3);
+            vec4 r1 = row4x4(PMT,0);
+            vec4 r2 = row4x4(PMT,1);
+            vec4 r4 = row4x4(PMT,3);
 
             float r1Dr4T = dot(r1.xyz,r4.xyz)-r1.w*r4.w;
             float r1Dr1T = dot(r1.xyz,r1.xyz)-r1.w*r1.w;
@@ -222,6 +230,54 @@ namespace {
             R_c = -sqrt(max(discriminant_x,discriminant_y)) / r4Dr4T;
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
+
+
+        // Computes the tangent to the projection of a disk in clip space
+        // \param[in] center_w , axis_w , R_w center, normal vector and radius
+        //            of the disk in world space
+        // \param[in] N_c a 2D vector in clip space
+        // \param[out] alpha1, alpha2, beta1, beta2
+        //    the maximal and minimal value of alpha such that the 2D
+        //    straight lines of equations  N_c.x*x + N_c.y*y + alpha and
+        //                                -N_c.y*x + N_c.x*y + alpha
+        //    are tangent to the projection of the disk.
+        void project_disk(
+            in vec3 center_w, in vec3 axis_w, in float R_w, in vec2 N_c,
+            out float alpha1, out float alpha2, out float beta1, out float beta2
+        ) {
+           vec3 U = cross(axis_w,axis_w.yzx); // TODO: check, is that true?
+           vec3 V = cross(axis_w,U);
+           // Remember, matrices are column-major order in GLSL!
+           mat3x4 T = mat3x4(
+              U.x, U.y, U.z, 0.0,
+              V.x, V.y, V.z, 0.0,
+              center_w.x/R_w, center_w.y/R_w, center_w.z/R_w, 1.0/R_w
+           );
+           mat3x4 PMT = GLUP.modelviewprojection_matrix * T;
+           vec3 r1 = row3x4(PMT,0);
+           vec3 r2 = row3x4(PMT,1);
+           vec3 r4 = row3x4(PMT,3);
+
+           vec3 rn1 = N_c.x*r1+N_c.y*r2;
+           vec3 rn2 =-N_c.y*r1+N_c.x*r2;
+
+           float r4Dr4T   = dot(r4.xy,r4.xy)   -r4.z*r4.z;   // a
+           float rn1Dr4T  = dot(rn1.xy,r4.xy)  -rn1.z*r4.z;  // b'
+           float rn1Drn1T = dot(rn1.xy,rn1.xy) -rn1.z*rn1.z; // c
+
+           float rn2Dr4T  = dot(rn2.xy,r4.xy)  -rn2.z*r4.z;  // b'
+           float rn2Drn2T = dot(rn2.xy,rn2.xy) -rn2.z*rn2.z; // c
+
+           float sqrtdelta1 = sqrt(abs(rn1Dr4T*rn1Dr4T - r4Dr4T*rn1Drn1T));
+           float sqrtdelta2 = sqrt(abs(rn2Dr4T*rn2Dr4T - r4Dr4T*rn2Drn2T));
+
+           alpha1 = (-rn1Dr4T-sqrtdelta1)/r4Dr4T;
+           alpha2 = (-rn1Dr4T+sqrtdelta1)/r4Dr4T;
+
+           beta1  = (-rn2Dr4T-sqrtdelta2)/r4Dr4T;
+           beta2  = (-rn2Dr4T+sqrtdelta2)/r4Dr4T;
+        }
+
 
         // For debugging purpose: if set, draw imposters that fill the
         // entire screen
