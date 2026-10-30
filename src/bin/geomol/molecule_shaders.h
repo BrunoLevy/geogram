@@ -423,17 +423,54 @@ namespace {
         glup_flat glup_out float R2;
         glup_flat glup_out int cell_id;
 
+        vec2 intersect(vec3 D1, vec3 D2) {
+           return -inverse(mat2(D1.x,D2.x,D1.y,D2.y))*vec2(D1.z,D2.z);
+        }
+
 	void main() {
             cell_id = gl_VertexID / 6;
             vec4 focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
             C = focus_R.xyz;
             R2 = focus_R.w;
             n = glup_fetch(cell_eqn_2_TBO,cell_id).xyz;
-
             vec4 imp1 = glup_fetch(cell_imposter_1_TBO,cell_id);
             vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
-
             vec2 scaling = viewport_scaling();
+
+//#define NEW_VERSION
+// new version (tight bboxes for cylinders) does not work
+// Debugging strategy
+// 1) display one H patch only / one disk only
+// 2) frag shader that displays disk and half spaces
+#ifdef NEW_VERSION
+            float a11, a12, b11, b12;
+            float a21, a22, b21, b22;
+            vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
+            vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);
+            vec2 n_c = normalize(UV2.xy/UV2.w)-(UV1.xy/UV1.w);
+            project_disk(imp1.xyz, n, imp1.w, n_c, a11, a12, b11, b12);
+            project_disk(imp2.xyz, n, imp2.w, n_c, a21, a22, b21, b22);
+            vec3 A1 = vec3(n_c,min(min(a11,a12),min(a21,a22)));
+            vec3 A2 = vec3(n_c,max(max(a11,a12),max(a21,a22)));
+            vec3 B1 = vec3(-n_c.y,n_c.x,min(min(b11,b12),min(b21,b22)));
+            vec3 B2 = vec3(-n_c.y,n_c.x,max(max(b11,b12),max(b21,b22)));
+            switch(gl_VertexID % 6) {
+               case 0:
+               case 3:
+                  gl_Position = vec4(intersect(A1,B1),0.0, 1.0);
+                  break;
+               case 1:
+                  gl_Position = vec4(intersect(A2,B1),0.0, 1.0);
+                  break;
+               case 2:
+               case 4:
+                  gl_Position = vec4(intersect(A2,B2),0.0, 1.0);
+                  break;
+               case 5:
+                  gl_Position = vec4(intersect(A1,B2),0.0, 1.0);
+                  break;
+            };
+#else
             vec2 UV1; float R1_c;
             vec2 UV2; float R2_c;
             project_sphere(imp1.xyz, imp1.w, UV1, R1_c);
@@ -451,6 +488,7 @@ namespace {
                offset = qsize*scaling*(mat2(H,Hperp)*offset);
                gl_Position = vec4(origin+offset,0.0,1.0);
             }
+#endif
 	}
 	)"
 

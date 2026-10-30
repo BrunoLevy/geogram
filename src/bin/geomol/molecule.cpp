@@ -469,13 +469,14 @@ namespace GEO {
 	}
 
 	if(r2_1 > r2_max || r2_2 > r2_max) {
-
 	    // cell completely inside quadric
 	    if(r2_1 > r2_max && r2_2 > r2_max && u1*u2 > 0) {
 		u1 = 0.0;
 		u2 = 0.0;
 		return;
 	    }
+
+	    return; // code below is wrong! H2 cells have missing parts
 
 	    double u = -(beta * r2_max + R2) / alpha;
 	    double uu1 = std::min(-u,u);
