@@ -460,7 +460,7 @@ namespace {
             float a21, a22, b21, b22;
             vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
             vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);
-            vec2 n_c = normalize(UV2.xy/UV2.w)-(UV1.xy/UV1.w);
+            vec2 n_c = normalize(UV2.xy/UV2.w-UV1.xy/UV1.w);
             project_disk(imp1.xyz, n, imp1.w, n_c, a11, a12, b11, b12);
             project_disk(imp2.xyz, n, imp2.w, n_c, a21, a22, b21, b22);
             vec3 A1 = vec3(n_c,min(min(a11,a12),min(a21,a22)));
