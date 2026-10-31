@@ -42,7 +42,7 @@ namespace {
         uniform glup_uBuffer facet_ptr_TBO;
         uniform glup_Buffer facet_plane_TBO;
         uniform bool show_imposters;
-        uniform int max_clip_planes;
+        uniform int max_clip_planes; // max number of clipping planes to test
 
         // \brief Tests whether a point is inside a cell of the mixed complex
         // \details max_clip_planes (a uniform) determines the maximum number
@@ -450,11 +450,6 @@ namespace {
            return -inverse(mat2(D1.x,D2.x,D1.y,D2.y))*vec2(D1.z,D2.z);
         }
 
-        // Normalizes a 2d vector or returns (1,0) if vector is too small
-        vec2 safe_normalize(vec2 v) {
-           return (dot(v,v) > 1e-12) ? normalize(v) : vec2(1.0, 0.0);
-        }
-
 	void main() {
             cell_id = gl_VertexID / 6;
             vec4 focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
@@ -476,10 +471,10 @@ namespace {
             vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
             vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);
 
-            // (N1_c,N2_c): projected axis of cylinder and ortho direction
+            // (N1_c,N2_c): projected axis of cyl and ortho direction, clip space
             vec2 N1_c = vec2(UV2.xy/UV2.w-UV1.xy/UV1.w);
             vec2 N2_c = normalize(vec2(-N1_c.y, N1_c.x));
-            // fix N1_c to ensure orthogonality condition in window coords
+            // fix N1_c to ensure orthog w.r.t. N2_c *in window coords*
             float W = GLUP.viewport[2]; float H = GLUP.viewport[3];
             N1_c = normalize(vec2(N1_c.x * W * W, N1_c.y * H * H));
 
