@@ -285,7 +285,7 @@ namespace {
            float sqrtdelta1 = sqrt(abs(rn1Dr4T*rn1Dr4T - r4Dr4T*rn1Drn1T));
            float sqrtdelta2 = sqrt(abs(rn2Dr4T*rn2Dr4T - r4Dr4T*rn2Drn2T));
 
-           if(r4Dr4T > 0) {
+           if(r4Dr4T > 0.0) {
               alpha1 = (-rn1Dr4T-sqrtdelta1)/r4Dr4T;
               alpha2 = (-rn1Dr4T+sqrtdelta1)/r4Dr4T;
               beta1  = (-rn2Dr4T-sqrtdelta2)/r4Dr4T;
