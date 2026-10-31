@@ -48,7 +48,7 @@
 #include <vector>
 #include <typeinfo>
 
-//#define GEO_TBO_SUPPORTED
+#define GEO_TBO_SUPPORTED
 
 #ifdef GEO_OS_EMSCRIPTEN
 #include <GLES3/gl3.h>

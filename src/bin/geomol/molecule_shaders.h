@@ -231,6 +231,15 @@ namespace {
             //(note: r4Dr4T is (probably) negative hence the minus sign)
         }
 
+        // Orthonormal basis (U, V, n) from a *unit* vector n.
+        // Duff et al., "Building an Orthonormal Basis, Revisited", JCGT 2017.
+        void orthonormal_basis(in vec3 n, out vec3 U, out vec3 V) {
+           float s = (n.z >= 0.0) ? 1.0 : -1.0;
+           float a = -1.0 / (s + n.z);
+           float b = n.x * n.y * a;
+           U = vec3(1.0 + s * n.x * n.x * a, s * b, -s * n.x);
+           V = vec3(b, s + n.y * n.y * a, -n.y);
+        }
 
         // Computes the tangent to the projection of a disk in clip space
         // \param[in] center_w , axis_w , R_w center, normal vector and radius
@@ -245,8 +254,12 @@ namespace {
             in vec3 center_w, in vec3 axis_w, in float R_w, in vec2 N_c,
             out float alpha1, out float alpha2, out float beta1, out float beta2
         ) {
-           vec3 U = cross(axis_w,axis_w.yzx); // TODO: check, is that true?
-           vec3 V = cross(axis_w,U);
+
+           // U, V MUST be unit and orthogonal: T maps (u,v,1) with u^2+v^2=1
+           // to center_w + R_w*(u*U + v*V).
+           vec3 U, V;
+           orthonormal_basis(normalize(axis_w), U, V);
+
            // Remember, matrices are column-major order in GLSL!
            mat3x4 T = mat3x4(
               U.x, U.y, U.z, 0.0,
@@ -437,7 +450,7 @@ namespace {
             vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
             vec2 scaling = viewport_scaling();
 
-//#define NEW_VERSION
+#define NEW_VERSION
 // new version (tight bboxes for cylinders) does not work
 // Debugging strategy
 // 1) display one H patch only / one disk only
