@@ -244,14 +244,15 @@ namespace {
         // Computes the tangent to the projection of a disk in clip space
         // \param[in] center_w , axis_w , R_w center, normal vector and radius
         //            of the disk in world space
-        // \param[in] N_c a 2D vector in clip space
+        // \param[in] N1_c , N2_c two 2D vectors in clip space
         // \param[out] alpha1, alpha2, beta1, beta2
-        //    the maximal and minimal value of alpha such that the 2D
-        //    straight lines of equations  N_c.x*x + N_c.y*y + alpha and
-        //                                -N_c.y*x + N_c.x*y + alpha
+        //    the maximal and minimal value of alpha and beta such that the 2D
+        //    straight lines of equations  N1_c.x*x + N1_c.y*y + alpha and
+        //                                 N2_c.y*x + N2_c.x*y + beta
         //    are tangent to the projection of the disk.
         void project_disk(
-            in vec3 center_w, in vec3 axis_w, in float R_w, in vec2 N_c,
+            in vec3 center_w, in vec3 axis_w, in float R_w,
+            in vec2 N1_c, in vec2 N2_c,
             out float alpha1, out float alpha2, out float beta1, out float beta2
         ) {
 
@@ -271,8 +272,8 @@ namespace {
            vec3 r2 = row3x4(PMT,1);
            vec3 r4 = row3x4(PMT,3);
 
-           vec3 rn1 = N_c.x*r1+N_c.y*r2;
-           vec3 rn2 =-N_c.y*r1+N_c.x*r2;
+           vec3 rn1 = N1_c.x*r1+N1_c.y*r2;
+           vec3 rn2 = N2_c.x*r1+N2_c.y*r2;
 
            float r4Dr4T   = dot(r4.xy,r4.xy)   -r4.z*r4.z;   // a
            float rn1Dr4T  = dot(rn1.xy,r4.xy)  -rn1.z*r4.z;  // b'
@@ -284,11 +285,17 @@ namespace {
            float sqrtdelta1 = sqrt(abs(rn1Dr4T*rn1Dr4T - r4Dr4T*rn1Drn1T));
            float sqrtdelta2 = sqrt(abs(rn2Dr4T*rn2Dr4T - r4Dr4T*rn2Drn2T));
 
-           alpha1 = (-rn1Dr4T-sqrtdelta1)/r4Dr4T;
-           alpha2 = (-rn1Dr4T+sqrtdelta1)/r4Dr4T;
-
-           beta1  = (-rn2Dr4T-sqrtdelta2)/r4Dr4T;
-           beta2  = (-rn2Dr4T+sqrtdelta2)/r4Dr4T;
+           if(r4Dr4T > 0) {
+              alpha1 = (-rn1Dr4T-sqrtdelta1)/r4Dr4T;
+              alpha2 = (-rn1Dr4T+sqrtdelta1)/r4Dr4T;
+              beta1  = (-rn2Dr4T-sqrtdelta2)/r4Dr4T;
+              beta2  = (-rn2Dr4T+sqrtdelta2)/r4Dr4T;
+           } else {
+              alpha2 = (-rn1Dr4T-sqrtdelta1)/r4Dr4T;
+              alpha1 = (-rn1Dr4T+sqrtdelta1)/r4Dr4T;
+              beta2  = (-rn2Dr4T-sqrtdelta2)/r4Dr4T;
+              beta1  = (-rn2Dr4T+sqrtdelta2)/r4Dr4T;
+           }
         }
 
 
@@ -436,8 +443,16 @@ namespace {
         glup_flat glup_out float R2;
         glup_flat glup_out int cell_id;
 
+        // intersection of two lines of equations
+        //  D1.x * x + D1.y * y + D1.z = 0 and
+        //  D2.x * x + D2.y * y + D2.z = 0 and
         vec2 intersect(vec3 D1, vec3 D2) {
            return -inverse(mat2(D1.x,D2.x,D1.y,D2.y))*vec2(D1.z,D2.z);
+        }
+
+        // Normalizes a 2d vector or returns (1,0) if vector is too small
+        vec2 safe_normalize(vec2 v) {
+           return (dot(v,v) > 1e-12) ? normalize(v) : vec2(1.0, 0.0);
         }
 
 	void main() {
@@ -446,27 +461,36 @@ namespace {
             C = focus_R.xyz;
             R2 = focus_R.w;
             n = glup_fetch(cell_eqn_2_TBO,cell_id).xyz;
+
+            if(full_imposters) {
+               vec2 offset = imposter_offset[gl_VertexID%6];
+               gl_Position = vec4(offset,0.0,1.0);
+               return;
+            }
+
             vec4 imp1 = glup_fetch(cell_imposter_1_TBO,cell_id);
             vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
-            vec2 scaling = viewport_scaling();
 
-#define NEW_VERSION
-// new version (tight bboxes for cylinders) does not work
-// Debugging strategy
-// 1) display one H patch only / one disk only
-// 2) frag shader that displays disk and half spaces
-#ifdef NEW_VERSION
-            float a11, a12, b11, b12;
-            float a21, a22, b21, b22;
+            float a11, a12, b11, b12; // bounds of first cap
+            float a21, a22, b21, b22; // bounds of second cap
             vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
             vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);
-            vec2 n_c = normalize(UV2.xy/UV2.w-UV1.xy/UV1.w);
-            project_disk(imp1.xyz, n, imp1.w, n_c, a11, a12, b11, b12);
-            project_disk(imp2.xyz, n, imp2.w, n_c, a21, a22, b21, b22);
-            vec3 A1 = vec3(n_c,min(min(a11,a12),min(a21,a22)));
-            vec3 A2 = vec3(n_c,max(max(a11,a12),max(a21,a22)));
-            vec3 B1 = vec3(-n_c.y,n_c.x,min(min(b11,b12),min(b21,b22)));
-            vec3 B2 = vec3(-n_c.y,n_c.x,max(max(b11,b12),max(b21,b22)));
+
+            // (N1_c,N2_c): projected axis of cylinder and ortho direction
+            vec2 N1_c = vec2(UV2.xy/UV2.w-UV1.xy/UV1.w);
+            vec2 N2_c = normalize(vec2(-N1_c.y, N1_c.x));
+            // fix N1_c to ensure orthogonality condition in window coords
+            float W = GLUP.viewport[2]; float H = GLUP.viewport[3];
+            N1_c = normalize(vec2(N1_c.x * W * W, N1_c.y * H * H));
+
+            project_disk(imp1.xyz, n, imp1.w, N1_c, N2_c, a11, a12, b11, b12);
+            project_disk(imp2.xyz, n, imp2.w, N1_c, N2_c, a21, a22, b21, b22);
+
+            // bounding line equations
+            vec3 A1 = vec3(N1_c,min(a11,a21));
+            vec3 A2 = vec3(N1_c,max(a12,a22));
+            vec3 B1 = vec3(N2_c,min(b11,b21));
+            vec3 B2 = vec3(N2_c,max(b12,b22));
             switch(gl_VertexID % 6) {
                case 0:
                case 3:
@@ -483,25 +507,6 @@ namespace {
                   gl_Position = vec4(intersect(A1,B2),0.0, 1.0);
                   break;
             };
-#else
-            vec2 UV1; float R1_c;
-            vec2 UV2; float R2_c;
-            project_sphere(imp1.xyz, imp1.w, UV1, R1_c);
-            project_sphere(imp2.xyz, imp2.w, UV2, R2_c);
-            float qsize = max(R1_c,R2_c);
-
-            vec2 H = normalize(UV2-UV1);
-            vec2 Hperp = vec2(-H.y,H.x);
-            vec2 offset = imposter_offset[gl_VertexID % 6];
-
-            if(full_imposters) {
-               gl_Position = vec4(offset,0.0,1.0);
-            } else {
-               vec2 origin = mix(UV1,UV2,0.5*(offset.x+1));
-               offset = qsize*scaling*(mat2(H,Hperp)*offset);
-               gl_Position = vec4(origin+offset,0.0,1.0);
-            }
-#endif
 	}
 	)"
 
