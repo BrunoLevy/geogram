@@ -331,33 +331,19 @@ namespace GEO {
 	    cells_[c].clear();
 	}
 
+	// For big molecules it may be worth it doing all cell types in parallel
+	// It gains several seconds for 1M atoms
+	// TODO: finer parallelism, for H1 and H2 cells that have costly mesh
+	// traversals.
 	{
-	    Stopwatch W("S0 cells",verbose_);
-	    update_S0_cells();
-	}
-	{
-	    Stopwatch W("H1 cells",verbose_);
-	    update_H1_cells();
-	}
-	{
-	    Stopwatch W("H2 cells",verbose_);
-	    update_H2_cells();
-	}
-	{
-	    Stopwatch W("S3 cells",verbose_);
-	    update_S3_cells();
+	    parallel(
+		[this]{update_S0_cells();},
+		[this]{update_H1_cells();},
+		[this]{update_H2_cells();},
+		[this]{update_S3_cells();}
+	    );
 	}
 
-
-	/*
-	// For big molecules it may be worth it doing all cell types in parallel.
-	parallel(
-	    [this]{update_S0_cells();},
-	    [this]{update_H1_cells();},
-	    [this]{update_H2_cells();},
-	    [this]{update_S3_cells();}
-	);
-	*/
     }
 
     void Molecule::update_S0_cells() {
