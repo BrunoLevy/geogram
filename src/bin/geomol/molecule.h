@@ -144,6 +144,10 @@ namespace GEO {
 
     protected:
 
+	bool load_geogram(const std::string& filename);
+
+	bool load_CIF(const std::string& filename);
+
 	index_range atoms() const {
 	    return index_range(0, nb_atoms());
 	}

@@ -50,6 +50,16 @@
 
 #define GEO_TBO_SUPPORTED
 
+// Note: for molecules with 2.5M atoms, it is FASTER
+// using standard texture than TBOs (with GEO_TBO_SUPPORTED *deactivated*
+// It seems that with TBOs it swaps between main memory and GPU
+// ... but for smaller molecules, TBOs seems worth it:
+// 1HTQ (900K atoms)
+// textures: 15   fps
+// TBOS:     25.5 fps
+//
+// TODO: test with SSBOs
+
 #ifdef GEO_OS_EMSCRIPTEN
 #include <GLES3/gl3.h>
    #ifdef GEO_TBO_SUPPORTED

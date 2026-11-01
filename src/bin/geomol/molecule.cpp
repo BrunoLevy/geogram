@@ -43,6 +43,8 @@
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/debug_stream.h>
 #include <geogram/basic/geometry_nd.h>
+#include <geogram/basic/file_system.h>
+#include <geogram/basic/line_stream.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
 
@@ -127,6 +129,13 @@ namespace GEO {
     }
 
     bool Molecule::load(const std::string& filename) {
+	if(FileSystem::extension(filename) == "cif") {
+	    return load_CIF(filename);
+	}
+	return load_geogram(filename);
+    }
+
+    bool Molecule::load_geogram(const std::string& filename) {
 	Mesh M;
 	if(!mesh_load(filename, M)) {
 	    return false;
@@ -145,6 +154,34 @@ namespace GEO {
 	    atom_chain_[v] =
 		atom_chain_attr.is_bound() ? index_t(atom_chain_attr[v]) : 0 ;
 	}
+	update(true);
+	return true;
+    }
+
+    bool Molecule::load_CIF(const std::string& filename) {
+	LineInput in(filename);
+	if(!in.OK()) {
+	    Logger::err("CIF") << "Could not open " << filename << std::endl;
+	    return false;
+	}
+	atom_pos_.resize(0);
+	atom_type_.resize(0);
+	atom_chain_.resize(0);
+	Logger::out("CIF") << "Loading " << filename << std::endl;
+	while(in.get_line()) {
+	    in.get_fields();
+	    if(!strcmp(in.field(0),"ATOM")) {
+		char type = in.field(2)[0];
+		unsigned int chain = in.field_as_uint(7);
+		double x = in.field_as_double(10);
+		double y = in.field_as_double(11);
+		double z = in.field_as_double(12);
+		atom_pos_.emplace_back(x,y,z);
+		atom_type_.push_back(type);
+		atom_chain_.push_back(chain);
+	    }
+	}
+	nb_atoms_ = atom_pos_.size();
 	update(true);
 	return true;
     }
@@ -216,7 +253,10 @@ namespace GEO {
 	    Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 				    << std::endl;
 	}
-	update_cells();
+	{
+	    Stopwatch W("cells",verbose_);
+	    update_cells();
+	}
     }
 
     bool Molecule::close_cells() {
@@ -290,6 +330,26 @@ namespace GEO {
 	for(index_t c=0; c<4; ++c) {
 	    cells_[c].clear();
 	}
+
+	{
+	    Stopwatch W("S0 cells",verbose_);
+	    update_S0_cells();
+	}
+	{
+	    Stopwatch W("H1 cells",verbose_);
+	    update_H1_cells();
+	}
+	{
+	    Stopwatch W("H2 cells",verbose_);
+	    update_H2_cells();
+	}
+	{
+	    Stopwatch W("S3 cells",verbose_);
+	    update_S3_cells();
+	}
+
+
+	/*
 	// For big molecules it may be worth it doing all cell types in parallel.
 	parallel(
 	    [this]{update_S0_cells();},
@@ -297,6 +357,7 @@ namespace GEO {
 	    [this]{update_H2_cells();},
 	    [this]{update_S3_cells();}
 	);
+	*/
     }
 
     void Molecule::update_S0_cells() {
@@ -398,7 +459,6 @@ namespace GEO {
 
 		cells.begin_H_cell(c, axis, R2, p1, imposter_r, p2, imposter_r);
 
-
 		// generate the two polygonal caps
 		index_t h = h0;
 		cells.add_shrunk_power_facet(h, FLIPPED);
@@ -419,7 +479,6 @@ namespace GEO {
 		    }
 		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
 		} while(h != h0);
-
 
 		cells.end_cell();
 	    }
