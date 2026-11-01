@@ -191,7 +191,7 @@ namespace {
 
         uniform glup_Buffer cell_eqn_1_TBO;
         uniform glup_Buffer cell_imposter_1_TBO;
-        uniform bool replace_imposter;
+        uniform bool replace_imposter; // if set, use cell_imposter_1_TBO
 
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;

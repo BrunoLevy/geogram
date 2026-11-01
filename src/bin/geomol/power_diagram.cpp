@@ -38,6 +38,7 @@
  */
 
 #include "power_diagram.h"
+#include <geogram/basic/thread_sync.h>
 
 namespace GEO {
 
@@ -49,6 +50,7 @@ namespace GEO {
 	    max_v = nb_vertices();
 	}
 	skel_ptr_.assign(max_v+1, 0); // +1 because there is a "sentry"
+
 	// Step 1: compute number of tets incident to each vertex
 	for(index_t t=0; t<nb_tets(); ++t) {
 	    for(index_t lv=0; lv<4; ++lv) {
@@ -58,6 +60,7 @@ namespace GEO {
 		}
 	    }
 	}
+
 	// Step 2: compute number of edges incident to each vertex
 	// using Euler-Poincaré characteristic (Nicolas Ray's idea):
 	// The outer boundary of the set of tets incident to a
@@ -71,28 +74,37 @@ namespace GEO {
 	    geo_debug_assert((skel_ptr_[v] & 1) == 0);
 	    skel_ptr_[v] = 2 + skel_ptr_[v]/2;
 	}
+
 	// Step 3: update row pointers and assign space for skel_h_
 	for(index_t v=1; v<=max_v; ++v) {
 	    skel_ptr_[v] += skel_ptr_[v-1];
 	}
 	skel_h_.assign(skel_ptr_[max_v], NO_INDEX);
+
 	// Step 4: insert all halfedges in skel_h_, keeping a single
 	// halfedge per oriented edge (see insert_in_skel()).
-	for(index_t t: tets()) {
-	    for(index_t lv1=0; lv1<4; ++lv1) {
-		for(index_t lv2=0; lv2<4; ++lv2) {
-		    if(lv1 == lv2) {
-			continue;
-		    }
-		    index_t v1 = tet_vertex(t,lv1);
-		    index_t v2 = tet_vertex(t,lv2);
-		    if(v1 < max_v && v2 != NO_INDEX) {
-			index_t h = make_halfedge_from_t_lv_lv(t, lv1, lv2);
-			insert_in_skel(v1,v2,h);
+	if(locks_.size() != nb_vertices()) {
+	    locks_.resize(nb_vertices());
+	}
+	parallel_for(
+	    0, nb_tets(), [&](index_t t) {
+		for(index_t lv1=0; lv1<4; ++lv1) {
+		    for(index_t lv2=0; lv2<4; ++lv2) {
+			if(lv1 == lv2) {
+			    continue;
+			}
+			index_t v1 = tet_vertex(t,lv1);
+			index_t v2 = tet_vertex(t,lv2);
+			if(v1 < max_v && v2 != NO_INDEX) {
+			    index_t h = make_halfedge_from_t_lv_lv(t, lv1, lv2);
+			    locks_.acquire_spinlock(v1);
+			    insert_in_skel(v1,v2,h);
+			    locks_.release_spinlock(v1);
+			}
 		    }
 		}
 	    }
-	}
+	);
     }
 
     vec3 PowerDiagram::radical_point(
