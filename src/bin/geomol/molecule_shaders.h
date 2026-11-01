@@ -259,7 +259,7 @@ namespace {
            // U, V MUST be unit and orthogonal: T maps (u,v,1) with u^2+v^2=1
            // to center_w + R_w*(u*U + v*V).
            vec3 U, V;
-           orthonormal_basis(normalize(axis_w), U, V);
+           orthonormal_basis(axis_w, U, V);
 
            // Remember, matrices are column-major order in GLSL!
            mat3x4 T = mat3x4(
@@ -457,8 +457,8 @@ namespace {
             R2 = focus_R.w;
             n = glup_fetch(cell_eqn_2_TBO,cell_id).xyz;
 
+            vec2 offset = imposter_offset[gl_VertexID%6];
             if(full_imposters) {
-               vec2 offset = imposter_offset[gl_VertexID%6];
                gl_Position = vec4(offset,0.0,1.0);
                return;
             }
@@ -466,8 +466,6 @@ namespace {
             vec4 imp1 = glup_fetch(cell_imposter_1_TBO,cell_id);
             vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
 
-            float a11, a12, b11, b12; // bounds of first cap
-            float a21, a22, b21, b22; // bounds of second cap
             vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
             vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);
 
@@ -475,33 +473,23 @@ namespace {
             vec2 N1_c = vec2(UV2.xy/UV2.w-UV1.xy/UV1.w);
             vec2 N2_c = normalize(vec2(-N1_c.y, N1_c.x));
             // fix N1_c to ensure orthog w.r.t. N2_c *in window coords*
+            // (W*W and H*H: pullback dot product from win to clip space)
             float W = GLUP.viewport[2]; float H = GLUP.viewport[3];
             N1_c = normalize(vec2(N1_c.x * W * W, N1_c.y * H * H));
 
+            float a11, a12, b11, b12; // bounds of first cap
+            float a21, a22, b21, b22; // bounds of second cap
             project_disk(imp1.xyz, n, imp1.w, N1_c, N2_c, a11, a12, b11, b12);
             project_disk(imp2.xyz, n, imp2.w, N1_c, N2_c, a21, a22, b21, b22);
 
-            // bounding line equations
-            vec3 A1 = vec3(N1_c,min(a11,a21));
-            vec3 A2 = vec3(N1_c,max(a12,a22));
-            vec3 B1 = vec3(N2_c,min(b11,b21));
-            vec3 B2 = vec3(N2_c,max(b12,b22));
-            switch(gl_VertexID % 6) {
-               case 0:
-               case 3:
-                  gl_Position = vec4(intersect(A1,B1),0.0, 1.0);
-                  break;
-               case 1:
-                  gl_Position = vec4(intersect(A2,B1),0.0, 1.0);
-                  break;
-               case 2:
-               case 4:
-                  gl_Position = vec4(intersect(A2,B2),0.0, 1.0);
-                  break;
-               case 5:
-                  gl_Position = vec4(intersect(A1,B2),0.0, 1.0);
-                  break;
-            };
+            vec2 uv = 0.5*(offset+vec2(1.0,1.0)); // remap offset to [0,1]
+            // bounding line equations. Note: line eqn: dot(N1_c,UV)+alpha = 0->
+            // large alpha means small U (same thing for beta,V), hence
+            // max alphas, max betas first -. then mins -.
+            //                              v            v
+            vec3 A = vec3(N1_c, mix(max(a12,a22), min(a11,a21), uv.x));
+            vec3 B = vec3(N2_c, mix(max(b12,b22), min(b11,b21), uv.y));
+            gl_Position=vec4(intersect(A,B),0.0,1.0);
 	}
 	)"
 
