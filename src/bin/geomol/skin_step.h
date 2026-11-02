@@ -994,11 +994,11 @@ namespace MSS_Claude {
 	    const double zsplit = 2.5 * z0; // near cap / far part boundary
 	    for (int sigma : {1, -1}) {
 		vec3 axis = q.a * double(sigma);
-		std::vector<HalfSpace> near = cell;
-		near.push_back(above(axis, q.c, 0));
-		near.push_back(below(axis, q.c, zsplit));
+		std::vector<HalfSpace> near_hs = cell;
+		near_hs.push_back(above(axis, q.c, 0));
+		near_hs.push_back(below(axis, q.c, zsplit));
 		TrimResult R;
-		trim_quadric(q, near, P.solid_is_inside, w, R);
+		trim_quadric(q, near_hs, P.solid_is_inside, w, R);
 		if (!R.loops.empty()) {
 		    // domain [-r,r]^2 covers zeta <= 2.7 z0 and
 		    // stays inside the disk s^2+t^2 < B
@@ -1008,10 +1008,10 @@ namespace MSS_Claude {
 		    );
 		    n += emit_faces(q, P.solid_is_inside, w, R, S);
 		}
-		std::vector<HalfSpace> far = cell;
-		far.push_back(above(axis, q.c, zsplit));
+		std::vector<HalfSpace> far_hs = cell;
+		far_hs.push_back(above(axis, q.c, zsplit));
 		double zmin, zmax;
-		if (!axial_range(far, axis, zmin, zmax)) continue;
+		if (!axial_range(far_hs, axis, zmin, zmax)) continue;
 		auto G  = [=](double t) {
 		    return vec2(rc * std::sinh(t), z0 * std::cosh(t));
 		};
@@ -1019,7 +1019,7 @@ namespace MSS_Claude {
 		    return vec2(rc * std::cosh(t), z0 * std::sinh(t));
 		};
 		revolution_pieces(
-		    far, axis, G, dG, std::acosh(zsplit / z0),
+		    far_hs, axis, G, dG, std::acosh(zsplit / z0),
 		    std::acosh(std::max(2.6, 1.05 * zmax / z0))
 		);
 	    }
