@@ -173,7 +173,7 @@ namespace MSS_Claude {
     // f(p) = q . Q q - A, q = p - c.   Sphere: Q = I, A = r^2.
     // Hyperboloid: Q = I - (1+B) a a^T  (so q.Qq = rho^2 - B z^2).
     struct Quadric {
-	vec3 c, a{0, 0, 1};
+	vec3 c{0, 0, 0}, a{0, 0, 1};
 	double A = 1, B = -1;
 	bool sphere = true;
 	vec3 Q(const vec3& v) const {
@@ -288,7 +288,7 @@ namespace MSS_Claude {
 		out.push_back(c);
 	    } else {                                     // hyperbola, l1 > 0 > l2
 		if (std::fabs(k) <= tol) return out;     // two lines (tangent plane): ignored
-		vec3 X; double a, b;
+		vec3 X{0,0,0}; double a, b;
 		if (k > 0) { X = v1; a = std::sqrt(k / l1);  b = std::sqrt(k / (-l2)); }
 		else       { X = v2; a = std::sqrt(k / l2);  b = std::sqrt(-k / l1);  }
 		for (double sgn : {1.0, -1.0}) {

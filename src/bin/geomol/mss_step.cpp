@@ -39,7 +39,7 @@ namespace MSS_Claude {
 	const double L = 1e4;
 	C.init_with_box(-L,-L,-L,L,L,L);
 	for(const HalfSpace& h: H) {
-	    C.clip_by_plane({-h.n,h.d});
+	    C.clip_by_plane({-h.n,h.d}); // Damnit, Halfspace is not x,y,z,w
 	}
 	C.compute_geometry();
 
@@ -49,7 +49,7 @@ namespace MSS_Claude {
 
 	// get vertices and initialize t_index and v2t
 	for(
-	    ushort t = C.first_triangle(); t != VBW::END_OF_LIST;
+	    VBW::ushort t = C.first_triangle(); t != VBW::END_OF_LIST;
 	    t = C.next_triangle(t)
 	) {
 	    t_index[t] = index_t(P.verts.size());
