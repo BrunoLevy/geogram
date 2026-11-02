@@ -1,7 +1,7 @@
 // molecule_step.h
 //
 // Export of geomol's molecular skin surface (geogram, src/bin/geomol/molecule.h)
-// as trimmed parametric surfaces in STEP, using the writer in skin_step.h.
+// as trimmed parametric surfaces in STEP, using the writer in mss_step.h.
 //
 // Data read from Molecule::MixedComplexCells (public):
 //   cells.nb_cells()
@@ -41,7 +41,7 @@
 #include <geogram/basic/geometry.h>
 #include "molecule.h"
 #endif
-#include "skin_step.h"
+#include "mss_step.h"
 
 namespace MSS_Claude {
 
