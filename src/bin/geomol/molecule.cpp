@@ -139,7 +139,7 @@ namespace GEO {
     bool Molecule::save(const std::string& filename) const {
 	if(FileSystem::extension(filename) == "stp") {
 	    double threshold = 1e-5;
-	    return skin::save_molecule_STEP(
+	    return MSS_Claude::save_molecule_STEP(
 		const_cast<Molecule&>(*this),filename,threshold
 	    );
 	}

@@ -38,34 +38,46 @@
 #endif
 #include "skin_step.h"
 
-namespace skin {
+namespace MSS_Claude {
 
-typedef GEO::Molecule::MixedComplexCells Cells;
+    typedef GEO::Molecule::MixedComplexCells Cells;
 
-// Clipping planes of cell c as half-spaces n.p <= d.
-// sign: +1 => inside is n.p + d <= 0, -1 => inside is n.p + d >= 0, 0 => auto-detect
-// (on return, sign holds the detected value).
-std::vector<HalfSpace> cell_halfspaces(const Cells& cells, GEO::index_t c, int& sign, double tol);
+    // Clipping planes of cell c as half-spaces n.p <= d.
+    // sign: +1 => inside is n.p + d <= 0, -1 => inside is n.p + d >= 0, 0 => auto-detect
+    // (on return, sign holds the detected value).
+    std::vector<HalfSpace> cell_halfspaces(
+	const Cells& cells, GEO::index_t c, int& sign, double tol
+    );
 
-// Hyperboloid parameters from a cell equation (the place to adapt the R2 convention).
-HyperboloidPatch quadric_from_cell_eqn(const GEO::vec4f& eq1, const GEO::vec4f& eq2,
-                                       bool is_H2, double shrink_factor);
+    // Hyperboloid parameters from a cell equation (the place to adapt the R2 convention).
+    HyperboloidPatch quadric_from_cell_eqn(
+	const GEO::vec4f& eq1, const GEO::vec4f& eq2,
+	bool is_H2, double shrink_factor
+    );
 
-// S0 / S3 cell -> trimmed SPHERICAL_SURFACE face.
-bool sphere_cell_to_step(const Cells& cells, GEO::index_t c, bool is_S3,
-                         StepWriter& w, int plane_sign = 0);
+    // S0 / S3 cell -> trimmed SPHERICAL_SURFACE face.
+    bool sphere_cell_to_step(
+	const Cells& cells, GEO::index_t c, bool is_S3,
+	StepWriter& w, int plane_sign = 0
+    );
 
-// H1 / H2 cell -> trimmed SURFACE_OF_REVOLUTION(HYPERBOLA) face(s).
-bool hyperboloid_cell_to_step(const Cells& cells, GEO::index_t c, bool is_H2, double shrink_factor,
-                              StepWriter& w, int plane_sign = 0);
+    // H1 / H2 cell -> trimmed SURFACE_OF_REVOLUTION(HYPERBOLA) face(s).
+    bool hyperboloid_cell_to_step(
+	const Cells& cells, GEO::index_t c, bool is_H2, double shrink_factor,
+	StepWriter& w, int plane_sign = 0
+    );
 
-// Converts a whole family. Returns the number of cells that produced faces
-// (empty cells, where the quadric misses the polytope, produce none).
-GEO::index_t mixed_cells_to_step(const Cells& cells, GEO::Molecule::MixedCellType type,
-                                 double shrink_factor, StepWriter& w, int plane_sign = 0);
+    // Converts a whole family. Returns the number of cells that produced faces
+    // (empty cells, where the quadric misses the polytope, produce none).
+    GEO::index_t mixed_cells_to_step(
+	const Cells& cells, GEO::Molecule::MixedCellType type,
+	double shrink_factor, StepWriter& w, int plane_sign = 0
+    );
 
-// Converts all four families of a molecule and writes the STEP file.
-// Requires Molecule::cells(type) (see above); shrink_factor() is used for B.
-bool save_molecule_STEP(GEO::Molecule& mol, const std::string& filename, double tol = 3e-5);
+    // Converts all four families of a molecule and writes the STEP file.
+    // Requires Molecule::cells(type) (see above); shrink_factor() is used for B.
+    bool save_molecule_STEP(
+	GEO::Molecule& mol, const std::string& filename, double tol = 3e-5
+    );
 
-} // namespace skin
+} // namespace MSS_Claude
