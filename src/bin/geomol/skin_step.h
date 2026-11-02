@@ -853,7 +853,9 @@ namespace MSS_Claude {
 	return nfaces;
     }
 
-    static std::vector<HalfSpace> normalised(const std::vector<HalfSpace>& cell) {
+    static std::vector<HalfSpace> normalised(
+	const std::vector<HalfSpace>& cell
+    ) {
 	std::vector<HalfSpace> out;
 	for (const auto& h : cell) {
 	    double n = length(h.n);
@@ -863,16 +865,26 @@ namespace MSS_Claude {
     }
 
     // half-space  dir . (p - c) >= z0   as a HalfSpace
-    static HalfSpace above(const vec3& dir, const vec3& c, double z0) { return {-dir, -(dot(dir, c) + z0)}; }
+    static HalfSpace above(const vec3& dir, const vec3& c, double z0) {
+	return {-dir, -(dot(dir, c) + z0)};
+    }
+
     // half-space  dir . (p - c) <= z1
-    static HalfSpace below(const vec3& dir, const vec3& c, double z1) { return {dir, dot(dir, c) + z1}; }
+    static HalfSpace below(const vec3& dir, const vec3& c, double z1) {
+	return {dir, dot(dir, c) + z1};
+    }
 
 // ------------------------------------------------------------- public API --
 
-    // Sphere ∩ convex cell -> trimmed SPHERICAL_SURFACE faces (one per octant met).
+    // Sphere ∩ convex cell -> trimmed SPHERICAL_SURFACE faces
+    // (one per octant met).
     inline bool sphere_patch_to_step(const SpherePatch& P, StepWriter& w) {
 	if (P.radius <= 0) return false;
-	Quadric q; q.sphere = true; q.c = P.center; q.A = P.radius * P.radius; q.B = -1;
+	Quadric q;
+	q.sphere = true;
+	q.c = P.center;
+	q.A = P.radius * P.radius;
+	q.B = -1;
 	std::vector<HalfSpace> cell = normalised(P.cell);
 	int n = 0;
 	for (int sx : {-1, 1}) for (int sy : {-1, 1}) for (int sz : {-1, 1}) {
@@ -883,40 +895,68 @@ namespace MSS_Claude {
 		    TrimResult R;
 		    trim_quadric(q, sub, P.solid_is_inside, w, R);
 		    if (R.loops.empty()) continue;
-		    Surface S = sphere_surface(q, normalize(vec3{double(sx), double(sy), double(sz)}), P.solid_is_inside, w);
+		    Surface S = sphere_surface(
+			q, normalize(vec3{double(sx), double(sy), double(sz)}),
+			P.solid_is_inside, w
+		    );
 		    n += emit_faces(q, P.solid_is_inside, w, R, S);
 		}
 	return n > 0;
     }
 
     // Hyperboloid of revolution ∩ convex cell -> trimmed rational Bezier faces.
-    inline bool hyperboloid_patch_to_step(const HyperboloidPatch& P, StepWriter& w) {
-	if (P.B <= 0 || P.A == 0 || length(P.axis) == 0) return false;
-	Quadric q; q.sphere = false; q.c = P.center; q.a = normalize(P.axis); q.A = P.A; q.B = P.B;
+    inline bool hyperboloid_patch_to_step(
+	const HyperboloidPatch& P, StepWriter& w
+    ) {
+	if (P.B <= 0 || P.A == 0 || length(P.axis) == 0) {
+	    return false;
+	}
+	Quadric q;
+	q.sphere = false;
+	q.c = P.center;
+	q.a = normalize(P.axis);
+	q.A = P.A;
+	q.B = P.B;
 	const std::vector<HalfSpace> cell = normalised(P.cell);
 	const vec3 e1 = any_perp(q.a), e2 = cross(q.a, e1);
-	const double tol = w.tol(), phi = 55.0 * M_PI / 180.0;   // sector half-angle (90 deg cut + margin)
+	const double tol = w.tol(), phi = 55.0 * M_PI / 180.0;
+           // sector half-angle (90 deg cut + margin)
 	int n = 0;
 
-	auto axial_range = [&](const std::vector<HalfSpace>& sub, const vec3& axis, double& zmin, double& zmax) {
+	auto axial_range = [&](
+	    const std::vector<HalfSpace>& sub, const vec3& axis,
+	    double& zmin, double& zmax
+	) {
 	    Polytope pt = build_polytope(sub, tol);
 	    if (pt.verts.size() < 4) return false;
 	    zmin = 1e300; zmax = -1e300;
-	    for (const vec3& v : pt.verts) { double z = dot(axis, v - q.c); zmin = std::min(zmin, z); zmax = std::max(zmax, z); }
+	    for (const vec3& v : pt.verts) {
+		double z = dot(axis, v - q.c);
+		zmin = std::min(zmin, z);
+		zmax = std::max(zmax, z);
+	    }
 	    return zmax > zmin;
 	};
 
-	// Revolution pieces: sectors x axial segments of the generatrix (rho(t), z(t)).
-	auto revolution_pieces = [&](const std::vector<HalfSpace>& base, const vec3& axis,
-				     const std::function<vec2(double)>& G, const std::function<vec2(double)>& dG,
-				     double T0, double T1) {
+	// Revolution pieces: sectors x axial segments
+	// of the generatrix (rho(t), z(t)).
+	auto revolution_pieces = [&](
+	    const std::vector<HalfSpace>& base, const vec3& axis,
+	    const std::function<vec2(double)>& G,
+	    const std::function<vec2(double)>& dG,
+	    double T0, double T1
+	) {
 	    int nseg = std::max(1, (int)std::ceil((T1 - T0) / 1.5));
 	    for (int k = 0; k < nseg; ++k) {
-		double Ta = T0 + (T1 - T0) * k / nseg, Tb = T0 + (T1 - T0) * (k + 1) / nseg;
+		double Ta = T0 + (T1 - T0) * k / nseg;
+		double Tb = T0 + (T1 - T0) * (k + 1) / nseg;
 		double delta = 0.05 * (Tb - Ta);
 		vec2 Gp[3]; double w1;
-		if (!conic_arc_bezier(G, dG, Ta - delta, Tb + delta, Gp, w1)) continue;
-		for (int s1 : {-1, 1}) for (int s2 : {-1, 1}) {
+		if (!conic_arc_bezier(G, dG, Ta - delta, Tb + delta, Gp, w1)) {
+		    continue;
+		}
+		for (int s1 : {-1, 1}) {
+		    for (int s2 : {-1, 1}) {
 			std::vector<HalfSpace> sub = base;
 			sub.push_back(above(e1 * double(s1), q.c, 0));
 			sub.push_back(above(e2 * double(s2), q.c, 0));
@@ -925,23 +965,33 @@ namespace MSS_Claude {
 			TrimResult R;
 			trim_quadric(q, sub, P.solid_is_inside, w, R);
 			if (R.loops.empty()) continue;
-			Surface S = revolution_surface(q, axis, normalize(e1 * double(s1) + e2 * double(s2)), phi, Gp, w1, P.solid_is_inside, w);
+			Surface S = revolution_surface(
+			    q, axis, normalize(e1*double(s1) + e2*double(s2)),
+			    phi, Gp, w1, P.solid_is_inside, w
+			);
 			n += emit_faces(q, P.solid_is_inside, w, R, S);
 		    }
+		}
 	    }
 	};
 
-	if (q.A > 0) {                                        // one sheet: rho = sa cosh t, z = sb sinh t
+	if (q.A > 0) { // one sheet: rho = sa cosh t, z = sb sinh t
 	    double zmin, zmax;
 	    if (!axial_range(cell, q.a, zmin, zmax)) return false;
 	    double m = 0.05 * (zmax - zmin); zmin -= m; zmax += m;
 	    double sa = std::sqrt(q.A), sb = std::sqrt(q.A / q.B);
-	    auto G  = [=](double t) { return vec2(sa * std::cosh(t), sb * std::sinh(t)); };
-	    auto dG = [=](double t) { return vec2(sa * std::sinh(t), sb * std::cosh(t)); };
-	    revolution_pieces(cell, q.a, G, dG, std::asinh(zmin / sb), std::asinh(zmax / sb));
-	} else {                                              // two sheets, one at a time
+	    auto G  = [=](double t) {
+		return vec2(sa * std::cosh(t), sb * std::sinh(t));
+	    };
+	    auto dG = [=](double t) {
+		return vec2(sa * std::sinh(t), sb * std::cosh(t));
+	    };
+	    revolution_pieces(
+		cell, q.a, G, dG, std::asinh(zmin / sb), std::asinh(zmax / sb)
+	    );
+	} else { // two sheets, one at a time
 	    double z0 = std::sqrt(-q.A / q.B), rc = std::sqrt(-q.A);
-	    const double zsplit = 2.5 * z0;                   // near cap / far part boundary
+	    const double zsplit = 2.5 * z0; // near cap / far part boundary
 	    for (int sigma : {1, -1}) {
 		vec3 axis = q.a * double(sigma);
 		std::vector<HalfSpace> near = cell;
@@ -950,17 +1000,28 @@ namespace MSS_Claude {
 		TrimResult R;
 		trim_quadric(q, near, P.solid_is_inside, w, R);
 		if (!R.loops.empty()) {
-		    // domain [-r,r]^2 covers zeta <= 2.7 z0 and stays inside the disk s^2+t^2 < B
-		    Surface S = stereographic_surface(q, axis, z0, std::sqrt(q.B * 1.7 / 3.7), P.solid_is_inside, w);
+		    // domain [-r,r]^2 covers zeta <= 2.7 z0 and
+		    // stays inside the disk s^2+t^2 < B
+		    Surface S = stereographic_surface(
+			q, axis, z0, std::sqrt(q.B * 1.7 / 3.7),
+			P.solid_is_inside, w
+		    );
 		    n += emit_faces(q, P.solid_is_inside, w, R, S);
 		}
 		std::vector<HalfSpace> far = cell;
 		far.push_back(above(axis, q.c, zsplit));
 		double zmin, zmax;
 		if (!axial_range(far, axis, zmin, zmax)) continue;
-		auto G  = [=](double t) { return vec2(rc * std::sinh(t), z0 * std::cosh(t)); };
-		auto dG = [=](double t) { return vec2(rc * std::cosh(t), z0 * std::sinh(t)); };
-		revolution_pieces(far, axis, G, dG, std::acosh(zsplit / z0), std::acosh(std::max(2.6, 1.05 * zmax / z0)));
+		auto G  = [=](double t) {
+		    return vec2(rc * std::sinh(t), z0 * std::cosh(t));
+		};
+		auto dG = [=](double t) {
+		    return vec2(rc * std::cosh(t), z0 * std::sinh(t));
+		};
+		revolution_pieces(
+		    far, axis, G, dG, std::acosh(zsplit / z0),
+		    std::acosh(std::max(2.6, 1.05 * zmax / z0))
+		);
 	    }
 	}
 	return n > 0;
