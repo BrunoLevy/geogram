@@ -75,6 +75,7 @@ namespace GEO {
 	 */
 	bool load(const std::string& filename);
 
+	bool save(const std::string& filename) const;
 
 	void initialize_demo();
 
@@ -142,6 +143,8 @@ namespace GEO {
 
 	/**************************************************************/
 
+	/**************************************************************/
+
     protected:
 
 	bool load_geogram(const std::string& filename);
@@ -199,6 +202,7 @@ namespace GEO {
 
 	/***********************************************************************/
 
+    public:
 	/**
 	 * \brief A familly of cells of the mixed complex.
 	 * \details Stores all the polygons in compressed row storage.
@@ -527,7 +531,6 @@ namespace GEO {
 
 	    bool store_mesh_ = false;
 	};
-
 
 	const MixedComplexCells& cells(index_t type) const {
 	    return cells_[type];

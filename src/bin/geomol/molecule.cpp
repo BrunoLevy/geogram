@@ -47,6 +47,7 @@
 #include <geogram/basic/line_stream.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
+#include "molecule_step.h"
 
 // TODO:
 //  - S0: OK
@@ -133,6 +134,16 @@ namespace GEO {
 	    return load_CIF(filename);
 	}
 	return load_geogram(filename);
+    }
+
+    bool Molecule::save(const std::string& filename) const {
+	if(FileSystem::extension(filename) == "stp") {
+	    double threshold = 1e-5;
+	    return skin::save_molecule_STEP(
+		const_cast<Molecule&>(*this),filename,threshold
+	    );
+	}
+	return false;
     }
 
     bool Molecule::load_geogram(const std::string& filename) {

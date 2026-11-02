@@ -247,7 +247,7 @@ namespace {
         }
 
         std::string supported_write_file_extensions() override {
-            return "";
+            return "stp;step";
         }
 
         bool load(const std::string& filename) override {
@@ -261,6 +261,10 @@ namespace {
 	    }
 	    return result;
         }
+
+        bool save(const std::string& filename) override {
+	    return molecule_.save(filename);
+	}
 
     private:
 	Molecule molecule_;
