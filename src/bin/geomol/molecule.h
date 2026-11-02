@@ -199,33 +199,6 @@ namespace GEO {
 
 	/***********************************************************************/
 
-    protected:
-
-	/** \brief symbolic constant for MixedCells::add_XXX() */
-	static constexpr bool FLIPPED = true;
-
-	/**
-	 * \brief When called the first time, creates the shaders used to
-	 *  render S0, H1, H2 and S3 patches.
-	 * \details Shaders sources are in molecule_shaders.h
-	 */
-	void create_shaders_if_needed();
-
-	/***********************************************************************/
-
-	double atom_radius(index_t v) const {
-	    return atom_size_*atom_radius_from_type(atom_type_[v]);
-	}
-
-	vec3 atom_color(index_t v) const {
-	    return atom_color_from_type(atom_type_[v]);
-	}
-
-	static double atom_radius_from_type(char c);
-	static vec3 atom_color_from_type(char c);
-
-	/***********************************************************************/
-
 	/**
 	 * \brief A familly of cells of the mixed complex.
 	 * \details Stores all the polygons in compressed row storage.
@@ -477,7 +450,6 @@ namespace GEO {
 
 	    /*************************************************/
 
-
 	protected:
 	    /**
 	     * \brief Used internally by draw()
@@ -555,6 +527,33 @@ namespace GEO {
 
 	    bool store_mesh_ = false;
 	};
+
+
+	const MixedComplexCells& cells(index_t type) const {
+	    return cells_[type];
+	}
+
+    protected:
+	/** \brief symbolic constant for MixedCells::add_XXX() */
+	static constexpr bool FLIPPED = true;
+
+	/**
+	 * \brief When called the first time, creates the shaders used to
+	 *  render S0, H1, H2 and S3 patches.
+	 * \details Shaders sources are in molecule_shaders.h
+	 */
+	void create_shaders_if_needed();
+
+	double atom_radius(index_t v) const {
+	    return atom_size_*atom_radius_from_type(atom_type_[v]);
+	}
+
+	vec3 atom_color(index_t v) const {
+	    return atom_color_from_type(atom_type_[v]);
+	}
+
+	static double atom_radius_from_type(char c);
+	static vec3 atom_color_from_type(char c);
 
     private:
 	index_t nb_atoms_;

@@ -48,7 +48,7 @@
 #include <vector>
 #include <typeinfo>
 
-// #define GEO_TBO_SUPPORTED
+#define GEO_TBO_SUPPORTED
 
 // Note: for molecules with 2.5M atoms, it is FASTER
 // using standard texture than TBOs (with GEO_TBO_SUPPORTED *deactivated*
