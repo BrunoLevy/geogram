@@ -1,5 +1,7 @@
 #include "mss_step.h"
 
+#include <geogram/voronoi/convex_cell.h>
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -13,7 +15,68 @@ namespace {
 
 namespace MSS_Claude {
 
+    void show_polytope(const Polytope& P) {
+	std::cerr << "Polytope" << std::endl;
+	std::cerr << "  Vertices" << std::endl;
+	for(const vec3 p: P.verts) {
+	    std::cerr << p << ", ";
+	}
+	std::cerr << std::endl;
+	std::cerr << "  Facets" << std::endl;
+	for(auto F: P.faces) {
+	    for(index_t v: F) {
+		std::cerr << v << " ";
+	    }
+	    std::cerr << std::endl;
+	}
+    }
+
+    // My version, based on ConvexCell
     Polytope build_polytope(const std::vector<HalfSpace>& H, double tol) {
+	geo_argused(tol);
+	ConvexCell C;
+	C.use_exact_predicates(true);
+	const double L = 1e4;
+	C.init_with_box(-L,-L,-L,L,L,L);
+	for(const HalfSpace& h: H) {
+	    C.clip_by_plane({-h.n,h.d});
+	}
+	C.compute_geometry();
+
+	Polytope P;
+	vector<index_t> v2t(C.nb_v(),VBW::index_t(-1));
+	vector<index_t> t_index(C.nb_t(),VBW::index_t(-1));
+
+	// get vertices and initialize t_index and v2t
+	for(
+	    ushort t = C.first_triangle(); t != VBW::END_OF_LIST;
+	    t = C.next_triangle(t)
+	) {
+	    t_index[t] = index_t(P.verts.size());
+	    P.verts.push_back(C.triangle_point(t));
+	    VBW::Triangle T = C.get_triangle(t);
+	    v2t[T.i] = t;
+	    v2t[T.j] = t;
+	    v2t[T.k] = t;
+	}
+
+	// get facets
+	for(index_t v=7; v<C.nb_v(); ++v) {
+            if(v2t[v] != VBW::index_t(-1)) {
+                index_t t = v2t[v];
+		P.faces.emplace_back();
+                do {
+		    P.faces.rbegin()->push_back(t_index[t]);
+		    index_t lv = C.triangle_find_vertex(t,v);
+                    t = C.triangle_adjacent(t, (lv + 1)%3);
+                } while(t != v2t[v]);
+            }
+	}
+	return P;
+    }
+
+    // Initial version by Claude
+    Polytope build_polytope_0(const std::vector<HalfSpace>& H, double tol) {
 	Polytope P;
 	const int n = (int)H.size();
 	auto inside = [&](const vec3& p) {
@@ -35,7 +98,9 @@ namespace MSS_Claude {
 		    vec3 p = (njk * H[i].d +
 			      cross(H[k].n, H[i].n) * H[j].d +
 			      cross(H[i].n, H[j].n) * H[k].d) * (1.0 / det);
-		    if (!inside(p)) continue;
+		    if (!inside(p)) {
+			continue;
+		    }
 		    bool dup = false;
 		    for (const auto& v : P.verts) {
 			if (length(v - p) <= tol) {
