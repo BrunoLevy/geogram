@@ -66,8 +66,7 @@ namespace {
     };
 
     // My version, based on ConvexCell
-    Polytope build_polytope(const std::vector<HalfSpace>& H, double tol) {
-	geo_argused(tol);
+    Polytope build_polytope(const std::vector<HalfSpace>& H) {
 	ConvexCell C;
 	C.use_exact_predicates(true);
 	const double L = 1e4;
@@ -499,7 +498,9 @@ namespace {
 	    const vec3 ni = cell[i].n, nj = cell[j].n;
 	    vec3 dir = cross(ni, nj);
 	    double L2 = dot(dir, dir);
-	    if (L2 < 1e-20) return p;
+	    if (L2 < 1e-20) {
+		return p;
+	    }
 	    // point on the line: solve for x = al ni + be nj
 	    double a11 = dot(ni, ni);
 	    double a12 = dot(ni, nj);
@@ -524,7 +525,8 @@ namespace {
 		    roots.push_back((-bb + disc) / aa);
 		}
 	    }
-	    vec3 best = p; double bd = 1e300;
+	    vec3 best = p;
+	    double bd = std::numeric_limits<double>::max();
 	    for (double t : roots) {
 		vec3 x = p0 + dir * t;
 		double d = length(x - p);
@@ -1184,7 +1186,9 @@ namespace MSS_Claude {
     // Sphere ∩ convex cell -> trimmed SPHERICAL_SURFACE faces
     // (one per octant met).
     bool sphere_patch_to_step(const SpherePatch& P, StepWriter& w) {
-	if (P.radius <= 0) return false;
+	if (P.radius <= 0) {
+	    return false;
+	}
 	Quadric q;
 	q.sphere = true;
 	q.c = P.center;
@@ -1201,7 +1205,9 @@ namespace MSS_Claude {
 		    sub.push_back(above({0, 0, double(sz)}, q.c, 0));
 		    TrimResult R;
 		    trim_quadric(q, sub, P.solid_is_inside, w, R);
-		    if (R.loops.empty()) continue;
+		    if (R.loops.empty()) {
+			continue;
+		    }
 		    Surface S = sphere_surface(
 			q, normalize(vec3{double(sx), double(sy), double(sz)}),
 			P.solid_is_inside, w
@@ -1225,8 +1231,9 @@ namespace MSS_Claude {
 	q.A = P.A;
 	q.B = P.B;
 	const std::vector<HalfSpace> cell = normalised(P.cell);
-	const vec3 e1 = any_perp(q.a), e2 = cross(q.a, e1);
-	const double tol = w.tol(), phi = 55.0 * M_PI / 180.0;
+	const vec3 e1 = any_perp(q.a);
+	const vec3 e2 = cross(q.a, e1);
+	const double phi = 55.0 * M_PI / 180.0;
            // sector half-angle (90 deg cut + margin)
 	int n = 0;
 
@@ -1234,15 +1241,18 @@ namespace MSS_Claude {
 	    const std::vector<HalfSpace>& sub, const vec3& axis,
 	    double& zmin, double& zmax
 	) {
-	    Polytope pt = build_polytope(sub, tol);
-	    if (pt.verts.size() < 4) return false;
-	    zmin = 1e300; zmax = -1e300;
+	    Polytope pt = build_polytope(sub);
+	    if (pt.verts.size() < 4) { // TODO: <= 8? (8 vertices of bbox)
+		return false;
+	    }
+	    zmin =  std::numeric_limits<double>::max();
+	    zmax = -std::numeric_limits<double>::max();
 	    for (const vec3& v : pt.verts) {
 		double z = dot(axis, v - q.c);
 		zmin = std::min(zmin, z);
 		zmax = std::max(zmax, z);
 	    }
-	    return zmax > zmin;
+	    return (zmax > zmin);
 	};
 
 	// Revolution pieces: sectors x axial segments
@@ -1284,7 +1294,9 @@ namespace MSS_Claude {
 
 	if (q.A > 0) { // one sheet: rho = sa cosh t, z = sb sinh t
 	    double zmin, zmax;
-	    if (!axial_range(cell, q.a, zmin, zmax)) return false;
+	    if (!axial_range(cell, q.a, zmin, zmax)) {
+		return false;
+	    }
 	    double m = 0.05 * (zmax - zmin); zmin -= m; zmax += m;
 	    double sa = std::sqrt(q.A), sb = std::sqrt(q.A / q.B);
 	    auto G  = [=](double t) {

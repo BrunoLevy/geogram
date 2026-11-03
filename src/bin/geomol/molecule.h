@@ -385,7 +385,11 @@ namespace GEO {
 
 	    std::pair<vec4f, vec4f> cell_eqn(index_t c) const {
 		geo_debug_assert(c < nb_cells());
-		return {cell_eqn_1_[c], cell_eqn_2_[c]};
+		if(cell_eqn_2_.size() != 0) {
+		    return {cell_eqn_1_[c], cell_eqn_2_[c]};
+		} else {
+		    return {cell_eqn_1_[c], vec4f(0.0f, 0.0f, 0.0f, 0.0f)};
+		}
 	    }
 
 	    /*************************************************/
