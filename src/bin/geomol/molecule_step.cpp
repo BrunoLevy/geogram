@@ -1,64 +1,57 @@
-// molecule_step.cpp  -  see molecule_step.h
+// written by Claude, slightly edited
+
 #include "molecule_step.h"
+#include "mss_step.h"
 
-namespace MSS_Claude {
+// Data read from Molecule::MixedComplexCells (public):
+//   cells.nb_cells()
+//   cells.cell_eqn(c)-> {vec4f, vec4f}
+//                    sphere      : {cx,cy,cz,R},  {unused,unused,unused,cell_id}
+//                    hyperboloid : {fx,fy,fz,R2}, {axisx,axisy,axisz,cell_id}
+//   cells.cell_planes(c)  -> range of vec4f (nx,ny,nz,d) with n.p + d = 0
+//                            (from end_facet() or add_facet_plane()).
+//
+// Cell families (Molecule::MixedCellType):
+//   CELL_TYPE_S0 (atom)         sphere,      solid = inside the sphere
+//   CELL_TYPE_H1 (edge)         hyperboloid  rho^2 - (s/(1-s)) z^2 = -s R2,
+//                                            solid = {<=}
+//   CELL_TYPE_H2 (triangle)     hyperboloid
+//                               rho^2 - ((1-s)/s) z^2 = (1-s) R2,  solid = {>=}
+//   CELL_TYPE_S3 (tetrahedron)  sphere,      solid = complement
+// (s = shrink factor; either hyperboloid has one or two sheets
+//  depending on the sign).
+//
+// Two conventions are not visible in molecule.h (they live in the shaders of
+// molecule_shaders.h) and are isolated so they are a one-line change:
+//   * which side of a clipping plane is inside: auto-detected per cell (the sign
+//     for which the planes bound a non-empty polytope),
+//     or forced with plane_sign;
+//   * the meaning of {f,R2}: verified on geomol output to be the radical point /
+//     orthocenter and its power for the balls with doubled weights (2 r^2); the
+//     hyperboloid constant is -s R2 (H1) or (1-s) R2 (H2),
+//     see quadric_from_cell_eqn().
 
-    static vec3 xyz(const GEO::vec4f& v) {
-	return {double(v.x), double(v.y), double(v.z)};
-    }
+namespace {
+    using namespace MSS_Claude;
 
-    // Claude's version
-    /*
-    std::vector<HalfSpace> cell_halfspaces_0(
-	const Cells& cells, GEO::index_t c, int& sign, double tol
-    ) {
-	std::vector<HalfSpace> raw;
-	for (GEO::vec4f P : cells.cell_planes(c)) {
-	    raw.push_back({xyz(P), double(P.w)});
-	}
-	auto with_sign = [&](int s) {
-	    std::vector<HalfSpace> out;
-	    for (const auto& h : raw) {
-		out.push_back(
-		    s > 0 ? HalfSpace{h.n, -h.d} : HalfSpace{-h.n, h.d}
-		);
-	    }
-	    return out;
-	};
-	if (sign == 0) {
-	    for (int s : {1, -1}) {
-		if (
-		    build_polytope(
-			normalised(with_sign(s)), tol
-		    ).verts.size() >= 4
-		) {
-		    sign = s;
-		    break;
-		}
-	    }
-	    if (sign == 0) return {};
-	}
-	return with_sign(sign);
-    }
-    */
+    typedef GEO::Molecule::MixedComplexCells Cells;
 
-    // My version (ignores sign)
-    std::vector<HalfSpace> cell_halfspaces(
-	const Cells& cells, GEO::index_t c, int& sign, double tol
-    ) {
-	geo_assert(sign == 0 || sign == 1);
-	geo_argused(tol);
-	sign = 1;
+    // Clipping planes of cell c as half-spaces n.p <= d.
+    std::vector<HalfSpace> cell_halfspaces(const Cells& cells, GEO::index_t c) {
 	std::vector<HalfSpace> result;
 	for (GEO::vec4f P : cells.cell_planes(c)) {
-	    result.push_back({xyz(P), -double(P.w)});
+	    result.push_back(
+		{vec3{double(P.x), double(P.y), double(P.z)}, -double(P.w)}
+	    );
 	}
 	return result;
     }
 
+    // Hyperboloid parameters from a cell equation
+    // (the place to adapt the R2 convention).
     HyperboloidPatch quadric_from_cell_eqn(
-	const GEO::vec4f& eq1, const GEO::vec4f& eq2,
-	bool is_H2, double shrink_factor
+	const GEO::vec4f& eq1, const GEO::vec4f& eq2, bool is_H2,
+	double shrink_factor
     ) {
 	// geomol conventions (verified on its output):
 	// the balls carry weight 2 r^2 (so that the shrunk skin spheres have
@@ -73,44 +66,51 @@ namespace MSS_Claude {
 	// One sheet if the right-hand side is positive, two sheets otherwise.
 	const double s = shrink_factor, R2 = double(eq1.w);
 	HyperboloidPatch P;
-	P.center = xyz(eq1);
-	P.axis = xyz(eq2);
+	P.center = {double(eq1.x), double(eq1.y), double(eq1.z)};
+	P.axis = {double(eq2.x), double(eq2.y), double(eq2.z)};
 	P.A = is_H2 ? (1.0 - s) * R2 : -s * R2;
 	P.B = is_H2 ? (1.0 - s) / s : s / (1.0 - s);
 	P.solid_is_inside = !is_H2;
 	return P;
     }
 
+    // S0 / S3 cell -> trimmed SPHERICAL_SURFACE face.
     bool sphere_cell_to_step(
-	const Cells& cells, GEO::index_t c,
-	bool is_S3, StepWriter& w, int plane_sign
+	const Cells& cells, GEO::index_t c, bool is_S3, StepWriter& w
     ) {
 	std::pair<GEO::vec4f, GEO::vec4f> eq = cells.cell_eqn(c);
 	SpherePatch P;
-	P.center = xyz(eq.first);
+	P.center = {double(eq.first.x), double(eq.first.y), double(eq.first.z)};
 	P.radius = double(eq.first.w);
 	P.solid_is_inside = !is_S3;
-	P.cell = cell_halfspaces(cells, c, plane_sign, w.tol());
-	if (P.cell.empty()) return false;
+	P.cell = cell_halfspaces(cells, c);
+	if (P.cell.empty()) {
+	    return false;
+	}
 	return sphere_patch_to_step(P, w);
     }
 
+    // H1 / H2 cell -> trimmed SURFACE_OF_REVOLUTION(HYPERBOLA) face(s).
     bool hyperboloid_cell_to_step(
 	const Cells& cells, GEO::index_t c, bool is_H2, double shrink_factor,
-	StepWriter& w, int plane_sign
+	StepWriter& w
     ) {
 	std::pair<GEO::vec4f, GEO::vec4f> eq = cells.cell_eqn(c);
 	HyperboloidPatch P = quadric_from_cell_eqn(
 	    eq.first, eq.second, is_H2, shrink_factor
 	);
-	P.cell = cell_halfspaces(cells, c, plane_sign, w.tol());
-	if (P.cell.empty()) return false;
+	P.cell = cell_halfspaces(cells, c);
+	if (P.cell.empty()) {
+	    return false;
+	}
 	return hyperboloid_patch_to_step(P, w);
     }
 
+    // Converts a whole family. Returns the number of cells that produced faces
+    // (empty cells, where the quadric misses the polytope, produce none).
     GEO::index_t mixed_cells_to_step(
 	const Cells& cells, GEO::Molecule::MixedCellType type,
-	double shrink_factor, StepWriter& w, int plane_sign
+	double shrink_factor, StepWriter& w
     ) {
 	using GEO::Molecule;
 	GEO::index_t done = 0;
@@ -118,19 +118,19 @@ namespace MSS_Claude {
 	    bool ok;
 	    switch (type) {
             case Molecule::CELL_TYPE_S0:
-		ok = sphere_cell_to_step(cells, c, false, w, plane_sign);
+		ok = sphere_cell_to_step(cells, c, false, w);
 		break;
             case Molecule::CELL_TYPE_S3:
-		ok = sphere_cell_to_step(cells, c, true, w, plane_sign);
+		ok = sphere_cell_to_step(cells, c, true, w);
 		break;
             case Molecule::CELL_TYPE_H1:
 		ok = hyperboloid_cell_to_step(
-		    cells, c, false, shrink_factor, w, plane_sign
+		    cells, c, false, shrink_factor, w
 		);
 		break;
             case Molecule::CELL_TYPE_H2:
 		ok = hyperboloid_cell_to_step(
-		    cells, c, true, shrink_factor, w, plane_sign
+		    cells, c, true, shrink_factor, w
 		);
 		break;
             default: ok = false;
@@ -139,6 +139,11 @@ namespace MSS_Claude {
 	}
 	return done;
     }
+}
+
+/*****************************************************************************/
+
+namespace MSS_Claude {
 
     bool save_molecule_STEP(
 	GEO::Molecule& mol, const std::string& filename, double tol
@@ -153,4 +158,4 @@ namespace MSS_Claude {
 	return w.save(filename, "molecular_skin");
     }
 
-} // namespace skin
+} // namespace MSS_Claude
