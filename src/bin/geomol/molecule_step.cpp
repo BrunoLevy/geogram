@@ -7,7 +7,8 @@ namespace MSS_Claude {
 	return {double(v.x), double(v.y), double(v.z)};
     }
 
-    std::vector<HalfSpace> cell_halfspaces(
+    // Claude's version
+    std::vector<HalfSpace> cell_halfspaces_0(
 	const Cells& cells, GEO::index_t c, int& sign, double tol
     ) {
 	std::vector<HalfSpace> raw;
@@ -27,7 +28,8 @@ namespace MSS_Claude {
 	    for (int s : {1, -1}) {
 		if (
 		    build_polytope(
-			normalised(with_sign(s)), tol).verts.size() >= 4
+			normalised(with_sign(s)), tol
+		    ).verts.size() >= 4
 		) {
 		    sign = s;
 		    break;
@@ -36,6 +38,20 @@ namespace MSS_Claude {
 	    if (sign == 0) return {};
 	}
 	return with_sign(sign);
+    }
+
+    // My version (ignores sign)
+    std::vector<HalfSpace> cell_halfspaces(
+	const Cells& cells, GEO::index_t c, int& sign, double tol
+    ) {
+	geo_assert(sign == 0 || sign == 1);
+	geo_argused(tol);
+	sign = 1;
+	std::vector<HalfSpace> result;
+	for (GEO::vec4f P : cells.cell_planes(c)) {
+	    result.push_back({xyz(P), -double(P.w)});
+	}
+	return result;
     }
 
     HyperboloidPatch quadric_from_cell_eqn(
