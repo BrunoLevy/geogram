@@ -8,6 +8,7 @@ namespace MSS_Claude {
     }
 
     // Claude's version
+    /*
     std::vector<HalfSpace> cell_halfspaces_0(
 	const Cells& cells, GEO::index_t c, int& sign, double tol
     ) {
@@ -39,6 +40,7 @@ namespace MSS_Claude {
 	}
 	return with_sign(sign);
     }
+    */
 
     // My version (ignores sign)
     std::vector<HalfSpace> cell_halfspaces(

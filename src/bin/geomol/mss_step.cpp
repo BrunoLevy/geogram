@@ -1,6 +1,14 @@
 #include "mss_step.h"
-
 #include <geogram/voronoi/convex_cell.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <fstream>
+#include <functional>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
@@ -9,11 +17,51 @@
 
 namespace {
     using namespace MSS_Claude;
-}
 
-/*****************************************************************************/
+    /**************** Utilities ***********************************************/
 
-namespace MSS_Claude {
+    inline vec3 any_perp(const vec3& n) {
+	vec3 t = std::fabs(n.x) < 0.9 ? vec3(1, 0, 0) : vec3(0, 1, 0);
+	return normalize(cross(n, t));
+    }
+
+    /**************** Halfspaces and Polytopes ********************************/
+
+    std::vector<HalfSpace> normalised(const std::vector<HalfSpace>& cell) {
+	std::vector<HalfSpace> out;
+	for (const auto& h : cell) {
+	    double n = length(h.n);
+	    if (n > 0) out.push_back({h.n * (1 / n), h.d / n});
+	}
+	return out;
+    }
+
+    // half-space  dir . (p - c) >= z0   as a HalfSpace
+    inline HalfSpace above(const vec3& dir, const vec3& c, double z0) {
+	return {-dir, -(dot(dir, c) + z0)};
+    }
+
+    // half-space  dir . (p - c) <= z1
+    inline HalfSpace below(const vec3& dir, const vec3& c, double z1) {
+	return {dir, dot(dir, c) + z1};
+    }
+
+    bool inside_cell(
+	const std::vector<HalfSpace>& cell, const vec3& p, double tol
+    ) {
+	for (const auto& h : cell) {
+	    if (dot(h.n, p) > h.d + tol) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    struct Polytope {
+	std::vector<vec3> verts;
+	std::vector<std::vector<int>> faces;
+        // faces[i]: CCW (about outward n_i) vertex ring of plane i
+    };
 
     // My version, based on ConvexCell
     Polytope build_polytope(const std::vector<HalfSpace>& H, double tol) {
@@ -58,7 +106,924 @@ namespace MSS_Claude {
 	}
 	return P;
     }
-}
+
+
+    /********************** Quadric ****************************************/
+
+    // f(p) = q . Q q - A, q = p - c.   Sphere: Q = I, A = r^2.
+    // Hyperboloid: Q = I - (1+B) a a^T  (so q.Qq = rho^2 - B z^2).
+    struct Quadric {
+	vec3 c{0, 0, 0}, a{0, 0, 1};
+	double A = 1, B = -1;
+	bool sphere = true;
+	vec3 Q(const vec3& v) const {
+	    return sphere ? v : v - a * ((1.0 + B) * dot(a, v));
+	}
+	double f(const vec3& p) const {
+	    vec3 q = p - c;
+	    return dot(q, Q(q)) - A;
+	}
+	vec3 grad(const vec3& p) const {
+	    return Q(p - c) * 2.0;
+	}
+	bool two_sheet() const {
+	    return !sphere && A < 0;
+	}
+    };
+
+    /********************** Conics ****************************************/
+
+    // Plane /\\ quadric, in STEP parametrisation conventions (Y = Z x X).
+    struct Conic {
+	enum Type { Circle, Ellipse, Hyperbola, Parabola } type = Circle;
+	vec3 C, X, Y;        // center (parabola: vertex), axes
+	double a = 1, b = 1; // semi axes (hyperbola: real/imaginary;
+	                     //            parabola: a = focal distance)
+	bool closed() const { return type == Circle || type == Ellipse; }
+
+	vec3 point(double t) const {
+	    switch (type) {
+            case Circle:
+	    case Ellipse:
+		return C + X * (a * std::cos(t)) + Y * (b * std::sin(t));
+            case Hyperbola:
+		return C + X * (a * std::cosh(t)) + Y * (b * std::sinh(t));
+            default:
+		return C + X * (a * t * t) + Y * (2 * a * t);
+	    }
+	}
+
+	vec3 tangent(double t) const {
+	    switch (type) {
+            case Circle:
+	    case Ellipse:
+		return X * (-a * std::sin(t)) + Y * (b * std::cos(t));
+            case Hyperbola:
+		return X * (a * std::sinh(t)) + Y * (b * std::cosh(t));
+            default:
+		return X * (2 * a * t) + Y * (2 * a);
+	    }
+	}
+
+	double param(const vec3& p) const {
+	    vec3 d = p - C;
+	    switch (type) {
+            case Circle:
+	    case Ellipse: {
+                double t = std::atan2(dot(d, Y) / b, dot(d, X) / a);
+                return t < 0 ? t + 2 * M_PI : t;
+            }
+            case Hyperbola:
+		return std::asinh(dot(d, Y) / b);
+            default:
+		return dot(d, Y) / (2 * a);
+	    }
+	}
+
+	int to_step(StepWriter& w) const {
+	    int pl = w.axis2(C, cross(X, Y), X);
+	    switch (type) {
+            case Circle:
+		return w.add("CIRCLE(''," + w.ref(pl) + "," + w.real(a) + ")");
+            case Ellipse:
+		return w.add(
+		    "ELLIPSE(''," + w.ref(pl) + "," + w.real(a) + ","
+		    + w.real(b) + ")"
+		);
+            case Hyperbola:
+		return w.add(
+		    "HYPERBOLA(''," + w.ref(pl) + "," + w.real(a) +
+		    "," + w.real(b) + ")"
+		);
+            default:
+		return w.add("PARABOLA(''," + w.ref(pl) + "," + w.real(a) + ")");
+	    }
+	}
+    };
+
+    // Symmetric 2x2 eigen-decomposition,
+    // l1 >= l2, (c,s) = unit eigenvector of l1.
+    void eig2(
+	double m11, double m12, double m22,
+	double& l1, double& l2, double& c, double& s
+    ) {
+	double mean = 0.5 * (m11 + m22), diff = 0.5 * (m11 - m22);
+	double disc = std::sqrt(diff * diff + m12 * m12);
+	l1 = mean + disc; l2 = mean - disc;
+	if (std::fabs(m12) > 1e-14*(std::fabs(m11)+std::fabs(m22)+1e-300)) {
+	    c = l1 - m22;
+	    s = m12;
+	} else if (m11 >= m22) {
+	    c = 1;
+	    s = 0;
+	} else {
+	    c = 0;
+	    s = 1;
+	}
+	double n = std::hypot(c, s);
+	c /= n;
+	s /= n;
+    }
+
+    // All (non-degenerate) conic components of plane(h) ∩ quadric(q).
+    // A hyperbola yields two Conic objects (one per branch).
+    std::vector<Conic> plane_section(
+	const Quadric& q, const HalfSpace& h, double tol
+    ) {
+	std::vector<Conic> out;
+	vec3 n = h.n, o = n * h.d;                 // h.n is unit here
+	vec3 e1 = any_perp(n), e2 = cross(n, e1);
+	vec3 q0 = o - q.c, Qe1 = q.Q(e1), Qe2 = q.Q(e2), Qq0 = q.Q(q0);
+	double m11 = dot(e1, Qe1), m12 = dot(e1, Qe2), m22 = dot(e2, Qe2);
+	double g1 = dot(e1, Qq0), g2 = dot(e2, Qq0);
+	double hh = dot(q0, Qq0) - q.A;
+	double det = m11 * m22 - m12 * m12;
+	double scale = m11 * m11 + 2 * m12 * m12 + m22 * m22;
+	double l1, l2, vc, vs;
+	eig2(m11, m12, m22, l1, l2, vc, vs);
+	vec3 v1 = e1 * vc + e2 * vs, v2 = e1 * (-vs) + e2 * vc; // v2=n x v1
+	auto to3 = [&](double s, double t) { return o + e1 * s + e2 * t; };
+
+	if (std::fabs(det) > 1e-10 * scale) {
+	    double cc1 = (-m22 * g1 + m12 * g2) / det;
+	    double cc2 = (m12 * g1 - m11 * g2) / det;
+	    double k = -(hh + g1 * cc1 + g2 * cc2);  // (x-cc)^T M (x-cc) = k
+	    vec3 C = to3(cc1, cc2);
+	    if (det > 0) {                           // ellipse / circle
+		if (l1 < 0) {
+		    l1 = -l1;
+		    l2 = -l2;
+		    k = -k;
+		}
+		if (k <= tol * tol) {
+		    return out;              // imaginary or a single point
+		}
+		Conic c; c.C = C; c.X = v1; c.Y = v2;
+		c.a = std::sqrt(k / l1); c.b = std::sqrt(k / l2);
+		if (std::fabs(l1 - l2) <= 1e-9 * (l1 + l2)) {
+		    c.type = Conic::Circle;
+		    c.b = c.a;
+		} else {
+		    c.type = Conic::Ellipse;
+		}
+		out.push_back(c);
+	    } else {                    // hyperbola, l1 > 0 > l2
+		if (std::fabs(k) <= tol) {
+		    return out;        // two lines (tangent plane): ignored
+		}
+		vec3 X{0,0,0};
+		double a;
+		double b;
+		if (k > 0) {
+		    X = v1;
+		    a = std::sqrt(k / l1);
+		    b = std::sqrt(k / (-l2));
+		} else {
+		    X = v2;
+		    a = std::sqrt(k / l2);
+		    b = std::sqrt(-k / l1);
+		}
+		for (double sgn : {1.0, -1.0}) {
+		    Conic c;
+		    c.type = Conic::Hyperbola;
+		    c.C = C;
+		    c.X = X * sgn;
+		    c.Y = cross(n, c.X);
+		    c.a = a;
+		    c.b = b;
+		    out.push_back(c);
+		}
+	    }
+	} else {   // parabola (l2 ~ 0)
+	    if (std::fabs(l1) <= 1e-12) {
+		return out;
+	    }
+	    double gX = g1 * vc + g2 * vs;
+	    double gY = -g1 * vs + g2 * vc;
+	    if (std::fabs(gY) <= 1e-12*(std::fabs(gX) + std::fabs(hh) + 1)) {
+		return out;  // parallel lines
+	    }
+	    double X0 = -gX / l1;
+	    double Y0 = -(hh - gX * gX / l1) / (2 * gY);
+	    double kappa = -l1 / (2 * gY);     // Y - Y0 = kappa (X - X0)^2
+	    Conic c; c.type = Conic::Parabola;
+	    c.C = to3(vc * X0 - vs * Y0, vs * X0 + vc * Y0);
+	    c.X = v2 * (kappa > 0 ? 1.0 : -1.0); c.Y = cross(n, c.X);
+	    c.a = 1.0 / (4 * std::fabs(kappa));
+	    out.push_back(c);
+	}
+	return out;
+    }
+
+    /********** Trimming *******************************************/
+
+    struct Arc {
+	int conic;              // index into TrimResult::conics
+	double t0, t1, tm;      // parameter interval (t0 < t1) and its midpoint
+	int v0, v1;             // STEP VERTEX_POINT ids at t0 / t1
+	vec3 mid;               // point(tm)
+	bool reversed = false;  // loop traverses v1 -> v0
+	int edge_id = 0;        // EDGE_CURVE id, created on emission
+	int start() const { return reversed ? v1 : v0; }
+	int end()   const { return reversed ? v0 : v1; }
+    };
+
+    struct Loop {
+	std::vector<int> arcs;
+	vec3 sample;
+    };
+
+    struct TrimResult {
+	std::vector<Conic> conics;
+	std::vector<int> conic_ids;   // STEP ids (0 = not yet written)
+	std::vector<Arc> arcs;
+	std::vector<Loop> loops;
+    };
+
+    struct VertexRegistry {
+	std::vector<std::pair<vec3, int>> items;
+	std::map<int, vec3> pos;
+	int get(const vec3& p, StepWriter& w, double tol) {
+	    for (const auto& it : items) {
+		if (length(it.first - p) <= tol) {
+		    return it.second;
+		}
+	    }
+	    int vid = w.add("VERTEX_POINT(''," + w.ref(w.point(p)) + ")");
+	    items.push_back({p, vid}); pos[vid] = p;
+	    return vid;
+	}
+    };
+
+    // Roots of  n . c(t) = d  for a conic c
+    //  (crossings of the conic with a plane).
+    std::vector<double> conic_plane_roots(
+	const Conic& c, const vec3& n, double d
+    ) {
+	std::vector<double> T;
+	double al, be, ga;
+	switch (c.type) {
+        case Conic::Circle:
+	case Conic::Ellipse: {
+            al = c.a * dot(n, c.X);
+	    be = c.b * dot(n, c.Y);
+	    ga = dot(n, c.C) - d;
+            double R = std::hypot(al, be);
+            if (R < 1e-300) {
+		break;
+	    }
+            double k = -ga / R;
+            if (k < -1 - 1e-9 || k > 1 + 1e-9) {
+		break;
+	    }
+            k = std::max(-1.0, std::min(1.0, k));
+            double phi = std::atan2(be, al), dl = std::acos(k);
+            for (double t : {phi + dl, phi - dl}) {
+                t = std::fmod(t, 2 * M_PI); if (t < 0) t += 2 * M_PI;
+                T.push_back(t);
+            }
+            break;
+        }
+        case Conic::Hyperbola: {
+            // al cosh t + be sinh t + ga = 0,  u = e^t
+            al = c.a * dot(n, c.X); be = c.b * dot(n, c.Y); ga = dot(n, c.C) - d;
+            double A2 = al + be, B2 = 2 * ga, C2 = al - be;
+            std::vector<double> U;
+            if (std::fabs(A2) < 1e-14*(std::fabs(B2) + std::fabs(C2) + 1e-300)) {
+                if (std::fabs(B2) > 0) {
+		    U.push_back(-C2 / B2);
+		}
+            } else {
+                double disc = B2 * B2 - 4 * A2 * C2;
+                if (disc >= 0) {
+		    disc = std::sqrt(disc);
+		    U.push_back((-B2 - disc) / (2 * A2));
+		    U.push_back((-B2 + disc) / (2 * A2)); }
+            }
+            for (double u : U) {
+		if (u > 0) {
+		    T.push_back(std::log(u));
+		}
+	    }
+            break;
+        }
+        default: {  // parabola: quadratic in t
+            double A2 = c.a * dot(n, c.X);
+	    double B2 = 2 * c.a * dot(n, c.Y);
+	    double C2 = dot(n, c.C) - d;
+            if (std::fabs(A2) < 1e-14*(std::fabs(B2) + std::fabs(C2) + 1e-300)) {
+                if (std::fabs(B2) > 0) {
+		    T.push_back(-C2 / B2);
+		}
+            } else {
+                double disc = B2 * B2 - 4 * A2 * C2;
+                if (disc >= 0) {
+		    disc = std::sqrt(disc);
+		    T.push_back((-B2 - disc) / (2 * A2));
+		    T.push_back((-B2 + disc) / (2 * A2));
+		}
+            }
+        }
+	}
+	return T;
+    }
+
+    // Dump of a cell that failed to trim, so it can be reproduced offline.
+    void dump_cell(const Quadric& q, const std::vector<HalfSpace>& cell) {
+	std::fprintf(
+	    stderr,
+	    "skin: failing cell: %s %.17g %.17g %.17g",
+	    q.sphere ? "S" : "H",
+	    q.c.x, q.c.y, q.c.z
+	);
+	if (q.sphere) {
+	    std::fprintf(stderr, " r=%.17g", std::sqrt(q.A));
+	} else {
+	    std::fprintf(
+		stderr, " axis=%.17g %.17g %.17g A=%.17g B=%.17g",
+		q.a.x, q.a.y, q.a.z, q.A, q.B
+	    );
+	}
+	std::fprintf(stderr, " planes(n.p<=d):");
+	for (const auto& h : cell) {
+	    std::fprintf(
+		stderr, " [%.17g %.17g %.17g %.17g]", h.n.x, h.n.y, h.n.z, h.d
+	    );
+	}
+	std::fprintf(stderr, "\n");
+    }
+
+    // Computes the boundary loops of quadric /\\ cell
+    // (cell planes must be unit-normalised).
+    // Each plane's conic is cut by all other planes analytically;
+    // a crossing point is computed once per plane pair (line /\\ quadric)
+    // so that adjacent faces share bit-identical vertices.
+    void trim_quadric(
+	const Quadric& q, const std::vector<HalfSpace>& cell_in,
+	bool solid_is_inside, StepWriter& w, TrimResult& R
+    ) {
+	const double tol = w.tol(), in_tol = 2 * tol, loose = 1e3 * tol;
+	// Cell extent (for merging nearly coincident planes):
+	// planes at distance <= 10 tol from each other over a ball
+	// of radius Rc around the quadric center are merged, keeping
+	// the tighter one.
+	double Rc = 0;
+	for (const HalfSpace& h : cell_in) {
+	    Rc = std::max(Rc, std::fabs(h.d - dot(h.n, q.c)));
+	}
+	Rc = std::min(Rc, 1e6) + 1.0;
+	std::vector<HalfSpace> cell;
+	for (const HalfSpace& h : cell_in) {
+	    bool merged = false;
+	    for (HalfSpace& g : cell) {
+		if (length(g.n - h.n) * Rc + std::fabs(g.d - h.d) <= 10 * tol) {
+		    if (h.d - dot(h.n, q.c) < g.d - dot(g.n, q.c)) {
+			g = h;   // keep the tighter plane
+		    }
+		    merged = true;
+		    break;
+		}
+	    }
+	    if (!merged) {
+		cell.push_back(h);
+	    }
+	}
+	const size_t np = cell.size();
+	VertexRegistry VR;
+
+	// canonical point of  plane i /\\ plane j /\\ quadric  nearest to p
+	auto canonical = [&](size_t i, size_t j, const vec3& p) {
+	    if (i > j) std::swap(i, j);
+	    const vec3 ni = cell[i].n, nj = cell[j].n;
+	    vec3 dir = cross(ni, nj);
+	    double L2 = dot(dir, dir);
+	    if (L2 < 1e-20) return p;
+	    // point on the line: solve for x = al ni + be nj
+	    double a11 = dot(ni, ni);
+	    double a12 = dot(ni, nj);
+	    double a22 = dot(nj, nj);
+	    double det = a11 * a22 - a12 * a12;
+	    double al = (cell[i].d * a22 - cell[j].d * a12) / det;
+	    double be = (cell[j].d * a11 - cell[i].d * a12) / det;
+	    vec3 p0 = ni * al + nj * be, q0 = p0 - q.c;
+	    double aa = dot(dir, q.Q(dir));
+	    double bb = dot(q0, q.Q(dir));
+	    double cc = dot(q0, q.Q(q0)) - q.A;
+	    std::vector<double> roots;
+	    if (std::fabs(aa) < 1e-14*(std::fabs(bb) + std::fabs(cc) + 1e-300)) {
+		if (bb != 0) {
+		    roots.push_back(-cc / (2 * bb));
+		}
+	    } else {
+		double disc = bb * bb - aa * cc;
+		if (disc >= 0) {
+		    disc = std::sqrt(disc);
+		    roots.push_back((-bb - disc) / aa);
+		    roots.push_back((-bb + disc) / aa);
+		}
+	    }
+	    vec3 best = p; double bd = 1e300;
+	    for (double t : roots) {
+		vec3 x = p0 + dir * t;
+		double d = length(x - p);
+		if (d < bd) {
+		    bd = d;
+		    best = x;
+		}
+	    }
+	    return bd <= 10 * tol ? best : p;
+	};
+
+	auto inside = [&](const vec3& p) {
+	    return inside_cell(cell, p, in_tol);
+	};
+
+	for (size_t i = 0; i < np; ++i) {
+	    std::vector<Conic> conics = plane_section(q, cell[i], tol);
+	    const vec3 nf = cell[i].n;
+	    for (const Conic& c : conics) {
+		int ci = (int)R.conics.size();
+		R.conics.push_back(c); R.conic_ids.push_back(0);
+		std::vector<std::pair<double, int>> T; // (param, vertex id)
+		for (size_t j = 0; j < np; ++j) {
+		    if (j == i) continue;
+		    for (double t : conic_plane_roots(c, cell[j].n, cell[j].d)) {
+			vec3 p = canonical(i, j, c.point(t));
+			if (!inside(p)) {
+			    continue;               // crossing outside the cell
+			}
+			double tt = c.param(p);
+			bool dup = false;
+			for (auto& e : T) {
+			    if (length(c.point(e.first) - p) <= tol) {
+				dup = true;
+				break;
+			    }
+			}
+			if (!dup) {
+			    T.push_back({tt, VR.get(p, w, tol)});
+			}
+		    }
+		}
+		std::sort(T.begin(), T.end());
+		auto make_arc = [&](double t0, double t1, int v0, int v1) {
+		    if (t1 - t0 <= 1e-12) return;
+		    Arc a;
+		    a.conic = ci;
+		    a.t0 = t0;
+		    a.t1 = t1;
+		    a.tm = 0.5 * (t0 + t1);
+		    a.v0 = v0;
+		    a.v1 = v1;
+		    a.mid = c.point(a.tm);
+		    if (!inside(a.mid)) {
+			return;
+		    }
+		    vec3 N = solid_is_inside ? q.grad(a.mid) : -q.grad(a.mid);
+		    a.reversed = dot(cross(N, c.tangent(a.tm)), nf) > 0;
+		    R.arcs.push_back(a);
+		};
+		if (c.closed()) {
+		    if (T.empty()) {
+			vec3 p0 = c.point(0);
+			if (inside(p0)) {
+			    int v = VR.get(p0, w, tol);
+			    make_arc(0, 2 * M_PI, v, v);
+			}
+		    } else {
+			for (size_t k = 0; k < T.size(); ++k) {
+			    size_t l = (k + 1) % T.size();
+			    make_arc(
+				T[k].first,
+				T[l].first + (l == 0 ? 2 * M_PI : 0),
+				T[k].second, T[l].second
+			    );
+			}
+		    }
+		} else {
+		    for (size_t k = 0; k + 1 < T.size(); ++k) {
+			make_arc(
+			    T[k].first, T[k + 1].first,
+			    T[k].second, T[k + 1].second
+			);
+		    }
+		}
+	    }
+	}
+
+	// Chain arcs into closed loops
+	// (exact vertex ids first, then a loose match).
+	std::vector<char> used(R.arcs.size(), 0);
+	auto find_next = [&](int cur, bool strict) {
+	    int best = -1; double bd = strict ? 0 : loose;
+	    for (size_t k = 0; k < R.arcs.size(); ++k) {
+		if (used[k]) continue;
+		int s = R.arcs[k].start();
+		if (s == cur) return (int)k;
+		if (!strict) {
+		    double d = length(VR.pos[s] - VR.pos[cur]);
+		    if (d <= bd) {
+			bd = d;
+			best = (int)k;
+		    }
+		}
+	    }
+	    return best;
+	};
+	bool failed = false;
+	for (size_t i = 0; i < R.arcs.size(); ++i) {
+	    if (used[i]) continue;
+	    Loop L;
+	    L.arcs.push_back((int)i);
+	    L.sample = R.arcs[i].mid; used[i] = 1;
+	    int s0 = R.arcs[i].start(), cur = R.arcs[i].end();
+	    size_t guard = 0;
+	    while (cur != s0 && guard++ <= R.arcs.size()) {
+		int next = find_next(cur, true);
+		if (next < 0) {
+		    if (length(VR.pos[cur] - VR.pos[s0]) <= loose) {
+                        // close the loop on the start vertex
+			Arc& a = R.arcs[L.arcs.back()];
+			(a.reversed ? a.v0 : a.v1) = s0;
+			cur = s0;
+			break;
+		    }
+		    next = find_next(cur, false);
+		    if (next < 0) break;
+		    Arc& a = R.arcs[next];
+		    (a.reversed ? a.v1 : a.v0) = cur;  // snap the loose match
+		}
+		used[next] = 1; L.arcs.push_back(next); cur = R.arcs[next].end();
+	    }
+	    if (cur == s0) {
+		R.loops.push_back(L);
+	    } else {
+		failed = true;
+		std::fprintf(
+		    stderr,
+		    "skin: warning, dropped an unclosed trimming loop "
+		    "(%zu arcs)\n",
+		    L.arcs.size()
+		);
+	    }
+	}
+	if (failed) {
+	    dump_cell(q, cell);
+	}
+    }
+
+    /********** Charts and Surfaces *****************************************/
+
+    //
+    // Every face is written on a surface whose parameter domain,
+    // restricted to the face, has no seam, no pole and no double cover
+    // (OpenCASCADE's STEP importer is fragile otherwise).
+    // Patches are therefore cut into pieces:
+    //   sphere      : 8 octants, each an exact rational biquadratic Bezier patch
+    //                 (stereographic projection from the antipode of the octant)
+    //   hyperboloid : 90-degree sectors x axial segments, each an exact rational
+    //                 biquadratic Bezier patch (circle arc x hyperbola arc)
+    // 2-sheet hyperboloid near its vertex (where revolution patches degenerate):
+    //                 an exact rational biquadratic Bezier patch obtained by
+    //                 stereographic projection from the opposite vertex.
+
+    // 2D chart of the surface region a piece lives in; used to classify loops.
+    // 'inv' maps a surface point to chart coordinates; right_handed tells
+    // whether d/dalpha x d/dbeta points along +grad f.
+    struct Chart {
+	std::function<std::pair<double, double>(const vec3&)> inv;
+	bool right_handed = true;
+    };
+
+    struct Surface {
+	int id = 0;
+	std::function<vec3(double, double)> eval;   // STEP parametrisation
+	double su = 0.5, sv = 0.5;   // a parameter sample inside the piece
+	Chart chart;
+    };
+
+    // Rational biquadratic Bezier patch, written as a rational B-spline surface.
+    struct Bezier22 {
+	vec3 P[3][3];
+	double W[3][3];
+
+	vec3 eval(double u, double v) const {
+	    double bu[3] = {(1 - u) * (1 - u), 2 * u * (1 - u), u * u};
+	    double bv[3] = {(1 - v) * (1 - v), 2 * v * (1 - v), v * v};
+	    vec3 num; double den = 0;
+	    for (int i = 0; i < 3; ++i) for (int j = 0; j < 3; ++j) {
+		    double b = bu[i] * bv[j] * W[i][j];
+		    num = num + P[i][j] * b; den += b;
+		}
+	    return num * (1.0 / den);
+	}
+
+	int to_step(StepWriter& w) const {
+	    std::string pts = "(", wts = "(";
+	    for (int i = 0; i < 3; ++i) {
+		pts += i ? ",(" : "("; wts += i ? ",(" : "(";
+		for (int j = 0; j < 3; ++j) {
+		    pts += (j ? "," : "") + w.ref(w.point(P[i][j]));
+		    wts += (j ? "," : "") + w.real(W[i][j]);
+		}
+		pts += ")"; wts += ")";
+	    }
+	    pts += ")"; wts += ")";
+	    return w.add(
+		"( BOUNDED_SURFACE() B_SPLINE_SURFACE(2,2," + pts +
+		",.UNSPECIFIED.,.F.,.F.,.F.) "
+		"B_SPLINE_SURFACE_WITH_KNOTS((3,3),(3,3),(0.,1.),(0.,1.),"
+		".UNSPECIFIED.)"
+		" GEOMETRIC_REPRESENTATION_ITEM() "
+		"RATIONAL_B_SPLINE_SURFACE(" + wts +
+		") REPRESENTATION_ITEM('') SURFACE() )"
+	    );
+	}
+    };
+
+
+    // Rational quadratic Bezier (w0 = w2 = 1) of the conic arc G(t),
+    // t in [T0,T1]. Requires the shoulder point (tangent parallel to the chord)
+    // at t = (T0+T1)/2, which holds for the cosh/sinh parametrisations
+    // used here.
+    bool conic_arc_bezier(
+	const std::function<vec2(double)>& G,
+	const std::function<vec2(double)>& dG,
+	double T0, double T1, vec2 P[3], double& w1
+    ) {
+	P[0] = G(T0); P[2] = G(T1);
+	vec2 d0 = dG(T0), d2 = dG(T1), r = P[2] - P[0];
+	double det = -d0.x * d2.y + d0.y * d2.x; // solve P0 + al d0 = P2 + be d2
+	if (std::fabs(det) < 1e-14 * (length(d0) * length(d2) + 1e-300)) {
+	    return false;
+	}
+	double al = (-r.x * d2.y + r.y * d2.x) / det;
+	P[1] = P[0] + d0 * al;
+	vec2 M = (P[0] + P[2]) * 0.5, S = G(0.5 * (T0 + T1));
+	double s = length(S - M) / length(P[1] - M);
+	if (!(s > 0 && s < 1)) {
+	    return false;
+	}
+	w1 = s / (1 - s);
+	return true;
+    }
+
+    // Normal of the STEP parametrisation at a sample,
+    // compared with the wanted face normal.
+    bool normal_agrees(
+	const std::function<vec3(double, double)>& eval, double u, double v,
+	const Quadric& q, bool solid_is_inside
+    ) {
+	const double h = 1e-5;
+	vec3 du = eval(u + h, v) - eval(u - h, v);
+	vec3 dv = eval(u, v + h) - eval(u, v - h);
+	vec3 want = solid_is_inside ? q.grad(eval(u, v)) : -q.grad(eval(u, v));
+	return dot(cross(du, dv), want) > 0;
+    }
+
+    // Writes a Bezier patch, transposed if needed
+    // so that its normal is the face normal.
+    static void finish_bezier(
+	Surface& S, Bezier22 B, const Quadric& q,
+	bool solid_is_inside, StepWriter& w
+    ) {
+	auto ev = [B](double u, double v) { return B.eval(u, v); };
+	if (!normal_agrees(ev, 0.5, 0.5, q, solid_is_inside)) {
+	    Bezier22 T;
+	    for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+		    T.P[i][j] = B.P[j][i];
+		    T.W[i][j] = B.W[j][i];
+		}
+	    }
+	    B = T;
+	}
+	S.id = B.to_step(w);
+	S.eval = [B](double u, double v) { return B.eval(u, v); };
+    }
+
+
+    // Sphere octant around direction n = cdir, as an exact rational
+    // biquadratic Bezier patch by stereographic projection from the
+    // antipode c - r n:
+    // p(s,t) = c + (2r s e1 + 2r t e2 + r(1 - s^2 - t^2) n) / (1 + s^2 + t^2),
+    // (s,t) in [-r0,r0]^2
+    // (s = tan(theta/2) for the angle theta from n;
+    // the octant needs r0 >= 0.52).
+    // Unlike SPHERICAL_SURFACE this patch has no seam or pole and its
+    // normal can be flipped (transposition), so every face can be written
+    // with same_sense = .T.
+    static Surface sphere_surface(
+	const Quadric& q, const vec3& cdir, bool solid_is_inside, StepWriter& w
+    ) {
+	const vec3 c = q.c, n = cdir;
+	const double r = std::sqrt(q.A), r0 = 0.6;
+	vec3 e1 = any_perp(n), e2 = cross(n, e1);
+	double L[3] = {-r0, 0, r0}, Sq[3] = {r0 * r0, -r0 * r0, r0 * r0};
+	Bezier22 B;
+	for (int i = 0; i < 3; ++i) for (int j = 0; j < 3; ++j) {
+		double wgt = 1 + Sq[i] + Sq[j];
+		B.P[i][j] =
+		    c + (e1 * (2 * r * L[i]) +
+			 e2 * (2 * r * L[j]) +
+			 n * (r * (1 - Sq[i] - Sq[j]))) * (1.0 / wgt);
+		B.W[i][j] = wgt;
+	    }
+	Surface S;
+	finish_bezier(S, B, q, solid_is_inside, w);
+	vec3 Zc = any_perp(cdir), Xc = cdir, Yc = cross(Zc, Xc);
+	S.chart.inv = [=](const vec3& p) {
+	    vec3 d = p - c;
+	    double z = std::max(-1.0, std::min(1.0, dot(d, Zc) / r));
+	    return std::make_pair(
+		std::atan2(dot(d, Yc), dot(d, Xc)), std::asin(z)
+	    );
+	};
+	S.chart.right_handed = true;
+	return S;
+    }
+
+    // Sector of a surface of revolution: circle arc of half-angle phi around m,
+    // times the generatrix arc G (rho, z) given as a rational quadratic Bezier.
+    static Surface revolution_surface(
+	const Quadric& q, const vec3& axis, const vec3& m, double phi,
+	const vec2 G[3], double w1, bool solid_is_inside, StepWriter& w
+    ) {
+	const vec3 c = q.c;
+	vec3 e1 = m, e2 = cross(axis, m);
+	vec3 Qd[3] = {
+	    e1 * std::cos(phi) - e2 * std::sin(phi),
+	    e1 * (1.0 / std::cos(phi)),
+	    e1 * std::cos(phi) + e2 * std::sin(phi)
+	};
+	double Wc[3] = {1, std::cos(phi), 1}, Wh[3] = {1, w1, 1};
+	Bezier22 B;
+	for (int i = 0; i < 3; ++i) {
+	    for (int j = 0; j < 3; ++j) {
+		B.P[i][j] = c + axis * G[j].y + Qd[i] * G[j].x;
+		B.W[i][j] = Wc[i] * Wh[j];
+	    }
+	}
+	Surface S;
+	finish_bezier(S, B, q, solid_is_inside, w);
+	S.chart.inv = [=](const vec3& p) {
+	    vec3 d = p - c;
+	    return std::make_pair(
+		std::atan2(dot(d, e2), dot(d, e1)), dot(d, axis)
+	    );
+	};
+	S.chart.right_handed = true;
+	return S;
+    }
+
+    // Cap of a 2-sheet hyperboloid rho^2 - B zeta^2 = -B z0^2 (zeta along axis),
+    // parametrised by stereographic projection from the opposite vertex:
+    //   p(s,t) = (2Bz0 s, 2Bz0 t, z0(B + s^2 + t^2)) / (B - s^2 - t^2),
+    //   (s,t) in [-r,r]^2
+    // (exact rational biquadratic; covers zeta <= z0 (B + r^2)/(B - r^2)).
+    static Surface stereographic_surface(
+	const Quadric& q, const vec3& axis, double z0, double r,
+	bool solid_is_inside, StepWriter& w
+    ) {
+	const vec3 c = q.c; const double B = q.B;
+	vec3 e1 = any_perp(axis), e2 = cross(axis, e1);
+	double L[3] = {-r, 0, r}; // Bernstein coeffs of s and s^2 on [-r,r]
+	double Sq[3] = {r*r, -r*r, r*r};
+	Bezier22 Bz;
+	for (int i = 0; i < 3; ++i) {
+	    for (int j = 0; j < 3; ++j) {
+		double wgt = B - Sq[i] - Sq[j];
+		Bz.P[i][j] =
+		    c + e1 * (2 * B * z0 * L[i] / wgt) +
+		        e2 * (2 * B * z0 * L[j] / wgt) +
+		    axis * (z0 * (B + Sq[i] + Sq[j]) / wgt);
+		Bz.W[i][j] = wgt;
+	    }
+	}
+	Surface S;
+	finish_bezier(S, Bz, q, solid_is_inside, w);
+	S.chart.inv = [=](const vec3& p) {
+	    vec3 d = p - c; double den = dot(d, axis) + z0;
+	    return std::make_pair(dot(d, e1) / den, dot(d, e2) / den);
+	};
+	S.chart.right_handed = false;
+	return S;
+    }
+
+    /********** Emission *****************************************/
+
+    bool point_in_polygon(
+	const std::vector<std::pair<double, double>>& poly,
+	std::pair<double, double> p
+    ) {
+	bool in = false;
+	for (size_t i = 0, j = poly.size() - 1; i < poly.size(); j = i++) {
+	    const auto& a = poly[i];
+	    const auto& b = poly[j];
+	    if (
+		(a.second > p.second) != (b.second > p.second) &&
+		p.first < (b.first - a.first) *
+		(p.second - a.second) / (b.second - a.second) + a.first) {
+		in = !in;
+	    }
+	}
+	return in;
+    }
+
+    // Writes the faces of one piece: loops are classified in the chart as outer
+    // boundaries (one face each) or holes (attached to the outer loop containing
+    // them).
+    // Optional debug hook, called for every piece before its faces are written.
+    inline std::function<void(const Quadric&,const Surface&,const TrimResult&)>&
+    debug_hook() {
+	static std::function<
+	    void(const Quadric&, const Surface&, const TrimResult&)
+	> h;
+	return h;
+    }
+
+    int emit_faces(
+	const Quadric& q, bool solid_is_inside,
+	StepWriter& w, TrimResult& R, const Surface& S)
+    {
+	if (R.loops.empty()) {
+	    return 0;
+	}
+	if (debug_hook()) {
+	    debug_hook()(q, S, R);
+	}
+	// The surface was built so that its normal is the face normal:
+	// same_sense is always .T.,
+	// which avoids the ambiguity of loop orientation on
+	// reversed faces in some readers.
+	int xi = (S.chart.right_handed == solid_is_inside) ? 1 : -1;
+	std::vector<std::vector<std::pair<double, double>>> poly(R.loops.size());
+	std::vector<bool> outer(R.loops.size());
+	for (size_t li = 0; li < R.loops.size(); ++li) {
+	    for (int ai : R.loops[li].arcs) {
+		const Arc& a = R.arcs[ai]; const Conic& c = R.conics[a.conic];
+		const int K = 8;
+		for (int k = 0; k < K; ++k) {
+		    double f = double(k) / K;
+		    double t = a.reversed ?
+			a.t1 - (a.t1 - a.t0) * f : a.t0 + (a.t1 - a.t0) * f;
+		    poly[li].push_back(S.chart.inv(c.point(t)));
+		}
+	    }
+	    double area = 0;
+	    for (size_t i=0, j=poly[li].size()-1; i < poly[li].size(); j = i++) {
+		area += poly[li][j].first * poly[li][i].second -
+		        poly[li][i].first * poly[li][j].second;
+	    }
+	    outer[li] = area * xi > 0;
+	}
+	std::vector<std::vector<int>> groups;
+	for (size_t li = 0; li < R.loops.size(); ++li) {
+	    if (outer[li]) {
+		groups.push_back({(int)li});
+	    }
+	}
+	if (groups.empty()) {
+	    groups.push_back({});
+	    for (size_t li = 0; li < R.loops.size(); ++li)
+		groups[0].push_back((int)li); }
+	else for (size_t li = 0; li < R.loops.size(); ++li) {
+		if (outer[li]) continue;
+		size_t g = 0;
+		for (size_t k = 0; k < groups.size(); ++k)
+		    if (point_in_polygon(poly[groups[k][0]], poly[li][0])) {
+			g = k;
+			break;
+		    }
+		groups[g].push_back((int)li);
+	    }
+
+	int nfaces = 0;
+	for (const auto& g : groups) {
+	    std::vector<int> bounds;
+	    for (size_t k = 0; k < g.size(); ++k) {
+		std::vector<int> oriented;
+		for (int ai : R.loops[g[k]].arcs) {
+		    Arc& a = R.arcs[ai];
+		    if (!a.edge_id) {
+			if (!R.conic_ids[a.conic])
+			    R.conic_ids[a.conic] = R.conics[a.conic].to_step(w);
+			a.edge_id = w.add("EDGE_CURVE(''," + w.ref(a.v0) + "," + w.ref(a.v1) + "," +
+					  w.ref(R.conic_ids[a.conic]) + ",.T.)");
+		    }
+		    oriented.push_back(w.add("ORIENTED_EDGE('',*,*," + w.ref(a.edge_id) + "," + (a.reversed ? ".F." : ".T.") + ")"));
+		}
+		int el = w.add("EDGE_LOOP('',(" + w.refs(oriented) + "))");
+		bool is_outer = (k == 0 && outer[g[0]]);
+		bounds.push_back(w.add(std::string(is_outer ? "FACE_OUTER_BOUND" : "FACE_BOUND") + "(''," + w.ref(el) + ",.T.)"));
+	    }
+	    w.add_face(w.add("ADVANCED_FACE('',(" + w.refs(bounds) + ")," + w.ref(S.id) + ",.T.)"));
+	    ++nfaces;
+	}
+	return nfaces;
+    }
+
+} // namespace
 
 /*****************************************************************************/
 /***** Public API: StepWriter                                            *****/
@@ -200,7 +1165,9 @@ namespace MSS_Claude {
 	q.B = -1;
 	std::vector<HalfSpace> cell = normalised(P.cell);
 	int n = 0;
-	for (int sx : {-1, 1}) for (int sy : {-1, 1}) for (int sz : {-1, 1}) {
+	for (int sx : {-1, 1}) {
+	    for (int sy : {-1, 1}) {
+		for (int sz : {-1, 1}) {
 		    std::vector<HalfSpace> sub = cell;
 		    sub.push_back(above({double(sx), 0, 0}, q.c, 0));
 		    sub.push_back(above({0, double(sy), 0}, q.c, 0));
@@ -214,6 +1181,8 @@ namespace MSS_Claude {
 		    );
 		    n += emit_faces(q, P.solid_is_inside, w, R, S);
 		}
+	    }
+	}
 	return n > 0;
     }
 
