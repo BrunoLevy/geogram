@@ -137,7 +137,10 @@ namespace GEO {
     }
 
     bool Molecule::save(const std::string& filename) const {
-	if(FileSystem::extension(filename) == "stp") {
+	if(
+	    FileSystem::extension(filename) == "stp" ||
+	    FileSystem::extension(filename) == "step"
+	) {
 	    double threshold = 1e-5;
 	    return MSS_Claude::save_molecule_STEP(
 		const_cast<Molecule&>(*this),filename,threshold
@@ -1186,6 +1189,4 @@ namespace GEO {
 	    out << std::endl;
 	}
     }
-
-
 }
