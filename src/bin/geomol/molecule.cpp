@@ -1076,7 +1076,17 @@ namespace GEO {
 	if(!store_mesh_) {
 	    index_t v1 = diagram().halfedge_v(h0,0);
 	    index_t v2 = diagram().halfedge_v(h0,1);
-	    index_t t = diagram().halfedge_t(h0);
+	    index_t t = NO_INDEX;
+	    index_t h = h0;
+	    do {
+		index_t ht = diagram().halfedge_t(h);
+		if(!diagram().tet_is_infinite(ht)) {
+		    t = ht;
+		    break;
+		}
+		h = diagram().next_halfedge_around_edge(h, v1, v2);
+	    } while(h != h0);
+	    geo_debug_assert(t != NO_INDEX);
 	    vec3 p = molecule_.mixed_vertex({v1,t});
 	    vec3 N = normalize(diagram().vertex(v2) - diagram().vertex(v1));
 	    add_facet_plane(vec4(N,-dot(N,p)), flipped);
