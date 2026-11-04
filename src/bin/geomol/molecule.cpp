@@ -40,6 +40,8 @@
 #include "molecule.h"
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/mesh_remesh.h>
+#include <geogram/mesh/mesh_geometry.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/debug_stream.h>
 #include <geogram/basic/geometry_nd.h>
@@ -156,10 +158,25 @@ namespace GEO {
 		nb_atoms(),
 		shrink_factor_
 	    );
-	    Mesh skin;
-	    Mesh* tet_complex = nullptr;
-	    mesher.compute(skin, tet_complex);
-	    return mesh_save(skin, filename);
+	    Mesh coarse, fine, quality;
+	    mesher.compute(coarse);
+	    mesher.subdivide(fine,3);
+
+	    // mesh_save(coarse, "coarse.obj");
+	    // mesh_save(fine, "fine.obj");
+
+	    compute_normals(fine);
+	    // simple_Laplacian_smooth(fine,3,true);
+	    set_anisotropy(fine, 0.01);
+	    remesh_smooth(fine, quality, fine.vertices.nb()/10);
+
+	    /*
+	    mesher.refine(quality);
+	    index_t bad = mesher.check_isotopy();
+	    Logger::out("Mesher") << bad << " bad" << std::endl;
+	    */
+
+	    return mesh_save(quality, filename);
 	}
 	return false;
     }

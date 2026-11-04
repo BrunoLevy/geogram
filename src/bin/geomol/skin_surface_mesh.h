@@ -80,13 +80,62 @@
  *   so that no additional points need to be inserted.
  *
  *   The intermediate tetrahedral complex can be retrieved for debugging.
+ *
+ *   Section 3.4 (mesh enhancement) is implemented by subdivide() and
+ *   refine(): vertices are only inserted on the surface along the
+ *   transversal segments of the tetrahedral complex (Lemma 24), and
+ *   edge flips/collapses are validated by checking that the new triangles
+ *   are crossed by the same transversal segments as the old ones.
  */
 
 namespace GEO {
 
+    class SkinSurfaceMesherImpl;
+
+    /**
+     * \brief Parameters for SkinSurfaceMesher::refine()
+     */
+    struct SkinRefineParams {
+        /** \brief Triangles with an angle smaller than this are refined. */
+        double min_angle_deg = 30.0;
+        /**
+         * \brief Target circumradius relative to the local radius of
+         *  curvature of the skin surface (0: no curvature-based size).
+         */
+        double size_factor = 0.5;
+        /** \brief Absolute maximum circumradius (0: none). */
+        double max_edge_length = 0.0;
+        /**
+         * \brief Triangles smaller than this fraction of the target
+         *  size are not refined for angle quality (termination guard).
+         */
+        double min_size_factor = 0.02;
+        /**
+         * \brief Before refinement, edges shorter than this fraction of
+         *  the target size are collapsed when isotopy allows (0: none).
+         */
+        double collapse_factor = 0.2;
+        /** \brief Maximum number of vertices, relative to the input. */
+        double max_vertices_factor = 20.0;
+        /**
+         * \brief When the circumcenter of a badly shaped triangle cannot
+         *  be inserted, its longest edge is split if it is longer than
+         *  this fraction of the target size.
+         */
+        double split_factor = 0.5;
+        /**
+         * \brief If the circumcenter of a bad triangle falls closer than
+         *  this (barycentric) distance to an edge, the edge is split
+         *  instead (0: always insert the circumcenter).
+         */
+        double encroach_factor = 0.0;
+        index_t max_flips_per_insertion = 100;
+        index_t max_walk_steps = 100;
+    };
+
     /**
      * \brief Computes a coarse mesh isotopic to the skin surface of a set
-     *  of weighted points.
+     *  of weighted points, and refines it while maintaining the isotopy.
      * \details The weighted Delaunay triangulation (power diagram) of the
      *  weighted points needs to be computed beforehand by the caller. In
      *  geomol, this is the PowerDiagram (derived from PeriodicDelaunay3d,
@@ -140,6 +189,49 @@ namespace GEO {
          */
         bool compute(Mesh& skin, Mesh* tet_complex = nullptr);
 
+        ~SkinSurfaceMesher();
+
+        /**
+         * \brief Subdivides the current mesh, maintaining the isotopy
+         *  (Section 3.4 of the paper, sqrt-3 method).
+         * \details Each triangle is subdivided into n^2 triangles (n=3
+         *  corresponds to two sqrt-3 steps, as in the paper) and the new
+         *  vertices are moved to the skin surface along the transversal
+         *  segments (Lemma 24). Can be called several times, and
+         *  combined with refine().
+         * \param[out] skin receives the subdivided mesh
+         * \param[in] n the number of sub-edges per edge (>= 2)
+         * \pre compute() was called and succeeded
+         */
+        bool subdivide(Mesh& skin, index_t n = 3);
+
+        /**
+         * \brief Refines the current mesh with a Delaunay refinement
+         *  algorithm adapted from Chew's, maintaining the isotopy
+         *  (Section 3.4 of the paper).
+         * \details Short edges are first collapsed, then bad triangles
+         *  (small angle or circumradius larger than the target size,
+         *  by default inversely proportional to the maximum curvature)
+         *  are refined by inserting their circumcenter, moved to the skin
+         *  surface along a transversal segment (Lemma 24), followed by
+         *  Delaunay edge flips. Every flip and collapse is validated by
+         *  the transversality test (the new triangles must be crossed by
+         *  the same transversal segments as the old ones, Section 3.4).
+         *  Can be called several times.
+         * \param[out] skin receives the refined mesh
+         * \pre compute() was called and succeeded
+         */
+        bool refine(Mesh& skin, const SkinRefineParams& params = SkinRefineParams());
+
+        /**
+         * \brief Checks the isotopy condition of Lemma 23 on all the
+         *  triangles of the current mesh.
+         * \return the number of triangles that violate it (0 is expected
+         *  after compute(), subdivide() and refine()), or NO_INDEX if
+         *  compute() was not called.
+         */
+        index_t check_isotopy();
+
         /**
          * \brief Sets verbosity.
          */
@@ -181,6 +273,7 @@ namespace GEO {
         index_t nb_complex_vertices_;
         index_t nb_complex_tets_;
         index_t nb_degenerate_tets_;
+        SkinSurfaceMesherImpl* impl_;
     };
 
 }

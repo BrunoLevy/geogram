@@ -105,8 +105,8 @@
  *  the mixed cells that are clipped away contain no part of the surface.
  */
 
-namespace {
-    using namespace GEO;
+namespace GEO {
+  namespace skin_internal {
 
     /**
      * \brief Local vertex indices of the facets of a tetrahedron.
@@ -248,17 +248,112 @@ namespace {
         double eval(const vec3& x) const {
             return form(x - c) - W;
         }
+
+        /**
+         * \brief Evaluates the gradient of I_X at a point x.
+         */
+        vec3 gradient(const vec3& x) const {
+            vec3 y = x - c;
+            switch(ell) {
+            case 0: {
+                return (2.0/s)*y;
+            }
+            case 1: {
+                double a = dot(y, axis);
+                return (2.0/s)*(y - a*axis) - (2.0/(1.0-s))*(a*axis);
+            }
+            case 2: {
+                double a = dot(y, axis);
+                return (2.0/s)*(a*axis) - (2.0/(1.0-s))*(y - a*axis);
+            }
+            default: {
+                return (-2.0/(1.0-s))*y;
+            }
+            }
+        }
+
+        /**
+         * \brief Projects a point onto the quadric, along its gradient
+         *  if the gradient line meets the quadric (choosing the root
+         *  closest to a reference point), else by Newton iterations
+         *  started from the reference point.
+         * \retval true on success
+         */
+        bool project(vec3& x, const vec3& ref) const {
+            vec3 g = gradient(x);
+            double gl2 = length2(g);
+            if(gl2 < 1e-300) {
+                return false;
+            }
+            // I(x + lambda g) = A lambda^2 + B lambda + C
+            double A = form(g);
+            double C = eval(x);
+            double B = form((x - c) + g) - form(x - c) - A; // 2 bilinear
+            double lambda;
+            bool ok = false;
+            if(std::fabs(A) < 1e-14*std::fabs(B)) {
+                if(B != 0.0) {
+                    lambda = -C/B;
+                    ok = true;
+                }
+            } else {
+                double disc = B*B - 4.0*A*C;
+                if(disc >= 0.0) {
+                    double sq = std::sqrt(disc);
+                    double l1 = (-B + sq)/(2.0*A);
+                    double l2 = (-B - sq)/(2.0*A);
+                    // choose the root closest to the reference point
+                    lambda = (
+                        distance2(x + l1*g, ref) < distance2(x + l2*g, ref)
+                    ) ? l1 : l2;
+                    ok = true;
+                }
+            }
+            if(ok) {
+                x = x + lambda*g;
+                return true;
+            }
+            // Newton iterations (the gradient line misses the quadric,
+            // this happens with hyperboloids)
+            vec3 y = ref;
+            double scale = std::fabs(W) + length2(x - c);
+            for(index_t iter=0; iter<20; ++iter) {
+                double f = eval(y);
+                if(std::fabs(f) < 1e-14*scale) {
+                    x = y;
+                    return true;
+                }
+                vec3 gg = gradient(y);
+                double gg2 = length2(gg);
+                if(gg2 < 1e-300) {
+                    return false;
+                }
+                y = y - (f/gg2)*gg;
+            }
+            if(std::fabs(eval(y)) < 1e-9*scale) {
+                x = y;
+                return true;
+            }
+            return false;
+        }
     };
 
-    /***********************************************************************/
+  }
+}
+
+/*************************************************************************/
+
+namespace GEO {
+
+    using namespace skin_internal;
 
     /**
      * \brief Internal class that does all the work.
      */
-    class Builder {
+    class SkinSurfaceMesherImpl {
     public:
 
-        Builder(
+        SkinSurfaceMesherImpl(
             const Delaunay& D,
             const double* points,
             const double* weights,
@@ -324,7 +419,8 @@ namespace {
             }
             {
                 Stopwatch W("skin:extract", verbose_);
-                extract_surface(skin);
+                extract_surface();
+                output_mesh(skin);
             }
             if(tet_complex != nullptr) {
                 get_tetrahedral_complex(*tet_complex);
@@ -350,6 +446,46 @@ namespace {
 
         index_t nb_complex_vertices() const {
             return cv_pos_.size();
+        }
+
+        /**
+         * \brief Counts the triangles of the current mesh that violate
+         *  the isotopy condition of Lemma 23.
+         */
+        index_t count_isotopy_violations() {
+            return check_isotopy();
+        }
+
+        /**
+         * \brief Subdivides the current mesh (each triangle into n^2
+         *  triangles) and copies it into \p skin.
+         */
+        bool subdivide(Mesh& skin, index_t n) {
+            if(rt_v_.size() == 0) {
+                return false;
+            }
+            Stopwatch W("skin:subdivide", verbose_);
+            if(!subdivide(n)) {
+                return false;
+            }
+            output_mesh(skin);
+            return true;
+        }
+
+        /**
+         * \brief Refines the current mesh and copies it into \p skin.
+         */
+        bool refine(Mesh& skin, const SkinRefineParams& params) {
+            if(rt_v_.size() == 0) {
+                return false;
+            }
+            Stopwatch W("skin:refine", verbose_);
+            refine_params_ = params;
+            if(!refine()) {
+                return false;
+            }
+            output_mesh(skin);
+            return true;
         }
 
         index_t nb_complex_tets() const {
@@ -2338,30 +2474,15 @@ namespace {
         /*****************************************************************/
 
         /**
-         * \brief Gets (or creates) the mesh vertex at the intersection
-         *  between the skin surface and an edge of the tetrahedral
-         *  complex.
-         * \details The intersection is computed as the root of the
-         *  quadric I_X restricted to the edge (there is exactly one by
-         *  the monotonicity condition, Observation 18). It is cached, so
-         *  that the two cells that share an edge of the complex use the
-         *  same vertex (no crack).
-         * \param[in] a , b the two extremities of the edge (one inside
-         *  and one outside)
-         * \param[in] q the quadric of the mixed cell
+         * \brief Finds the root of the quadric of a mixed cell along a
+         *  segment, given the values at the extremities.
+         * \details I_X(pa + t (pb - pa)) = A t^2 + B t + C, with the
+         *  constraints f(0) = fa and f(1) = fb. There is exactly one root
+         *  in [0,1] when fa and fb have different signs.
          */
-        index_t edge_intersection(index_t a, index_t b, index_t q, Mesh& M) {
-            Numeric::uint64 key = edge_key(a, b);
-            auto it = edge_vertex_.find(key);
-            if(it != edge_vertex_.end()) {
-                return it->second;
-            }
-            vec3 pa = cv_pos_[a];
-            vec3 pb = cv_pos_[b];
-            double fa = cv_val_[a];
-            double fb = cv_val_[b];
-            // I_X(pa + t (pb - pa)) = A t^2 + B t + C, with the
-            // constraints f(0) = fa and f(1) = fb.
+        vec3 segment_root(
+            const vec3& pa, const vec3& pb, double fa, double fb, index_t q
+        ) const {
             double A = quadrics_[q].form(pb - pa);
             double B = fb - fa - A;
             double C = fa;
@@ -2388,46 +2509,53 @@ namespace {
                 t = fa / (fa - fb);
                 t = std::max(0.0, std::min(1.0, t));
             }
-            vec3 p = pa + t*(pb - pa);
-            index_t result = M.vertices.create_vertex();
-            M.vertices.point(result) = p;
+            return pa + t*(pb - pa);
+        }
+
+        /**
+         * \brief Gets (or creates) the mesh vertex at the intersection
+         *  between the skin surface and an edge of the tetrahedral
+         *  complex.
+         * \details The intersection is computed as the root of the
+         *  quadric I_X restricted to the edge (there is exactly one by
+         *  the monotonicity condition, Observation 18). It is cached, so
+         *  that the two cells that share an edge of the complex use the
+         *  same vertex (no crack). The support of the created vertex is
+         *  the edge (a,b).
+         * \param[in] a , b the two extremities of the edge (one inside
+         *  and one outside)
+         * \param[in] q the quadric of the mixed cell
+         */
+        index_t edge_intersection(index_t a, index_t b, index_t q) {
+            Numeric::uint64 key = edge_key(a, b);
+            auto it = edge_vertex_.find(key);
+            if(it != edge_vertex_.end()) {
+                return it->second;
+            }
+            vec3 p = segment_root(
+                cv_pos_[a], cv_pos_[b], cv_val_[a], cv_val_[b], q
+            );
+            index_t sup[2] = { std::min(a,b), std::max(a,b) };
+            index_t result = new_rvertex(p, sup, 2);
             edge_vertex_[key] = result;
             return result;
         }
 
         /**
-         * \brief Adds a triangle to the mesh, oriented in such a way
-         *  that its normal points towards \p outside.
-         */
-        void add_triangle(
-            Mesh& M, index_t v0, index_t v1, index_t v2,
-            const vec3& outside, index_t type,
-            Attribute<index_t>& type_attr
-        ) {
-            const vec3& p0 = M.vertices.point(v0);
-            const vec3& p1 = M.vertices.point(v1);
-            const vec3& p2 = M.vertices.point(v2);
-            vec3 n = cross(p1-p0, p2-p0);
-            if(dot(n, outside) < 0.0) {
-                std::swap(v1, v2);
-            }
-            index_t f = M.facets.create_triangle(v0, v1, v2);
-            type_attr[f] = type;
-        }
-
-        /**
          * \brief Extracts the skin surface from the tetrahedral complex
-         *  with the marching tetrahedra algorithm (Figure 5).
+         *  with the marching tetrahedra algorithm (Figure 5), into the
+         *  internal refinable mesh.
          */
-        void extract_surface(Mesh& M) {
-            M.clear();
-            M.vertices.set_dimension(3);
-            Attribute<index_t> type_attr(
-                M.facets.attributes(), "mixed_cell_type"
-            );
+        void extract_surface() {
+            rv_.clear();
+            rt_v_.clear();
+            rt_adj_.clear();
+            rt_alive_.clear();
+            rt_carrier_.clear();
+            edge_vertex_.clear();
+            build_cv_tets();
             for(index_t t=0; t<nb_complex_tets(); ++t) {
                 index_t q = ct_q_[t];
-                index_t type = quadrics_[q].ell;
                 index_t in[4];
                 index_t out[4];
                 index_t nb_in = 0;
@@ -2454,27 +2582,1900 @@ namespace {
                 vec3 dir = (1.0/double(nb_out))*g_out - (1.0/double(nb_in))*g_in;
 
                 if(nb_in == 1) {
-                    index_t x0 = edge_intersection(in[0], out[0], q, M);
-                    index_t x1 = edge_intersection(in[0], out[1], q, M);
-                    index_t x2 = edge_intersection(in[0], out[2], q, M);
-                    add_triangle(M, x0, x1, x2, dir, type, type_attr);
+                    index_t x0 = edge_intersection(in[0], out[0], q);
+                    index_t x1 = edge_intersection(in[0], out[1], q);
+                    index_t x2 = edge_intersection(in[0], out[2], q);
+                    new_rtriangle(x0, x1, x2, dir, t);
                 } else if(nb_in == 3) {
-                    index_t x0 = edge_intersection(in[0], out[0], q, M);
-                    index_t x1 = edge_intersection(in[1], out[0], q, M);
-                    index_t x2 = edge_intersection(in[2], out[0], q, M);
-                    add_triangle(M, x0, x1, x2, dir, type, type_attr);
+                    index_t x0 = edge_intersection(in[0], out[0], q);
+                    index_t x1 = edge_intersection(in[1], out[0], q);
+                    index_t x2 = edge_intersection(in[2], out[0], q);
+                    new_rtriangle(x0, x1, x2, dir, t);
                 } else {
                     // nb_in == 2: quad x00 x01 x11 x10, where xij is
                     // on the edge (in[i], out[j]).
-                    index_t x00 = edge_intersection(in[0], out[0], q, M);
-                    index_t x01 = edge_intersection(in[0], out[1], q, M);
-                    index_t x11 = edge_intersection(in[1], out[1], q, M);
-                    index_t x10 = edge_intersection(in[1], out[0], q, M);
-                    add_triangle(M, x00, x01, x11, dir, type, type_attr);
-                    add_triangle(M, x00, x11, x10, dir, type, type_attr);
+                    index_t x00 = edge_intersection(in[0], out[0], q);
+                    index_t x01 = edge_intersection(in[0], out[1], q);
+                    index_t x11 = edge_intersection(in[1], out[1], q);
+                    index_t x10 = edge_intersection(in[1], out[0], q);
+                    new_rtriangle(x00, x01, x11, dir, t);
+                    new_rtriangle(x00, x11, x10, dir, t);
                 }
             }
+            rebuild_adjacency();
+        }
+
+        /*****************************************************************/
+        /** Refinable mesh                                               */
+        /*****************************************************************/
+
+        /*
+         * The refinable mesh is a triangle mesh with adjacencies.
+         * Each vertex stores its support: the (sorted) vertices of the
+         * smallest simplex of the tetrahedral complex that contains it.
+         * Each triangle stores its carrier: a tetrahedron of the complex
+         * that contains it (the triangle is always contained in a single
+         * tetrahedron, this is an invariant maintained by all the
+         * operations, that makes the isotopy tests easy).
+         *
+         * Isotopy is maintained as follows (Section 3.4 of the paper):
+         * - new vertices are always inserted on an existing triangle (or
+         *   edge) and moved to the skin surface along the transversal
+         *   segment through their initial position (Lemma 24);
+         * - edge flips and collapses are only done if the new triangles
+         *   are each contained in a single tetrahedron of the complex and
+         *   pass the test of Lemma 23 (the plane of the triangle separates
+         *   the inside and outside vertices of the tetrahedron, with the
+         *   inside vertices on the inner side).
+         */
+
+        struct RVertex {
+            vec3 p;
+            index_t sup[4];
+            index_t nsup;
+            bool alive;
+        };
+
+        index_t new_rvertex(const vec3& p, const index_t* sup, index_t nsup) {
+            RVertex v;
+            v.p = p;
+            v.nsup = nsup;
+            for(index_t i=0; i<4; ++i) {
+                v.sup[i] = (i < nsup) ? sup[i] : NO_INDEX;
+            }
+            v.alive = true;
+            rv_.push_back(v);
+            return rv_.size()-1;
+        }
+
+        /**
+         * \brief Creates a triangle, oriented in such a way that its
+         *  normal points towards \p outside.
+         */
+        index_t new_rtriangle(
+            index_t v0, index_t v1, index_t v2, const vec3& outside,
+            index_t carrier
+        ) {
+            vec3 n = cross(rv_[v1].p - rv_[v0].p, rv_[v2].p - rv_[v0].p);
+            if(dot(n, outside) < 0.0) {
+                std::swap(v1, v2);
+            }
+            return new_rtriangle(v0, v1, v2, carrier);
+        }
+
+        index_t new_rtriangle(
+            index_t v0, index_t v1, index_t v2, index_t carrier
+        ) {
+            index_t t = rt_v_.size()/3;
+            rt_v_.push_back(v0);
+            rt_v_.push_back(v1);
+            rt_v_.push_back(v2);
+            rt_adj_.push_back(NO_INDEX);
+            rt_adj_.push_back(NO_INDEX);
+            rt_adj_.push_back(NO_INDEX);
+            rt_alive_.push_back(true);
+            rt_carrier_.push_back(carrier);
+            return t;
+        }
+
+        index_t nb_rtriangles() const {
+            return rt_v_.size()/3;
+        }
+
+        index_t rt_vertex(index_t t, index_t k) const {
+            return rt_v_[3*t + (k%3)];
+        }
+
+        index_t& rt_adjacent(index_t t, index_t k) {
+            return rt_adj_[3*t + (k%3)];
+        }
+
+        /**
+         * \brief Finds the side k of triangle t such that the edge
+         *  (vertex k, vertex k+1) is (u,v).
+         */
+        index_t rt_side(index_t t, index_t u, index_t v) const {
+            for(index_t k=0; k<3; ++k) {
+                if(rt_vertex(t,k) == u && rt_vertex(t,k+1) == v) {
+                    return k;
+                }
+            }
+            return NO_INDEX;
+        }
+
+        /**
+         * \brief Replaces an adjacency pointer in a triangle.
+         */
+        void rt_replace_adjacent(index_t t, index_t from, index_t to) {
+            if(t == NO_INDEX) {
+                return;
+            }
+            for(index_t k=0; k<3; ++k) {
+                if(rt_adjacent(t,k) == from) {
+                    rt_adjacent(t,k) = to;
+                    return;
+                }
+            }
+        }
+
+        /**
+         * \brief Recomputes all the adjacencies from scratch.
+         */
+        void rebuild_adjacency() {
+            std::unordered_map<Numeric::uint64, index_t> edge_tri;
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                for(index_t k=0; k<3; ++k) {
+                    rt_adjacent(t,k) = NO_INDEX;
+                }
+            }
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                for(index_t k=0; k<3; ++k) {
+                    index_t u = rt_vertex(t,k);
+                    index_t v = rt_vertex(t,k+1);
+                    Numeric::uint64 key = edge_key(u,v);
+                    auto it = edge_tri.find(key);
+                    if(it == edge_tri.end()) {
+                        edge_tri[key] = t;
+                    } else {
+                        index_t t2 = it->second;
+                        index_t k2 = rt_side(t2, v, u);
+                        if(k2 != NO_INDEX) {
+                            rt_adjacent(t,k) = t2;
+                            rt_adjacent(t2,k2) = t;
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * \brief Copies the refinable mesh into a geogram mesh.
+         */
+        void output_mesh(Mesh& M) {
+            M.clear();
+            M.vertices.set_dimension(3);
+            vector<index_t> new_id(rv_.size(), NO_INDEX);
+            index_t nv = 0;
+            for(index_t v=0; v<rv_.size(); ++v) {
+                if(rv_[v].alive) {
+                    new_id[v] = nv++;
+                }
+            }
+            M.vertices.create_vertices(nv);
+            for(index_t v=0; v<rv_.size(); ++v) {
+                if(rv_[v].alive) {
+                    M.vertices.point(new_id[v]) = rv_[v].p;
+                }
+            }
+            Attribute<index_t> type_attr(
+                M.facets.attributes(), "mixed_cell_type"
+            );
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                index_t f = M.facets.create_triangle(
+                    new_id[rt_vertex(t,0)],
+                    new_id[rt_vertex(t,1)],
+                    new_id[rt_vertex(t,2)]
+                );
+                type_attr[f] = quadrics_[ct_q_[rt_carrier_[t]]].ell;
+            }
             M.facets.connect();
+        }
+
+        /*****************************************************************/
+        /** Complex simplices, carriers and transversal segments         */
+        /*****************************************************************/
+
+        /**
+         * \brief Computes for each vertex of the complex the list of
+         *  tetrahedra incident to it.
+         */
+        void build_cv_tets() {
+            index_t nv = cv_pos_.size();
+            index_t nt = nb_complex_tets();
+            cv_tets_ptr_.assign(nv+1, 0);
+            for(index_t i=0; i<4*nt; ++i) {
+                cv_tets_ptr_[ct_v_[i]+1]++;
+            }
+            for(index_t v=0; v<nv; ++v) {
+                cv_tets_ptr_[v+1] += cv_tets_ptr_[v];
+            }
+            cv_tets_.assign(cv_tets_ptr_[nv], NO_INDEX);
+            vector<index_t> fill(nv, 0);
+            for(index_t t=0; t<nt; ++t) {
+                for(index_t lv=0; lv<4; ++lv) {
+                    index_t v = ct_v_[4*t+lv];
+                    cv_tets_[cv_tets_ptr_[v] + fill[v]] = t;
+                    fill[v]++;
+                }
+            }
+        }
+
+        bool ct_contains(index_t t, const index_t* U, index_t nU) const {
+            for(index_t i=0; i<nU; ++i) {
+                bool found = false;
+                for(index_t lv=0; lv<4; ++lv) {
+                    if(ct_v_[4*t+lv] == U[i]) {
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * \brief Finds all the tetrahedra of the complex that contain a
+         *  set of complex vertices.
+         */
+        void tets_containing(
+            const index_t* U, index_t nU, vector<index_t>& tets
+        ) const {
+            tets.resize(0);
+            if(nU == 0) {
+                return;
+            }
+            for(index_t k=cv_tets_ptr_[U[0]]; k<cv_tets_ptr_[U[0]+1]; ++k) {
+                index_t t = cv_tets_[k];
+                if(ct_contains(t, U, nU)) {
+                    tets.push_back(t);
+                }
+            }
+        }
+
+        /**
+         * \brief Computes the union of the supports of a set of mesh
+         *  vertices (the vertices of the smallest complex simplex that
+         *  contains them all, if it is a simplex of the complex).
+         * \return the number of complex vertices (nU), or 5 if there are
+         *  more than 4.
+         */
+        index_t carrier_set(
+            const index_t* verts, index_t n, index_t U[4]
+        ) const {
+            index_t nU = 0;
+            for(index_t i=0; i<n; ++i) {
+                const RVertex& V = rv_[verts[i]];
+                for(index_t j=0; j<V.nsup; ++j) {
+                    index_t w = V.sup[j];
+                    bool found = false;
+                    for(index_t k=0; k<nU; ++k) {
+                        if(U[k] == w) {
+                            found = true;
+                        }
+                    }
+                    if(!found) {
+                        if(nU == 4) {
+                            return 5;
+                        }
+                        U[nU++] = w;
+                    }
+                }
+            }
+            // sort (at most 4 elements)
+            for(index_t i=1; i<nU; ++i) {
+                for(index_t j=i; j>0 && U[j] < U[j-1]; --j) {
+                    std::swap(U[j], U[j-1]);
+                }
+            }
+            return nU;
+        }
+
+        /**
+         * \brief Finds a tetrahedron of the complex that contains a set
+         *  of complex vertices, or NO_INDEX if there is none.
+         */
+        index_t find_carrier(const index_t* U, index_t nU) const {
+            if(nU == 0 || nU > 4) {
+                return NO_INDEX;
+            }
+            for(index_t k=cv_tets_ptr_[U[0]]; k<cv_tets_ptr_[U[0]+1]; ++k) {
+                index_t t = cv_tets_[k];
+                if(ct_contains(t, U, nU)) {
+                    return t;
+                }
+            }
+            return NO_INDEX;
+        }
+
+        /**
+         * \brief Computes the parameters of the closest points between
+         *  two lines p0 + s d0 and p1 + t d1.
+         */
+        static void closest_params(
+            const vec3& p0, const vec3& d0,
+            const vec3& p1, const vec3& d1,
+            double& s, double& t
+        ) {
+            vec3 r = p0 - p1;
+            double a = dot(d0,d0);
+            double b = dot(d0,d1);
+            double c = dot(d1,d1);
+            double d = dot(d0,r);
+            double e = dot(d1,r);
+            double den = a*c - b*b;
+            if(std::fabs(den) < 1e-20 * (a*c + 1e-300)) {
+                s = 0.0;
+                t = (c > 0.0) ? e / c : 0.0;
+                return;
+            }
+            s = (b*e - c*d) / den;
+            t = (a*e - b*d) / den;
+        }
+
+        static double clamp01(double x) {
+            return std::max(0.0, std::min(1.0, x));
+        }
+
+        /**
+         * \brief Computes the transversal segment through a point x of
+         *  a simplex of the complex (Theorem 21 and Section 3.4).
+         * \details Let V- and V+ be the inside and outside vertices of
+         *  the simplex. The transversal segments are the segments ab with
+         *  a in conv(V-) and b in conv(V+). The one through x is unique:
+         *  if |V-| = 1 (resp. |V+| = 1), it is on the line through a
+         *  (resp. b) and x; if |V-| = |V+| = 2, it is the unique line
+         *  through x that meets both edges.
+         * \param[in] U , nU the vertices of the simplex
+         * \param[in] x the point
+         * \param[out] a , b the extremities of the segment (a inside,
+         *  b outside)
+         * \param[in] clamp if true, the extremities are clamped to the
+         *  faces of the simplex (x is expected to be inside). If false,
+         *  the family of segments is extended outside the simplex (used
+         *  to walk on the mesh).
+         * \retval true on success
+         * \retval false if the simplex does not intersect the surface
+         */
+        bool transversal_segment(
+            const index_t* U, index_t nU, const vec3& x, vec3& a, vec3& b,
+            bool clamp = true
+        ) const {
+            vec3 In[4];
+            vec3 Out[4];
+            index_t nIn = 0;
+            index_t nOut = 0;
+            for(index_t i=0; i<nU; ++i) {
+                if(cv_val_[U[i]] < 0.0) {
+                    In[nIn++] = cv_pos_[U[i]];
+                } else {
+                    Out[nOut++] = cv_pos_[U[i]];
+                }
+            }
+            if(nIn == 0 || nOut == 0) {
+                return false;
+            }
+            if(nIn == 1 && nOut == 1) {
+                a = In[0];
+                b = Out[0];
+                return true;
+            }
+            if(nIn == 1 || nOut == 1) {
+                // Central projection from the single vertex onto the
+                // opposite face.
+                const vec3& apex = (nIn == 1) ? In[0] : Out[0];
+                const vec3* face = (nIn == 1) ? Out : In;
+                index_t nf = (nIn == 1) ? nOut : nIn;
+                vec3 hit;
+                if(nf == 2) {
+                    double s, t;
+                    closest_params(apex, x - apex, face[0], face[1]-face[0], s, t);
+                    if(clamp) {
+                        t = clamp01(t);
+                    }
+                    hit = face[0] + t*(face[1]-face[0]);
+                } else {
+                    vec3 sol;
+                    bool ok = solve3_columns(
+                        face[0]-apex, face[1]-face[0], face[2]-face[0],
+                        x - apex, sol
+                    );
+                    double lambda = ok ? sol.x : 0.0;
+                    double alpha = 0.0;
+                    double beta = 0.0;
+                    if(ok && lambda > 1e-12) {
+                        alpha = sol.y / lambda;
+                        beta = sol.z / lambda;
+                    } else {
+                        alpha = 1.0/3.0;
+                        beta = 1.0/3.0;
+                    }
+                    if(clamp) {
+                        // clamp to the triangle
+                        alpha = std::max(0.0, alpha);
+                        beta = std::max(0.0, beta);
+                        if(alpha + beta > 1.0) {
+                            double sum = alpha + beta;
+                            alpha /= sum;
+                            beta /= sum;
+                        }
+                    }
+                    hit = face[0] + alpha*(face[1]-face[0]) + beta*(face[2]-face[0]);
+                }
+                if(nIn == 1) {
+                    a = apex;
+                    b = hit;
+                } else {
+                    a = hit;
+                    b = apex;
+                }
+                return true;
+            }
+            // nIn == 2 and nOut == 2: the line through x that meets both
+            // edges. The plane through x and the inside edge meets the
+            // outside edge in b.
+            vec3 n = cross(In[1]-In[0], x-In[0]);
+            double denom = dot(n, Out[1]-Out[0]);
+            double beta = (std::fabs(denom) > 1e-300) ?
+                -dot(n, Out[0]-In[0]) / denom : 0.5;
+            if(clamp) {
+                beta = clamp01(beta);
+            }
+            b = Out[0] + beta*(Out[1]-Out[0]);
+            double s, t;
+            closest_params(b, x - b, In[0], In[1]-In[0], s, t);
+            if(clamp) {
+                t = clamp01(t);
+            }
+            a = In[0] + t*(In[1]-In[0]);
+            return true;
+        }
+
+        /**
+         * \brief Moves a point of a simplex of the complex to the skin
+         *  surface, along the transversal segment through it (Lemma 24).
+         * \param[in] U , nU the vertices of the simplex
+         * \param[in] carrier a tetrahedron that contains the simplex
+         *  (used for the quadric)
+         * \param[in,out] x the point, moved to the surface
+         * \retval true on success
+         */
+        bool move_to_surface(
+            const index_t* U, index_t nU, index_t carrier, vec3& x
+        ) const {
+            vec3 a, b;
+            if(!transversal_segment(U, nU, x, a, b)) {
+                return false;
+            }
+            index_t q = ct_q_[carrier];
+            double fa = quadrics_[q].eval(a);
+            double fb = quadrics_[q].eval(b);
+            if(!(fa < 0.0 && fb > 0.0)) {
+                // Numerical issue (a or b too close to the surface),
+                // extend the segment slightly along its direction.
+                vec3 d = b - a;
+                a = a - 1e-6*d;
+                b = b + 1e-6*d;
+                fa = quadrics_[q].eval(a);
+                fb = quadrics_[q].eval(b);
+                if(!(fa < 0.0 && fb > 0.0)) {
+                    return false;
+                }
+            }
+            x = segment_root(a, b, fa, fb, q);
+            return true;
+        }
+
+        /**
+         * \brief Computes the inward-oriented plane of a facet of a
+         *  tetrahedron of the complex.
+         */
+        void ct_facet_plane(index_t t, index_t lf, vec3& p, vec3& n) const {
+            const vec3& a = cv_pos_[ct_v_[4*t + tet_facet_vertex[lf][0]]];
+            const vec3& b = cv_pos_[ct_v_[4*t + tet_facet_vertex[lf][1]]];
+            const vec3& c = cv_pos_[ct_v_[4*t + tet_facet_vertex[lf][2]]];
+            const vec3& d = cv_pos_[ct_v_[4*t + lf]];
+            p = a;
+            n = cross(b-a, c-a);
+            if(dot(n, d-a) < 0.0) {
+                n = -1.0*n;
+            }
+        }
+
+        /**
+         * \brief Tests whether a point is inside a tetrahedron of the
+         *  complex (with a relative tolerance).
+         */
+        bool ct_contains_point(index_t t, const vec3& x) const {
+            for(index_t lf=0; lf<4; ++lf) {
+                vec3 p, n;
+                ct_facet_plane(t, lf, p, n);
+                if(dot(n, x-p) < -1e-9*length(n)*length(x-p)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * \brief Clips a triangle by a tetrahedron of the complex
+         *  (Sutherland-Hodgman).
+         * \param[out] poly the clipped polygon (empty if the triangle
+         *  does not intersect the tetrahedron)
+         */
+        void clip_triangle_by_tet(
+            index_t t, const vec3& p0, const vec3& p1, const vec3& p2,
+            vector<vec3>& poly
+        ) {
+            poly.resize(0);
+            poly.push_back(p0);
+            poly.push_back(p1);
+            poly.push_back(p2);
+            for(index_t lf=0; lf<4 && poly.size() != 0; ++lf) {
+                vec3 p, n;
+                ct_facet_plane(t, lf, p, n);
+                tmp_poly_.resize(0);
+                index_t np = poly.size();
+                for(index_t i=0; i<np; ++i) {
+                    const vec3& A = poly[i];
+                    const vec3& B = poly[(i+1)%np];
+                    double da = dot(n, A-p);
+                    double db = dot(n, B-p);
+                    if(da >= 0.0) {
+                        tmp_poly_.push_back(A);
+                    }
+                    if((da >= 0.0) != (db >= 0.0)) {
+                        double tt = da / (da - db);
+                        tmp_poly_.push_back(A + tt*(B-A));
+                    }
+                }
+                poly.swap(tmp_poly_);
+            }
+        }
+
+        static double polygon_area(const vector<vec3>& poly, const vec3& n_unit) {
+            double a = 0.0;
+            for(index_t i=1; i+1<poly.size(); ++i) {
+                a += dot(n_unit, cross(poly[i]-poly[0], poly[i+1]-poly[0]));
+            }
+            return 0.5*a;
+        }
+
+        /**
+         * \brief Collects the tetrahedra of the complex that may be
+         *  crossed by a triangle: the tetrahedra incident to the support
+         *  vertices of its vertices (and optionally their neighbors).
+         */
+        void candidate_tets(
+            const index_t* verts, index_t nv, bool two_rings,
+            vector<index_t>& tets
+        ) {
+            tets.resize(0);
+            ++tet_stamp_;
+            if(tet_mark_.size() != nb_complex_tets()) {
+                tet_mark_.assign(nb_complex_tets(), 0);
+            }
+            for(index_t i=0; i<nv; ++i) {
+                const RVertex& V = rv_[verts[i]];
+                for(index_t j=0; j<V.nsup; ++j) {
+                    index_t sv = V.sup[j];
+                    for(index_t k=cv_tets_ptr_[sv]; k<cv_tets_ptr_[sv+1]; ++k) {
+                        index_t t = cv_tets_[k];
+                        if(tet_mark_[t] != tet_stamp_) {
+                            tet_mark_[t] = tet_stamp_;
+                            tets.push_back(t);
+                        }
+                    }
+                }
+            }
+            if(two_rings) {
+                index_t n1 = tets.size();
+                for(index_t i=0; i<n1; ++i) {
+                    for(index_t lv=0; lv<4; ++lv) {
+                        index_t sv = ct_v_[4*tets[i]+lv];
+                        for(index_t k=cv_tets_ptr_[sv]; k<cv_tets_ptr_[sv+1]; ++k) {
+                            index_t t = cv_tets_[k];
+                            if(tet_mark_[t] != tet_stamp_) {
+                                tet_mark_[t] = tet_stamp_;
+                                tets.push_back(t);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * \brief Finds the tetrahedron of the complex that contains a
+         *  point, among the candidates of some mesh vertices.
+         */
+        index_t find_tet_containing(
+            const index_t* verts, index_t nv, const vec3& x, index_t hint
+        ) {
+            if(hint != NO_INDEX && ct_contains_point(hint, x)) {
+                return hint;
+            }
+            for(index_t pass=0; pass<2; ++pass) {
+                candidate_tets(verts, nv, pass==1, tmp_cand_);
+                for(index_t t : tmp_cand_) {
+                    if(ct_contains_point(t, x)) {
+                        return t;
+                    }
+                }
+            }
+            return NO_INDEX;
+        }
+
+        /**
+         * \brief Tests whether a triangle of the mesh is transversal to
+         *  the family of transversal segments of the tetrahedra of the
+         *  complex that it crosses, with the right orientation.
+         * \details This is the local condition that makes the mesh,
+         *  restricted to a tetrahedron, a "graph" over the family of
+         *  transversal segments (proof of Theorem 21): at each point x of
+         *  the triangle inside tetrahedron c, the direction
+         *  d(x) = b(x) - a(x) of the segment of c through x (from inside
+         *  to outside) must cross the (outward oriented) triangle from
+         *  inside to outside, i.e. n . d(x) > 0. The triangle is clipped
+         *  by each tetrahedron it crosses; in the central projection cases
+         *  (one inside or one outside vertex) n . d(x) is affine so it is
+         *  sufficient to test the vertices of the clipped polygon; in the
+         *  2-2 case, the centroid is tested as well. The condition of
+         *  Lemma 23 of the paper is a sufficient condition that only works
+         *  when the triangles are large with respect to the tetrahedra;
+         *  the present condition works at any resolution.
+         *  Two adjacent triangles that both satisfy the condition have
+         *  disjoint projections: this is the invariant maintained by
+         *  refine() (an edge flip is valid iff the two new triangles
+         *  satisfy it, which means that the projected quad is convex, i.e.
+         *  that the new triangles are crossed by the same transversal
+         *  segments as the old ones, Section 3.4).
+         * \param[in] v0 , v1 , v2 the vertices of the (oriented) triangle
+         * \param[out] carrier the tetrahedron that contains the largest
+         *  part of the triangle
+         */
+        bool isotopy_test(
+            index_t v0, index_t v1, index_t v2, index_t& carrier
+        ) {
+            const vec3& p0 = rv_[v0].p;
+            const vec3& p1 = rv_[v1].p;
+            const vec3& p2 = rv_[v2].p;
+            vec3 n = cross(p1 - p0, p2 - p0);
+            double nl2 = length2(n);
+            if(nl2 == 0.0) {
+                return false;
+            }
+            vec3 n_unit = (1.0/std::sqrt(nl2))*n;
+            double tri_area = 0.5*std::sqrt(nl2);
+            index_t verts[3] = {v0, v1, v2};
+            carrier = NO_INDEX;
+            for(index_t pass=0; pass<2; ++pass) {
+                candidate_tets(verts, 3, pass==1, tmp_cand_);
+                double area = 0.0;
+                double best_area = 0.0;
+                for(index_t t : tmp_cand_) {
+                    // quick reject
+                    bool out = false;
+                    for(index_t lf=0; lf<4 && !out; ++lf) {
+                        vec3 p, nn;
+                        ct_facet_plane(t, lf, p, nn);
+                        if(dot(nn,p0-p) < 0.0 && dot(nn,p1-p) < 0.0 && dot(nn,p2-p) < 0.0) {
+                            out = true;
+                        }
+                    }
+                    if(out) {
+                        continue;
+                    }
+                    clip_triangle_by_tet(t, p0, p1, p2, tmp_clip_);
+                    if(tmp_clip_.size() < 3) {
+                        continue;
+                    }
+                    double a = polygon_area(tmp_clip_, n_unit);
+                    if(a <= 1e-12*tri_area) {
+                        continue;
+                    }
+                    area += a;
+                    if(a > best_area) {
+                        best_area = a;
+                        carrier = t;
+                    }
+                    const index_t* T = &(ct_v_[4*t]);
+                    vec3 g(0.0, 0.0, 0.0);
+                    for(const vec3& x : tmp_clip_) {
+                        g += x;
+                    }
+                    g = (1.0/double(tmp_clip_.size()))*g;
+                    tmp_clip_.push_back(g);
+                    for(const vec3& x : tmp_clip_) {
+                        vec3 a3, b3;
+                        if(!transversal_segment(T, 4, x, a3, b3, false)) {
+                            return false;
+                        }
+                        if(!(dot(n, b3 - a3) > 0.0)) {
+                            return false;
+                        }
+                    }
+                }
+                if(area >= (1.0 - 1e-6)*tri_area) {
+                    return carrier != NO_INDEX;
+                }
+                // The triangle crosses tetrahedra that are not in the
+                // candidates: retry with a larger neighborhood.
+            }
+            return false;
+        }
+
+        /**
+         * \brief Counts the triangles of the mesh that do not satisfy
+         *  the transversality condition (see isotopy_test()).
+         */
+        index_t check_isotopy() {
+            index_t nb_bad = 0;
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                index_t carrier;
+                if(!isotopy_test(
+                       rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2), carrier
+                   )
+                ) {
+                    ++nb_bad;
+                }
+            }
+            return nb_bad;
+        }
+
+        /*****************************************************************/
+        /** Subdivision (Section 3.4, sqrt-3 method generalized)         */
+        /*****************************************************************/
+
+        /**
+         * \brief Subdivides each triangle into n^2 triangles (n=3 is the
+         *  result of two sqrt-3 subdivision steps, as in the paper) and
+         *  moves the new vertices to the skin surface along the
+         *  transversal segments (Lemma 24).
+         * \retval true on success
+         */
+        bool subdivide(index_t n) {
+            if(n < 2) {
+                return true;
+            }
+            index_t nt0 = nb_rtriangles();
+            // Vertices on the edges: shared by the two incident triangles.
+            // key: (u,v) with u<v, the n-1 vertices from u to v.
+            std::unordered_map<Numeric::uint64, index_t> edge_pts;
+            vector<index_t> epts;
+            index_t nb_failed = 0;
+            auto edge_vertices = [&](index_t u, index_t v) -> index_t {
+                Numeric::uint64 key = edge_key(u,v);
+                auto it = edge_pts.find(key);
+                if(it != edge_pts.end()) {
+                    return it->second;
+                }
+                index_t umin = std::min(u,v);
+                index_t vmax = std::max(u,v);
+                index_t verts[2] = {umin, vmax};
+                index_t first = epts.size();
+                index_t hint = NO_INDEX;
+                for(index_t i=1; i<n; ++i) {
+                    double lambda = double(i)/double(n);
+                    vec3 x = (1.0-lambda)*rv_[umin].p + lambda*rv_[vmax].p;
+                    index_t c = find_tet_containing(verts, 2, x, hint);
+                    if(c == NO_INDEX) {
+                        ++nb_failed;
+                        index_t U[2] = {umin, vmax}; // unused support
+                        epts.push_back(new_rvertex(x, U, 0));
+                        continue;
+                    }
+                    hint = c;
+                    const index_t* U = &(ct_v_[4*c]);
+                    if(!move_to_surface(U, 4, c, x)) {
+                        ++nb_failed;
+                    }
+                    epts.push_back(new_rvertex(x, U, 4));
+                }
+                edge_pts[key] = first;
+                return first;
+            };
+
+            vector<index_t> lattice((n+1)*(n+2)/2);
+            for(index_t t=0; t<nt0; ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                index_t v[3] = { rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2) };
+                index_t carrier = rt_carrier_[t];
+                // lattice point (i,j): barycentric (i/n, j/n, 1-i/n-j/n)
+                // on vertices (v1, v2, v0). index = j*(n+1) - j(j-1)/2 + i
+                auto idx = [n](index_t i, index_t j) -> index_t {
+                    return j*(n+1) - (j*(j-1))/2 + i;
+                };
+                // corners
+                lattice[idx(0,0)] = v[0];
+                lattice[idx(n,0)] = v[1];
+                lattice[idx(0,n)] = v[2];
+                // edges: (v0,v1): i=1..n-1, j=0; (v1,v2): i+j=n;
+                // (v2,v0): i=0, j=1..n-1
+                {
+                    index_t f01 = edge_vertices(v[0], v[1]);
+                    index_t f12 = edge_vertices(v[1], v[2]);
+                    index_t f20 = edge_vertices(v[2], v[0]);
+                    for(index_t i=1; i<n; ++i) {
+                        // point i/n from v0 to v1: stored from min to max
+                        index_t k01 = (v[0] < v[1]) ? i-1 : n-1-i;
+                        lattice[idx(i,0)] = epts[f01 + k01];
+                        // point at i/n from v1 to v2: (n-i, i)
+                        index_t k12 = (v[1] < v[2]) ? i-1 : n-1-i;
+                        lattice[idx(n-i,i)] = epts[f12 + k12];
+                        // point at i/n from v2 to v0: (0, n-i)
+                        index_t k20 = (v[2] < v[0]) ? i-1 : n-1-i;
+                        lattice[idx(0,n-i)] = epts[f20 + k20];
+                    }
+                }
+                // interior points
+                for(index_t j=1; j<n; ++j) {
+                    for(index_t i=1; i+j<n; ++i) {
+                        double a = double(i)/double(n);
+                        double b = double(j)/double(n);
+                        vec3 x = (1.0-a-b)*rv_[v[0]].p + a*rv_[v[1]].p + b*rv_[v[2]].p;
+                        index_t c = find_tet_containing(v, 3, x, carrier);
+                        if(c == NO_INDEX) {
+                            ++nb_failed;
+                            lattice[idx(i,j)] = new_rvertex(x, v, 0);
+                            continue;
+                        }
+                        const index_t* U = &(ct_v_[4*c]);
+                        if(!move_to_surface(U, 4, c, x)) {
+                            ++nb_failed;
+                        }
+                        lattice[idx(i,j)] = new_rvertex(x, U, 4);
+                    }
+                }
+                // sub-triangles
+                auto add_sub = [&](index_t a, index_t b, index_t cc) {
+                    index_t tt = new_rtriangle(a, b, cc, carrier);
+                    index_t sv[3] = {a, b, cc};
+                    vec3 g = (1.0/3.0)*(rv_[a].p + rv_[b].p + rv_[cc].p);
+                    index_t c2 = find_tet_containing(sv, 3, g, carrier);
+                    if(c2 != NO_INDEX) {
+                        rt_carrier_[tt] = c2;
+                    }
+                };
+                for(index_t j=0; j<n; ++j) {
+                    for(index_t i=0; i+j<n; ++i) {
+                        add_sub(lattice[idx(i,j)], lattice[idx(i+1,j)], lattice[idx(i,j+1)]);
+                        if(i+j+1 < n) {
+                            add_sub(lattice[idx(i+1,j)], lattice[idx(i+1,j+1)], lattice[idx(i,j+1)]);
+                        }
+                    }
+                }
+                rt_alive_[t] = false;
+            }
+            rebuild_adjacency();
+            if(nb_failed != 0 && verbose_) {
+                Logger::warn("skin")
+                    << nb_failed << " vertices could not be moved to the surface"
+                    << std::endl;
+            }
+            repair_transversality();
+            return true;
+        }
+
+        /**
+         * \brief Repairs the (rare) triangles that do not satisfy the
+         *  transversality condition by flipping their edges.
+         * \details Subdivision in a tetrahedron with two inside and two
+         *  outside vertices can create sliver triangles that are not
+         *  graphs over the (non-linear) family of transversal segments.
+         *  Flipping an edge of such a triangle usually repairs it.
+         * \return the number of triangles that could not be repaired
+         */
+        index_t repair_transversality() {
+            index_t nb_bad = 0;
+            index_t nb_repaired = 0;
+            vector<index_t> around;
+            for(index_t round=0; round<5; ++round) {
+                nb_bad = 0;
+                for(index_t t=0; t<nb_rtriangles(); ++t) {
+                    if(!rt_alive_[t]) {
+                        continue;
+                    }
+                    index_t c;
+                    if(isotopy_test(rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2), c)) {
+                        continue;
+                    }
+                    bool repaired = false;
+                    // try to flip an edge
+                    for(index_t k=0; k<3 && !repaired; ++k) {
+                        index_t n = rt_adjacent(t,k);
+                        if(n == NO_INDEX) {
+                            continue;
+                        }
+                        index_t u = rt_vertex(t,k);
+                        index_t v = rt_vertex(t,k+1);
+                        index_t p = rt_vertex(t,k+2);
+                        index_t kn = rt_side(n, v, u);
+                        if(kn == NO_INDEX) {
+                            continue;
+                        }
+                        index_t q = rt_vertex(n, kn+2);
+                        if(q == p || edge_exists(p, q, t)) {
+                            continue;
+                        }
+                        index_t ct, cn;
+                        if(isotopy_test(u, q, p, ct) && isotopy_test(v, p, q, cn)) {
+                            index_t nt[2];
+                            flip_edge(t, k, ct, cn, nt);
+                            repaired = true;
+                        }
+                    }
+                    // try to collapse an edge (shortest first)
+                    if(!repaired) {
+                        index_t order[3] = {0, 1, 2};
+                        double len[3];
+                        for(index_t k=0; k<3; ++k) {
+                            len[k] = length(rv_[rt_vertex(t,k+1)].p - rv_[rt_vertex(t,k)].p);
+                        }
+                        std::sort(order, order+3, [&](index_t a, index_t b) {
+                            return len[a] < len[b];
+                        });
+                        for(index_t i=0; i<3 && !repaired; ++i) {
+                            if(try_collapse(t, order[i], around)) {
+                                repaired = true;
+                            } else {
+                                // try the other direction
+                                index_t n = rt_adjacent(t, order[i]);
+                                if(n != NO_INDEX) {
+                                    index_t kn = rt_side(
+                                        n, rt_vertex(t,order[i]+1), rt_vertex(t,order[i])
+                                    );
+                                    if(kn != NO_INDEX && try_collapse(n, kn, around)) {
+                                        repaired = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(repaired) {
+                        ++nb_repaired;
+                    } else {
+                        ++nb_bad;
+                    }
+                }
+                if(nb_bad == 0) {
+                    break;
+                }
+            }
+            if(verbose_ && (nb_repaired != 0 || nb_bad != 0)) {
+                Logger::out("skin")
+                    << "Transversality repair: " << nb_repaired
+                    << " triangles repaired, " << nb_bad << " remaining"
+                    << std::endl;
+            }
+            return nb_bad;
+        }
+
+        /**
+         * \brief Tests whether an edge (p,q) exists in the mesh, by
+         *  turning around p starting from a triangle incident to p.
+         */
+        bool edge_exists(index_t p, index_t q, index_t t_start) {
+            if(!triangles_around(p, t_start, tmp_tris_)) {
+                return true; // be conservative
+            }
+            for(index_t tp : tmp_tris_) {
+                for(index_t i=0; i<3; ++i) {
+                    if(rt_vertex(tp,i) == q) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /*****************************************************************/
+        /** Chew-style refinement (Section 3.4)                           */
+        /*****************************************************************/
+
+        /**
+         * \brief Computes the maximum absolute principal curvature of
+         *  the skin surface at a point, for a given mixed cell.
+         * \details The quadric is I(x) = (x-c)^T M (x-c) - W, its
+         *  gradient is g = 2 M (x-c) and its Hessian is H = 2 M. The
+         *  principal curvatures are the two non-zero eigenvalues of
+         *  P H P / |g|, with P = I - n n^T, n = g/|g|.
+         */
+        double max_curvature(const Quadric& Q, const vec3& x) const {
+            double M[3][3];
+            double sa = 1.0 / Q.s;
+            double sb = -1.0 / (1.0 - Q.s);
+            vec3 d = Q.axis;
+            for(index_t i=0; i<3; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    double I = (i==j) ? 1.0 : 0.0;
+                    double D = d[i]*d[j];
+                    switch(Q.ell) {
+                    case 0:  M[i][j] = sa*I; break;
+                    case 1:  M[i][j] = sb*D + sa*(I - D); break;
+                    case 2:  M[i][j] = sb*(I - D) + sa*D; break;
+                    default: M[i][j] = sb*I; break;
+                    }
+                }
+            }
+            vec3 y = x - Q.c;
+            vec3 g;
+            for(index_t i=0; i<3; ++i) {
+                g[i] = 2.0*(M[i][0]*y[0] + M[i][1]*y[1] + M[i][2]*y[2]);
+            }
+            double gl = length(g);
+            if(gl < 1e-300) {
+                return Numeric::max_float64();
+            }
+            vec3 n = (1.0/gl)*g;
+            // A = P H P / |g|, H = 2M, P = I - n n^T
+            double P[3][3], HP[3][3], A[3][3];
+            for(index_t i=0; i<3; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    P[i][j] = ((i==j) ? 1.0 : 0.0) - n[i]*n[j];
+                }
+            }
+            for(index_t i=0; i<3; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    HP[i][j] = 0.0;
+                    for(index_t k=0; k<3; ++k) {
+                        HP[i][j] += 2.0*M[i][k]*P[k][j];
+                    }
+                }
+            }
+            double tr = 0.0;
+            double F2 = 0.0;
+            for(index_t i=0; i<3; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    A[i][j] = 0.0;
+                    for(index_t k=0; k<3; ++k) {
+                        A[i][j] += P[i][k]*HP[k][j];
+                    }
+                    A[i][j] /= gl;
+                    F2 += A[i][j]*A[i][j];
+                }
+                tr += A[i][i];
+            }
+            // eigenvalues k1,k2 (the third one is 0):
+            // k1+k2 = tr, k1^2+k2^2 = F2
+            double disc = std::max(0.0, 2.0*F2 - tr*tr);
+            double k1 = 0.5*(tr + std::sqrt(disc));
+            double k2 = 0.5*(tr - std::sqrt(disc));
+            return std::max(std::fabs(k1), std::fabs(k2));
+        }
+
+        /**
+         * \brief Gets the target size (maximum circumradius) of the
+         *  triangles at a point of a triangle.
+         */
+        double target_size(index_t t, const vec3& x) const {
+            double h = (refine_params_.max_edge_length > 0.0) ?
+                refine_params_.max_edge_length : Numeric::max_float64();
+            if(refine_params_.size_factor > 0.0) {
+                double k = max_curvature(quadrics_[ct_q_[rt_carrier_[t]]], x);
+                if(k > 0.0) {
+                    h = std::min(h, refine_params_.size_factor / k);
+                }
+            }
+            return h;
+        }
+
+        static double triangle_min_angle(
+            const vec3& p0, const vec3& p1, const vec3& p2
+        ) {
+            double a = length(p1-p2);
+            double b = length(p2-p0);
+            double c = length(p0-p1);
+            double m = std::min(a, std::min(b,c));
+            if(a*b*c == 0.0) {
+                return 0.0;
+            }
+            // angle opposite to the smallest edge
+            double cosang;
+            if(m == a) {
+                cosang = (b*b + c*c - a*a) / (2.0*b*c);
+            } else if(m == b) {
+                cosang = (a*a + c*c - b*b) / (2.0*a*c);
+            } else {
+                cosang = (a*a + b*b - c*c) / (2.0*a*b);
+            }
+            cosang = std::max(-1.0, std::min(1.0, cosang));
+            return std::acos(cosang);
+        }
+
+        static vec3 circumcenter(
+            const vec3& p0, const vec3& p1, const vec3& p2, double& R
+        ) {
+            vec3 a = p1 - p0;
+            vec3 b = p2 - p0;
+            vec3 axb = cross(a,b);
+            double d = 2.0*length2(axb);
+            if(d < 1e-300) {
+                R = Numeric::max_float64();
+                return (1.0/3.0)*(p0+p1+p2);
+            }
+            vec3 c = (1.0/d)*cross(length2(a)*b - length2(b)*a, axb);
+            R = length(c);
+            return p0 + c;
+        }
+
+        /**
+         * \brief Tests whether a triangle needs to be refined (too
+         *  small angle or too large circumradius).
+         */
+        bool is_bad(index_t t) const {
+            const vec3& p0 = rv_[rt_vertex(t,0)].p;
+            const vec3& p1 = rv_[rt_vertex(t,1)].p;
+            const vec3& p2 = rv_[rt_vertex(t,2)].p;
+            double R;
+            circumcenter(p0, p1, p2, R);
+            vec3 g = (1.0/3.0)*(p0+p1+p2);
+            double h = target_size(t, g);
+            if(R > h) {
+                return true;
+            }
+            // Do not try to improve very small triangles (relative to
+            // the target size), this avoids infinite refinement.
+            if(R < refine_params_.min_size_factor * h) {
+                return false;
+            }
+            double min_angle = triangle_min_angle(p0, p1, p2);
+            return min_angle < refine_params_.min_angle_deg * 3.14159265358979323846 / 180.0;
+        }
+
+        /**
+         * \brief Splits a triangle into three by inserting a vertex.
+         * \param[in] t the triangle
+         * \param[in] x the position of the new vertex (on the surface)
+         * \param[in] U , nU the support of the new vertex
+         * \param[out] new_tris the three triangles
+         */
+        index_t split_triangle(
+            index_t t, const vec3& x, const index_t* U, index_t nU,
+            index_t new_tris[3]
+        ) {
+            index_t w = new_rvertex(x, U, nU);
+            index_t v0 = rt_vertex(t,0);
+            index_t v1 = rt_vertex(t,1);
+            index_t v2 = rt_vertex(t,2);
+            index_t a0 = rt_adjacent(t,0);
+            index_t a1 = rt_adjacent(t,1);
+            index_t a2 = rt_adjacent(t,2);
+            index_t carrier = rt_carrier_[t];
+            index_t t1 = new_rtriangle(v1, v2, w, carrier);
+            index_t t2 = new_rtriangle(v2, v0, w, carrier);
+            rt_v_[3*t+2] = w;
+            rt_adjacent(t,0) = a0;
+            rt_adjacent(t,1) = t1;
+            rt_adjacent(t,2) = t2;
+            rt_adjacent(t1,0) = a1;
+            rt_adjacent(t1,1) = t2;
+            rt_adjacent(t1,2) = t;
+            rt_adjacent(t2,0) = a2;
+            rt_adjacent(t2,1) = t;
+            rt_adjacent(t2,2) = t1;
+            rt_replace_adjacent(a1, t, t1);
+            rt_replace_adjacent(a2, t, t2);
+            new_tris[0] = t;
+            new_tris[1] = t1;
+            new_tris[2] = t2;
+            return w;
+        }
+
+        /**
+         * \brief Splits an edge (and its two incident triangles) by
+         *  inserting a vertex.
+         * \param[in] t , k the edge (side k of triangle t)
+         * \param[in] x the position of the new vertex (on the surface)
+         * \param[in] U , nU the support of the new vertex
+         * \param[out] new_tris the four triangles
+         */
+        index_t split_edge(
+            index_t t, index_t k, const vec3& x, const index_t* U, index_t nU,
+            index_t new_tris[4]
+        ) {
+            index_t n = rt_adjacent(t,k);
+            index_t u = rt_vertex(t,k);
+            index_t v = rt_vertex(t,k+1);
+            index_t p = rt_vertex(t,k+2);
+            index_t kn = rt_side(n, v, u);
+            index_t q = rt_vertex(n, kn+2);
+            index_t w = new_rvertex(x, U, nU);
+            index_t t_out1 = rt_adjacent(t, k+1);  // across (v,p)
+            index_t t_out2 = rt_adjacent(t, k+2);  // across (p,u)
+            index_t n_out1 = rt_adjacent(n, kn+1); // across (u,q)
+            index_t n_out2 = rt_adjacent(n, kn+2); // across (q,v)
+            index_t ct = rt_carrier_[t];
+            index_t cn = rt_carrier_[n];
+            // t  = (u,w,p), t1 = (w,v,p), n = (v,w,q), n1 = (w,u,q)
+            index_t t1 = new_rtriangle(w, v, p, ct);
+            index_t n1 = new_rtriangle(w, u, q, cn);
+            rt_v_[3*t] = u;   rt_v_[3*t+1] = w;   rt_v_[3*t+2] = p;
+            rt_v_[3*n] = v;   rt_v_[3*n+1] = w;   rt_v_[3*n+2] = q;
+            rt_adjacent(t,0) = n1;     rt_adjacent(t,1) = t1;     rt_adjacent(t,2) = t_out2;
+            rt_adjacent(t1,0) = n;     rt_adjacent(t1,1) = t_out1; rt_adjacent(t1,2) = t;
+            rt_adjacent(n,0) = t1;     rt_adjacent(n,1) = n1;     rt_adjacent(n,2) = n_out2;
+            rt_adjacent(n1,0) = t;     rt_adjacent(n1,1) = n_out1; rt_adjacent(n1,2) = n;
+            rt_replace_adjacent(t_out1, t, t1);
+            rt_replace_adjacent(n_out1, n, n1);
+            new_tris[0] = t;
+            new_tris[1] = t1;
+            new_tris[2] = n;
+            new_tris[3] = n1;
+            return w;
+        }
+
+        /**
+         * \brief Flips an edge.
+         * \param[in] t , k the edge (side k of triangle t)
+         * \param[in] carrier_t , carrier_n the carriers of the new
+         *  triangles (u,q,p) and (v,p,q)
+         * \param[out] new_tris the two new triangles
+         */
+        void flip_edge(
+            index_t t, index_t k, index_t carrier_t, index_t carrier_n,
+            index_t new_tris[2]
+        ) {
+            index_t n = rt_adjacent(t,k);
+            index_t u = rt_vertex(t,k);
+            index_t v = rt_vertex(t,k+1);
+            index_t p = rt_vertex(t,k+2);
+            index_t kn = rt_side(n, v, u);
+            index_t q = rt_vertex(n, kn+2);
+            index_t t_out1 = rt_adjacent(t, k+1);  // across (v,p)
+            index_t t_out2 = rt_adjacent(t, k+2);  // across (p,u)
+            index_t n_out1 = rt_adjacent(n, kn+1); // across (u,q)
+            index_t n_out2 = rt_adjacent(n, kn+2); // across (q,v)
+            // t = (u,q,p), n = (v,p,q)
+            rt_v_[3*t] = u;   rt_v_[3*t+1] = q;   rt_v_[3*t+2] = p;
+            rt_v_[3*n] = v;   rt_v_[3*n+1] = p;   rt_v_[3*n+2] = q;
+            rt_adjacent(t,0) = n_out1; rt_adjacent(t,1) = n;      rt_adjacent(t,2) = t_out2;
+            rt_adjacent(n,0) = t_out1; rt_adjacent(n,1) = t;      rt_adjacent(n,2) = n_out2;
+            rt_replace_adjacent(n_out1, n, t);
+            rt_replace_adjacent(t_out1, t, n);
+            rt_carrier_[t] = carrier_t;
+            rt_carrier_[n] = carrier_n;
+            new_tris[0] = t;
+            new_tris[1] = n;
+        }
+
+        /**
+         * \brief Tests whether an edge should be flipped to improve the
+         *  Delaunay property (sum of the opposite angles greater than pi)
+         *  and whether it can be flipped while maintaining the isotopy.
+         * \param[out] carrier_t , carrier_n the carriers of the new
+         *  triangles, if the edge can be flipped
+         */
+        bool flip_wanted_and_safe(
+            index_t t, index_t k, index_t& carrier_t, index_t& carrier_n
+        ) {
+            index_t n = rt_adjacent(t,k);
+            if(n == NO_INDEX || n == t) {
+                return false;
+            }
+            index_t u = rt_vertex(t,k);
+            index_t v = rt_vertex(t,k+1);
+            index_t p = rt_vertex(t,k+2);
+            index_t kn = rt_side(n, v, u);
+            if(kn == NO_INDEX) {
+                return false;
+            }
+            index_t q = rt_vertex(n, kn+2);
+            if(q == p) {
+                return false;
+            }
+            // Delaunay criterion (angles at p and q opposite to (u,v))
+            const vec3& pu = rv_[u].p;
+            const vec3& pv = rv_[v].p;
+            const vec3& pp = rv_[p].p;
+            const vec3& pq = rv_[q].p;
+            auto angle = [](const vec3& a, const vec3& b) {
+                double c = dot(a,b) / std::sqrt(length2(a)*length2(b) + 1e-300);
+                return std::acos(std::max(-1.0, std::min(1.0, c)));
+            };
+            double ap = angle(pu-pp, pv-pp);
+            double aq = angle(pu-pq, pv-pq);
+            if(ap + aq <= 3.14159265358979323846 + 1e-9) {
+                return false;
+            }
+            ++nb_flips_wanted_;
+            // the new edge (p,q) should not already exist
+            if(edge_exists(p, q, t)) {
+                return false;
+            }
+            // isotopy test (and fold test) on the new triangles
+            // (u,q,p) and (v,p,q)
+            if(!isotopy_test(u, q, p, carrier_t)) {
+                ++nb_flips_refused_;
+                return false;
+            }
+            if(!isotopy_test(v, p, q, carrier_n)) {
+                ++nb_flips_refused_;
+                return false;
+            }
+            ++nb_flips_done_;
+            return true;
+        }
+
+        /**
+         * \brief Restores the Delaunay property around some triangles
+         *  by edge flips (only isotopy-safe flips are done).
+         * \param[in,out] stack the triangles to process (emptied)
+         * \param[in,out] to_check receives the modified triangles
+         */
+        void lawson_flips(
+            vector<index_t>& stack, vector<index_t>& to_check
+        ) {
+            index_t nb_flips = 0;
+            while(stack.size() != 0 && nb_flips < refine_params_.max_flips_per_insertion) {
+                index_t t = stack.back();
+                stack.pop_back();
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                for(index_t k=0; k<3; ++k) {
+                    index_t ct, cn;
+                    if(flip_wanted_and_safe(t, k, ct, cn)) {
+                        index_t nt[2];
+                        flip_edge(t, k, ct, cn, nt);
+                        stack.push_back(nt[0]);
+                        stack.push_back(nt[1]);
+                        to_check.push_back(nt[0]);
+                        to_check.push_back(nt[1]);
+                        ++nb_flips;
+                        break;
+                    }
+                }
+            }
+            stack.resize(0);
+        }
+
+        /**
+         * \brief Locates the triangle crossed by the transversal segment
+         *  through a point of the surface, by walking on the mesh from a
+         *  starting triangle.
+         * \details For each visited triangle T, the transversal segment
+         *  through \p xs in the carrier of T is intersected with the
+         *  plane of T.
+         * \param[in] t the starting triangle
+         * \param[in] xs the point (on the surface)
+         * \param[out] bary the barycentric coordinates of the
+         *  intersection in the found triangle
+         * \return the triangle, or NO_INDEX if the walk failed
+         */
+        index_t locate(index_t t, const vec3& xs, double bary[3]) {
+            index_t prev = NO_INDEX;
+            for(index_t iter=0; iter<refine_params_.max_walk_steps; ++iter) {
+                const vec3& p0 = rv_[rt_vertex(t,0)].p;
+                const vec3& p1 = rv_[rt_vertex(t,1)].p;
+                const vec3& p2 = rv_[rt_vertex(t,2)].p;
+                vec3 n = cross(p1-p0, p2-p0);
+                double area2 = length2(n);
+                if(area2 < 1e-300) {
+                    return NO_INDEX;
+                }
+                // intersection of the transversal segment through xs
+                // with the plane of t
+                const index_t* T = &(ct_v_[4*rt_carrier_[t]]);
+                vec3 a, b;
+                if(!transversal_segment(T, 4, xs, a, b, false)) {
+                    return NO_INDEX;
+                }
+                vec3 d = b - a;
+                double denom = dot(n, d);
+                if(std::fabs(denom) < 1e-300) {
+                    return NO_INDEX;
+                }
+                double lambda = dot(n, p0 - a) / denom;
+                vec3 x = a + lambda*d;
+                bary[0] = dot(n, cross(p1-x, p2-x)) / area2;
+                bary[1] = dot(n, cross(p2-x, p0-x)) / area2;
+                bary[2] = dot(n, cross(p0-x, p1-x)) / area2;
+                index_t kmin = 0;
+                for(index_t k=1; k<3; ++k) {
+                    if(bary[k] < bary[kmin]) {
+                        kmin = k;
+                    }
+                }
+                if(bary[kmin] >= -1e-9) {
+                    return t;
+                }
+                if(iter + 1 == refine_params_.max_walk_steps) {
+                    return NO_INDEX;
+                }
+                // cross the edge opposite to vertex kmin, i.e.
+                // side (kmin+1, kmin+2)
+                index_t next = rt_adjacent(t, kmin+1);
+                if(next == NO_INDEX || next == prev) {
+                    // try the second most negative
+                    index_t k2 = NO_INDEX;
+                    for(index_t k=0; k<3; ++k) {
+                        if(k != kmin && bary[k] < 0.0 && rt_adjacent(t,k+1) != prev) {
+                            k2 = k;
+                        }
+                    }
+                    if(k2 == NO_INDEX) {
+                        return NO_INDEX;
+                    }
+                    next = rt_adjacent(t, k2+1);
+                }
+                prev = t;
+                t = next;
+            }
+            return NO_INDEX;
+        }
+
+        /**
+         * \brief Inserts a vertex inside a triangle, at the point of the
+         *  surface on the transversal segment through \p x.
+         * \retval true on success
+         */
+        bool insert_in_triangle(
+            index_t t, vec3 x, vector<index_t>& to_check
+        ) {
+            index_t verts[3] = { rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2) };
+            index_t c = find_tet_containing(verts, 3, x, rt_carrier_[t]);
+            if(c == NO_INDEX) {
+                return false;
+            }
+            const index_t* U = &(ct_v_[4*c]);
+            index_t nU = 4;
+            if(!move_to_surface(U, nU, c, x)) {
+                return false;
+            }
+            // save state for undo
+            index_t save_v[3] = { verts[0], verts[1], verts[2] };
+            index_t save_adj[3] = { rt_adjacent(t,0), rt_adjacent(t,1), rt_adjacent(t,2) };
+            index_t nv0 = rv_.size();
+            index_t nt0 = nb_rtriangles();
+            index_t nt[3];
+            split_triangle(t, x, U, nU, nt);
+            // check the new triangles (Lemma 24 guarantees the isotopy,
+            // but numerically degenerate configurations may occur)
+            index_t carriers[3];
+            bool ok = true;
+            for(index_t i=0; i<3 && ok; ++i) {
+                ok = isotopy_test(
+                    rt_vertex(nt[i],0), rt_vertex(nt[i],1), rt_vertex(nt[i],2),
+                    carriers[i]
+                );
+            }
+            if(!ok) {
+                {
+                    // undo
+                    for(index_t k=0; k<3; ++k) {
+                        rt_v_[3*t+k] = save_v[k];
+                        rt_adjacent(t,k) = save_adj[k];
+                    }
+                    rt_replace_adjacent(save_adj[1], nt[1], t);
+                    rt_replace_adjacent(save_adj[2], nt[2], t);
+                    rv_.resize(nv0);
+                    rt_v_.resize(3*nt0);
+                    rt_adj_.resize(3*nt0);
+                    rt_alive_.resize(nt0);
+                    rt_carrier_.resize(nt0);
+                    return false;
+                }
+            }
+            for(index_t i=0; i<3; ++i) {
+                rt_carrier_[nt[i]] = carriers[i];
+                to_check.push_back(nt[i]);
+            }
+            return true;
+        }
+
+        /**
+         * \brief Inserts a vertex on an edge, at the point of the
+         *  surface on the transversal segment through the midpoint.
+         * \retval true on success
+         */
+        bool insert_on_edge(
+            index_t t, index_t k, vector<index_t>& to_check
+        ) {
+            index_t n = rt_adjacent(t,k);
+            if(n == NO_INDEX) {
+                return false;
+            }
+            index_t u = rt_vertex(t,k);
+            index_t v = rt_vertex(t,k+1);
+            index_t verts[2] = {u, v};
+            vec3 x = 0.5*(rv_[u].p + rv_[v].p);
+            index_t c = find_tet_containing(verts, 2, x, rt_carrier_[t]);
+            if(c == NO_INDEX) {
+                return false;
+            }
+            const index_t* U = &(ct_v_[4*c]);
+            index_t nU = 4;
+            if(!move_to_surface(U, nU, c, x)) {
+                return false;
+            }
+            // save state for undo
+            index_t kn = rt_side(n, v, u);
+            index_t save_tv[3] = { rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2) };
+            index_t save_nv[3] = { rt_vertex(n,0), rt_vertex(n,1), rt_vertex(n,2) };
+            index_t save_ta[3] = { rt_adjacent(t,0), rt_adjacent(t,1), rt_adjacent(t,2) };
+            index_t save_na[3] = { rt_adjacent(n,0), rt_adjacent(n,1), rt_adjacent(n,2) };
+            index_t nv0 = rv_.size();
+            index_t nt0 = nb_rtriangles();
+            index_t nt[4];
+            split_edge(t, k, x, U, nU, nt);
+            index_t carriers[4];
+            bool ok = true;
+            for(index_t i=0; i<4 && ok; ++i) {
+                ok = isotopy_test(
+                    rt_vertex(nt[i],0), rt_vertex(nt[i],1), rt_vertex(nt[i],2),
+                    carriers[i]
+                );
+            }
+            if(!ok) {
+                {
+                    // undo
+                    for(index_t j=0; j<3; ++j) {
+                        rt_v_[3*t+j] = save_tv[j];
+                        rt_v_[3*n+j] = save_nv[j];
+                        rt_adjacent(t,j) = save_ta[j];
+                        rt_adjacent(n,j) = save_na[j];
+                    }
+                    rt_replace_adjacent(save_ta[(k+1)%3], nt[1], t);
+                    rt_replace_adjacent(save_na[(kn+1)%3], nt[3], n);
+                    rv_.resize(nv0);
+                    rt_v_.resize(3*nt0);
+                    rt_adj_.resize(3*nt0);
+                    rt_alive_.resize(nt0);
+                    rt_carrier_.resize(nt0);
+                    return false;
+                }
+            }
+            for(index_t i=0; i<4; ++i) {
+                rt_carrier_[nt[i]] = carriers[i];
+                to_check.push_back(nt[i]);
+            }
+            return true;
+        }
+
+        /**
+         * \brief Collapses the edges shorter than a threshold (relative
+         *  to the target size), when the isotopy is maintained.
+         * \details As in the paper, this is done before Chew's algorithm
+         *  to reduce the size of the final mesh (the coarse mesh has
+         *  many very short edges).
+         */
+        void collapse_short_edges() {
+            index_t nb_collapsed = 0;
+            vector<index_t> around;
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                for(index_t k=0; k<3; ++k) {
+                    if(!rt_alive_[t]) {
+                        break;
+                    }
+                    index_t u = rt_vertex(t,k);
+                    index_t v = rt_vertex(t,k+1);
+                    double l = length(rv_[u].p - rv_[v].p);
+                    vec3 m = 0.5*(rv_[u].p + rv_[v].p);
+                    double h = target_size(t, m);
+                    if(l >= refine_params_.collapse_factor * h) {
+                        continue;
+                    }
+                    if(try_collapse(t, k, around)) {
+                        ++nb_collapsed;
+                        break;
+                    }
+                }
+            }
+            if(verbose_) {
+                Logger::out("skin") << "Collapsed " << nb_collapsed
+                                    << " short edges" << std::endl;
+            }
+        }
+
+        /**
+         * \brief Gets the triangles around a vertex, in order.
+         * \retval true on success
+         * \retval false if the vertex is not surrounded by a closed fan
+         */
+        bool triangles_around(index_t u, index_t t0, vector<index_t>& tris) {
+            tris.resize(0);
+            index_t t = t0;
+            for(index_t iter=0; iter<1000; ++iter) {
+                tris.push_back(t);
+                index_t lu = NO_INDEX;
+                for(index_t k=0; k<3; ++k) {
+                    if(rt_vertex(t,k) == u) {
+                        lu = k;
+                    }
+                }
+                if(lu == NO_INDEX) {
+                    return false;
+                }
+                index_t next = rt_adjacent(t, lu);
+                if(next == NO_INDEX) {
+                    return false;
+                }
+                if(next == t0) {
+                    return true;
+                }
+                t = next;
+            }
+            return false;
+        }
+
+        /**
+         * \brief Collapses the edge (side k of triangle t) by merging
+         *  its first vertex into its second one, if the result is
+         *  manifold and the isotopy is maintained.
+         */
+        bool try_collapse(index_t t, index_t k, vector<index_t>& around) {
+            index_t n = rt_adjacent(t,k);
+            if(n == NO_INDEX) {
+                return false;
+            }
+            index_t u = rt_vertex(t,k);
+            index_t v = rt_vertex(t,k+1);
+            index_t p = rt_vertex(t,k+2);
+            index_t kn = rt_side(n, v, u);
+            index_t q = rt_vertex(n, kn+2);
+            if(kn == NO_INDEX || p == q) {
+                return false;
+            }
+            if(!triangles_around(u, t, around)) {
+                return false;
+            }
+            if(around.size() < 4) {
+                return false;
+            }
+            // link condition: the neighbors of u, other than v, p, q,
+            // must not be neighbors of v. We check it with the triangles
+            // around v.
+            vector<index_t> around_v;
+            if(!triangles_around(v, n, around_v)) {
+                return false;
+            }
+            for(index_t tu : around) {
+                if(tu == t || tu == n) {
+                    continue;
+                }
+                for(index_t i=0; i<3; ++i) {
+                    index_t w = rt_vertex(tu,i);
+                    if(w == u || w == p || w == q || w == v) {
+                        continue;
+                    }
+                    for(index_t tv : around_v) {
+                        for(index_t j=0; j<3; ++j) {
+                            if(rt_vertex(tv,j) == w) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            // isotopy test on the new triangles
+            vector<index_t> carriers;
+            for(index_t tu : around) {
+                if(tu == t || tu == n) {
+                    continue;
+                }
+                index_t w[3];
+                for(index_t i=0; i<3; ++i) {
+                    w[i] = rt_vertex(tu,i);
+                    if(w[i] == u) {
+                        w[i] = v;
+                    }
+                }
+                index_t carrier;
+                if(!isotopy_test(w[0], w[1], w[2], carrier)) {
+                    return false;
+                }
+                carriers.push_back(carrier);
+            }
+            // do it
+            index_t t_out1 = rt_adjacent(t, k+1);  // across (v,p)
+            index_t t_out2 = rt_adjacent(t, k+2);  // across (p,u)
+            index_t n_out1 = rt_adjacent(n, kn+1); // across (u,q)
+            index_t n_out2 = rt_adjacent(n, kn+2); // across (q,v)
+            if(t_out1 == NO_INDEX || t_out2 == NO_INDEX || n_out1 == NO_INDEX || n_out2 == NO_INDEX) {
+                return false;
+            }
+            rt_replace_adjacent(t_out1, t, t_out2);
+            rt_replace_adjacent(t_out2, t, t_out1);
+            rt_replace_adjacent(n_out1, n, n_out2);
+            rt_replace_adjacent(n_out2, n, n_out1);
+            rt_alive_[t] = false;
+            rt_alive_[n] = false;
+            index_t c = 0;
+            for(index_t tu : around) {
+                if(tu == t || tu == n) {
+                    continue;
+                }
+                for(index_t i=0; i<3; ++i) {
+                    if(rt_v_[3*tu+i] == u) {
+                        rt_v_[3*tu+i] = v;
+                    }
+                }
+                rt_carrier_[tu] = carriers[c++];
+            }
+            rv_[u].alive = false;
+            return true;
+        }
+
+
+        /**
+         * \brief Chew-style Delaunay refinement with isotopy tests.
+         * \details Bad triangles (too small angle or too large) are
+         *  refined by inserting their circumcenter, located by walking on
+         *  the mesh, moved to the skin surface along the transversal
+         *  segment (Lemma 24). If the circumcenter cannot be located, the
+         *  longest edge is split instead. After each insertion, the
+         *  Delaunay property is restored by edge flips, each flip being
+         *  tested with Lemma 23.
+         */
+        bool refine() {
+            if(refine_params_.collapse_factor > 0.0) {
+                collapse_short_edges();
+            }
+            vector<index_t> queue;
+            vector<index_t> to_check;
+            vector<index_t> stack;
+            for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(rt_alive_[t]) {
+                    queue.push_back(t);
+                }
+            }
+            index_t nv0 = 0;
+            for(const RVertex& v : rv_) {
+                nv0 += index_t(v.alive);
+            }
+            index_t max_nv = index_t(
+                double(nv0) * refine_params_.max_vertices_factor
+            );
+            index_t nb_inserted = 0;
+            index_t nb_fallback = 0;
+            while(queue.size() != 0) {
+                index_t t = queue.back();
+                queue.pop_back();
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                if(!is_bad(t)) {
+                    index_t cc;
+                    if(isotopy_test(rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2), cc)) {
+                        continue;
+                    }
+                }
+                if(nv0 + nb_inserted >= max_nv) {
+                    break;
+                }
+                const vec3& p0 = rv_[rt_vertex(t,0)].p;
+                const vec3& p1 = rv_[rt_vertex(t,1)].p;
+                const vec3& p2 = rv_[rt_vertex(t,2)].p;
+                double R;
+                vec3 c = circumcenter(p0, p1, p2, R);
+                // target point: closest point of the surface to the
+                // circumcenter (along the gradient of the quadric)
+                vec3 xs = c;
+                to_check.resize(0);
+                bool done = false;
+                double bary[3];
+                index_t T = NO_INDEX;
+                vec3 g_t = (1.0/3.0)*(p0+p1+p2);
+                if(quadrics_[ct_q_[rt_carrier_[t]]].project(xs, g_t)) {
+                    T = locate(t, xs, bary);
+                    if(T == NO_INDEX) ++nb_locate_failures_;
+                } else {
+                    ++nb_project_failures_;
+                }
+                if(T != NO_INDEX) {
+                    // If the circumcenter is close to an edge of T, split
+                    // this edge instead (encroachment), else insert it
+                    // inside T.
+                    const double eps = refine_params_.encroach_factor;
+                    index_t kmin = 0;
+                    for(index_t i=1; i<3; ++i) {
+                        if(bary[i] < bary[kmin]) {
+                            kmin = i;
+                        }
+                    }
+                    if(bary[kmin] < eps) {
+                        // edge opposite to vertex kmin is side kmin+1
+                        done = insert_on_edge(T, kmin+1, to_check);
+                        if(done) {
+                            ++nb_fallback;
+                        }
+                    } else {
+                        for(index_t i=0; i<3; ++i) {
+                            bary[i] = std::max(bary[i], 1e-3);
+                        }
+                        double sum = bary[0]+bary[1]+bary[2];
+                        // Chew: the inserted point is at distance >= R
+                        // from the existing vertices. If this is far from
+                        // being the case (bad location), do not insert.
+                        for(index_t i=0; i<3; ++i) {
+                            if(length(xs - rv_[rt_vertex(T,i)].p) < 0.25*R) {
+                                T = NO_INDEX;
+                                break;
+                            }
+                        }
+                        if(T != NO_INDEX) {
+                            vec3 x = (bary[0]/sum)*rv_[rt_vertex(T,0)].p +
+                                     (bary[1]/sum)*rv_[rt_vertex(T,1)].p +
+                                     (bary[2]/sum)*rv_[rt_vertex(T,2)].p;
+                            done = insert_in_triangle(T, x, to_check);
+                            if(!done) ++nb_insert_failures_;
+                        }
+                    }
+                }
+                // Fallback: split the longest edge, only if the triangle
+                // is too large or its longest edge is still long with
+                // respect to the target size (so that edge lengths are
+                // bounded from below and the process terminates). Other
+                // badly shaped triangles whose circumcenter could not be
+                // inserted are left as is.
+                if(!done) {
+                    index_t kmax = 0;
+                    double lmax = -1.0;
+                    for(index_t k=0; k<3; ++k) {
+                        double l = length(rv_[rt_vertex(t,k+1)].p - rv_[rt_vertex(t,k)].p);
+                        if(l > lmax) {
+                            lmax = l;
+                            kmax = k;
+                        }
+                    }
+                    double h = target_size(t, g_t);
+                    if(R > h || lmax > refine_params_.split_factor * h) {
+                        done = insert_on_edge(t, kmax, to_check);
+                    }
+                    if(done) {
+                        ++nb_fallback;
+                    }
+                }
+                if(!done) {
+                    continue;
+                }
+                ++nb_inserted;
+                stack = to_check;
+                lawson_flips(stack, to_check);
+                for(index_t t2 : to_check) {
+                    queue.push_back(t2);
+                }
+            }
+            if(verbose_) {
+                Logger::out("skin")
+                    << "Refinement: inserted " << nb_inserted << " vertices ("
+                    << nb_fallback << " edge splits), flips wanted/refused/done: "
+                    << nb_flips_wanted_ << "/" << nb_flips_refused_ << "/"
+                    << nb_flips_done_ << ", locate/project/insert failures: "
+                    << nb_locate_failures_ << "/" << nb_project_failures_
+                    << "/" << nb_insert_failures_ << std::endl;
+            }
+            repair_transversality();
+            return true;
         }
 
     private:
@@ -2533,12 +4534,28 @@ namespace {
 
         // Surface extraction
         std::unordered_map<Numeric::uint64, index_t> edge_vertex_;
+
+        // Refinable mesh
+        vector<RVertex> rv_;
+        vector<index_t> rt_v_;        // 3 vertices per triangle
+        vector<index_t> rt_adj_;      // 3 adjacent triangles per triangle
+        vector<bool>    rt_alive_;
+        vector<index_t> rt_carrier_;  // complex tet containing the triangle
+        vector<index_t> cv_tets_ptr_; // complex tets incident to each
+        vector<index_t> cv_tets_;     //   complex vertex (CRS)
+        vector<index_t> tmp_tets_;
+        vector<index_t> tmp_tris_;
+        vector<index_t> tmp_cand_;
+        vector<vec3> tmp_clip_;
+        vector<vec3> tmp_poly_;
+        vector<index_t> tet_mark_;
+        index_t tet_stamp_ = 0;
+        index_t nb_flips_wanted_ = 0, nb_flips_refused_ = 0, nb_flips_done_ = 0;
+        index_t nb_locate_failures_ = 0, nb_project_failures_ = 0, nb_insert_failures_ = 0;
+        SkinRefineParams refine_params_;
     };
-}
 
-/*************************************************************************/
-
-namespace GEO {
+    /*********************************************************************/
 
     SkinSurfaceMesher::SkinSurfaceMesher(
         const Delaunay& delaunay,
@@ -2554,22 +4571,57 @@ namespace GEO {
         verbose_(true),
         nb_complex_vertices_(0),
         nb_complex_tets_(0),
-        nb_degenerate_tets_(0) {
+        nb_degenerate_tets_(0),
+        impl_(nullptr) {
         // The quadrics have 1/s and 1/(1-s) terms: keep s away from
         // 0 and 1 (for s=1 the skin surface is the union of the balls,
         // for s=0 it is the convex hull of the shrunk-to-nothing balls).
         shrink_ = std::max(1e-4, std::min(1.0 - 1e-4, shrink_));
     }
 
+    SkinSurfaceMesher::~SkinSurfaceMesher() {
+        delete impl_;
+    }
+
     bool SkinSurfaceMesher::compute(Mesh& skin, Mesh* tet_complex) {
-        Builder builder(
+        delete impl_;
+        impl_ = new SkinSurfaceMesherImpl(
             delaunay_, points_, weights_, nb_atoms_, shrink_, verbose_
         );
-        bool result = builder.run(skin, tet_complex);
-        nb_complex_vertices_ = builder.nb_complex_vertices();
-        nb_complex_tets_ = builder.nb_complex_tets();
-        nb_degenerate_tets_ = builder.nb_degenerate_tets();
+        bool result = impl_->run(skin, tet_complex);
+        nb_complex_vertices_ = impl_->nb_complex_vertices();
+        nb_complex_tets_ = impl_->nb_complex_tets();
+        nb_degenerate_tets_ = impl_->nb_degenerate_tets();
+        if(!result) {
+            delete impl_;
+            impl_ = nullptr;
+        }
         return result;
+    }
+
+    bool SkinSurfaceMesher::subdivide(Mesh& skin, index_t n) {
+        if(impl_ == nullptr) {
+            Logger::err("skin") << "subdivide(): call compute() first"
+                                << std::endl;
+            return false;
+        }
+        return impl_->subdivide(skin, n);
+    }
+
+    bool SkinSurfaceMesher::refine(Mesh& skin, const SkinRefineParams& params) {
+        if(impl_ == nullptr) {
+            Logger::err("skin") << "refine(): call compute() first"
+                                << std::endl;
+            return false;
+        }
+        return impl_->refine(skin, params);
+    }
+
+    index_t SkinSurfaceMesher::check_isotopy() {
+        if(impl_ == nullptr) {
+            return NO_INDEX;
+        }
+        return impl_->count_isotopy_violations();
     }
 
 }
