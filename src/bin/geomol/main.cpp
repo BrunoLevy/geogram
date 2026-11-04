@@ -247,7 +247,7 @@ namespace {
         }
 
         std::string supported_write_file_extensions() override {
-            return "stp;step";
+            return "stp;step;obj";
         }
 
         bool load(const std::string& filename) override {

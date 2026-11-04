@@ -48,6 +48,7 @@
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
 #include "molecule_step.h"
+#include "skin_surface_mesh.h"
 
 // TODO:
 //  - S0: OK
@@ -145,6 +146,20 @@ namespace GEO {
 	    return MSS_Claude::save_molecule_STEP(
 		const_cast<Molecule&>(*this),filename,threshold
 	    );
+	}
+	if(FileSystem::extension(filename) == "obj") {
+	    while(const_cast<Molecule*>(this)->close_cells());
+	    SkinSurfaceMesher mesher(
+		*diagram_,
+		atom_pos_[0].data(),
+		atom_weight_.data(),
+		nb_atoms(),
+		shrink_factor_
+	    );
+	    Mesh skin;
+	    Mesh* tet_complex = nullptr;
+	    mesher.compute(skin, tet_complex);
+	    return mesh_save(skin, filename);
 	}
 	return false;
     }
