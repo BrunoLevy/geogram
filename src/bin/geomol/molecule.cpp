@@ -149,8 +149,10 @@ namespace GEO {
 		const_cast<Molecule&>(*this),filename,threshold
 	    );
 	}
-	if(FileSystem::extension(filename) == "obj") {
-	    // while(const_cast<Molecule*>(this)->close_cells());
+
+	// At this point we suppose it is a mesh file format,
+	// so we mesh the MSS and save the mesh.
+	{
 	    SkinSurfaceMesher mesher(
 		*diagram_,
 		atom_pos_[0].data(),
@@ -166,11 +168,11 @@ namespace GEO {
 	    // mesh_save(fine, "fine.obj");
 
 	    compute_normals(fine);
-	    // simple_Laplacian_smooth(fine,3,true);
+	    // simple_Laplacian_smooth(fine,3,true); // not good
 	    set_anisotropy(fine, 0.01);
 	    remesh_smooth(fine, quality, fine.vertices.nb()/10);
 
-	    /*
+	    /* // alternative Delaunay-refinement based method as in article
 	    mesher.refine(quality);
 	    index_t bad = mesher.check_isotopy();
 	    Logger::out("Mesher") << bad << " bad" << std::endl;

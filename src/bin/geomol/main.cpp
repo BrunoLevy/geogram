@@ -39,6 +39,7 @@
 
 #include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
+#include <geogram/mesh/mesh_io.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/stopwatch.h>
 #include "molecule.h"
@@ -247,7 +248,11 @@ namespace {
         }
 
         std::string supported_write_file_extensions() override {
-            return "stp;step;obj";
+	    std::vector<std::string> extensions;
+	    GEO::MeshIOHandlerFactory::list_creators(extensions);
+	    extensions.push_back("step");
+	    extensions.push_back("stp");
+	    return String::join_strings(extensions, ';');
         }
 
         bool load(const std::string& filename) override {
