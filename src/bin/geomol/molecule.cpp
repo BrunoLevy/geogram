@@ -148,7 +148,7 @@ namespace GEO {
 	    );
 	}
 	if(FileSystem::extension(filename) == "obj") {
-	    while(const_cast<Molecule*>(this)->close_cells());
+	    // while(const_cast<Molecule*>(this)->close_cells());
 	    SkinSurfaceMesher mesher(
 		*diagram_,
 		atom_pos_[0].data(),

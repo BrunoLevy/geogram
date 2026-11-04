@@ -1,6 +1,4 @@
 /*
- *  Generated using Claude
- *
  *  Copyright (c) 2000-2022 Inria
  *  All rights reserved.
  *
@@ -77,6 +75,10 @@
  *       result is isotopic to the skin surface. Intersection points are
  *       computed exactly (root of the quadric along the edge).
  *
+ *   Unbounded power cells are handled by clipping the power diagram with
+ *   a bounding box (see the notes at the top of skin_surface_mesh.cpp),
+ *   so that no additional points need to be inserted.
+ *
  *   The intermediate tetrahedral complex can be retrieved for debugging.
  */
 
@@ -88,11 +90,13 @@ namespace GEO {
      * \details The weighted Delaunay triangulation (power diagram) of the
      *  weighted points needs to be computed beforehand by the caller. In
      *  geomol, this is the PowerDiagram (derived from PeriodicDelaunay3d,
-     *  that is itself derived from Delaunay). All the power cells of the
-     *  atoms need to be bounded (in geomol this is ensured by
-     *  Molecule::close_cells(), that inserts additional points, with indices
-     *  larger or equal to nb_atoms). Mixed cells that are incident to one of
-     *  these additional points are not meshed.
+     *  that is itself derived from Delaunay), computed with
+     *  keeps_infinite set. Infinite (unbounded) power cells are supported:
+     *  the power diagram is clipped internally by a bounding box large
+     *  enough to contain all the surface, there is no need to insert
+     *  additional points (close_cells()). If additional points are
+     *  nevertheless present (indices >= nb_atoms), the mixed cells
+     *  incident to them are not meshed.
      */
     class SkinSurfaceMesher {
     public:
@@ -107,9 +111,10 @@ namespace GEO {
          *  (1 double per point). The weight is the squared radius of the
          *  unshrunk ball. The ball of the skin surface has squared radius
          *  shrink_factor * weight.
-         * \param[in] nb_atoms number of real atoms. Points with index
-         *  greater or equal to \p nb_atoms are the additional points used
-         *  to close the infinite cells. They are ignored.
+         * \param[in] nb_atoms number of real atoms (usually
+         *  delaunay.nb_vertices()). Points with index greater or equal to
+         *  \p nb_atoms are considered as auxiliary points (e.g. inserted
+         *  by close_cells()): their cells are not meshed.
          * \param[in] shrink_factor the shrink factor s, in ]0,1[.
          */
         SkinSurfaceMesher(
@@ -131,8 +136,7 @@ namespace GEO {
          *  with the value of the implicit function, and the cells have
          *  an attribute "mixed_cell_type").
          * \retval true on success.
-         * \retval false if a power cell of an atom is unbounded (call
-         *  close_cells() first).
+         * \retval false if the triangulation is inconsistent.
          */
         bool compute(Mesh& skin, Mesh* tet_complex = nullptr);
 

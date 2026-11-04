@@ -1,6 +1,4 @@
 /*
- *  Generated using Claude
- *
  *  Copyright (c) 2000-2022 Inria
  *  All rights reserved.
  *
@@ -74,18 +72,37 @@
  *  ad(X)  : the anchor point of delta_X, i.e. the point of delta_X closest
  *           to c(X). sd(X) is the face of delta_X that contains ad(X) in its
  *           relative interior (Lemma 15: ad(X) = ad(sd(X))).
- *  av(X)  : the anchor point of nu_X, i.e. the point of nu_X closest to
- *           c(X). sv(X) is the face of nu_X that contains av(X) in its
- *           relative interior (it is nu_{X''} for a coface X'' of X, and
- *           Lemma 16: av(X) = av(sv(X))).
+ *  av(nu) : the anchor point of a face nu of the power diagram, i.e. the
+ *           point of nu closest to c(G), G being the set of points whose
+ *           cells contain nu. sv(nu) is the face of nu that contains av(nu)
+ *           in its relative interior (Lemma 16: av(nu) = av(sv(nu))).
  *
- *  The anchor point of the polyhedral cell mu_{X,X'} is (Lemma 14)
- *     (1-s) ad(X) + s av(X')
- *  and it is identified by the pair (sd(X), sv(X')): if the anchor point
- *  lies on the boundary of mu_{X,X'} then it coincides with the anchor
- *  point of the face mu_{sd(X),sv(X')} and the vertex is "collapsed" as
+ *  The anchor point of the polyhedral cell mu_{X,nu} = (1-s)delta_X (+) s nu
+ *  is (Lemma 14)
+ *     (1-s) ad(X) + s av(nu)
+ *  and it is identified by the pair (sd(X), sv(nu)): if the anchor point
+ *  lies on the boundary of mu_{X,nu} then it coincides with the anchor
+ *  point of the face mu_{sd(X),sv(nu)} and the vertex is "collapsed" as
  *  described in Section 3.2 of the paper. The collapsed vertices generate
  *  degenerate tetrahedra (with repeated vertices) that are simply skipped.
+ *
+ *  Infinite power cells. Rather than inserting additional points, the
+ *  power diagram is clipped by a bounding box B, and the mixed complex of
+ *  the clipped diagram, mu_X = (1-s) delta_X (+) s (nu_X inter B), is
+ *  used. This preserves the structure needed by the algorithm: the box
+ *  cuts of a type 0 cell are planar (circular) facets; the box cuts of a
+ *  type 1 cell mu_e are (1-s) delta_e (+) s sigma for segments sigma of
+ *  the bisector plane of e, that is, rectangles with sides parallel and
+ *  orthogonal to the symmetry axis (hyperbolic facets); the clipped nu_f
+ *  of a type 2 cell is still a segment along the normal of f. Lemmas
+ *  13-16 generalize verbatim (the anchor of a clipped face is the point
+ *  closest to the projection of c(G) onto its affine hull). B is chosen
+ *  large enough so that the Voronoi component z of every point
+ *  x = (1-s) y + s z of the skin surface lies inside B: the body is
+ *  contained in conv(P) (+) ball(sqrt(Pmax)), hence
+ *  |z - y| = |x - y|/s <= (diam(P) + sqrt(Pmax))/s. Hence no facet of the
+ *  clipped complex that lies on the boundary of B meets the surface, and
+ *  the mixed cells that are clipped away contain no part of the surface.
  */
 
 namespace {
@@ -269,13 +286,37 @@ namespace {
                     return false;
                 }
                 build_vertex_edges();
+                compute_delaunay_anchors();
             }
             {
-                Stopwatch W("skin:anchors", verbose_);
-                compute_delaunay_anchors();
-                if(!compute_voronoi_anchors()) {
+                Stopwatch W("skin:clip", verbose_);
+                // The clipped power diagram is built with a bounding box
+                // large enough to contain all the surface. In the (rare)
+                // near-degenerate cases where the combinatorial decisions
+                // are inconsistent, the box is enlarged and the
+                // construction is restarted.
+                bool ok = false;
+                double scale = 1.0;
+                for(index_t trial=0; trial<8 && !ok; ++trial) {
+                    compute_box(scale);
+                    ok = build_clipped_power_diagram();
+                    if(!ok) {
+                        if(verbose_) {
+                            Logger::warn("skin")
+                                << "Inconsistent clipped power diagram, "
+                                << "enlarging the bounding box"
+                                << std::endl;
+                        }
+                        scale *= 1.7;
+                    }
+                }
+                if(!ok) {
+                    Logger::err("skin")
+                        << "Could not build the clipped power diagram"
+                        << std::endl;
                     return false;
                 }
+                compute_voronoi_anchors();
             }
             {
                 Stopwatch W("skin:complex", verbose_);
@@ -289,6 +330,9 @@ namespace {
                 get_tetrahedral_complex(*tet_complex);
             }
             if(verbose_) {
+                Logger::out("skin")
+                    << "Clipped power diagram: " << vf_.size() << " faces"
+                    << std::endl;
                 Logger::out("skin")
                     << "Tetrahedral complex: "
                     << cv_pos_.size() << " vertices, "
@@ -767,139 +811,1074 @@ namespace {
             }
         }
 
-        /**
-         * \brief Computes for each Delaunay simplex delta_X the point
-         *  av(X) of the power cell nu_X closest to c(X), and the face
-         *  sv(X) of nu_X that contains it (Lemma 16).
-         * \details Faces of nu_X are the nu_X'' for cofaces X'' of X.
-         * \retval true on success
-         * \retval false if the power cell of an atom is unbounded
-         */
-        bool compute_voronoi_anchors() {
+        /*****************************************************************/
+        /** The bounding box B                                           */
+        /*****************************************************************/
 
-            // Triangles: nu_f is the segment [c_t1, c_t2]
-            index_t nf = nb_tris();
-            av_f_.resize(nf);
-            sv_f_.resize(nf);
-            for(index_t f=0; f<nf; ++f) {
-                index_t t0 = tri_t_[2*f];
-                index_t t1 = tri_t_[2*f+1];
-                if(
-                    t0 == NO_INDEX || t1 == NO_INDEX ||
-                    !tet_finite_[t0] || !tet_finite_[t1]
-                ) {
-                    // Unbounded power edge, only incident to cells of
-                    // non-atom vertices (never used).
-                    sv_f_[f] = SF(f);
-                    av_f_[f] = c_f_[f];
+        /**
+         * \brief Box faces are numbered 0..5: face k is on axis k/2,
+         *  on the min side if k is even and on the max side if k is odd.
+         */
+        static index_t box_axis(index_t k) {
+            return k >> 1;
+        }
+
+        static bool box_max_side(index_t k) {
+            return (k & 1) != 0;
+        }
+
+        /**
+         * \brief Gets the outward normal of a box face.
+         */
+        vec3 box_normal(index_t k) const {
+            vec3 N(0.0, 0.0, 0.0);
+            N[box_axis(k)] = box_max_side(k) ? 1.0 : -1.0;
+            return N;
+        }
+
+        /**
+         * \brief Gets the offset b of a box face, such that the face is
+         *  N.x = b and the box is N.x <= b.
+         */
+        double box_offset(index_t k) const {
+            index_t a = box_axis(k);
+            return box_max_side(k) ? box_max_[a] : -box_min_[a];
+        }
+
+        /**
+         * \brief Gets the generator id of a box face (box faces are
+         *  numbered after the points).
+         */
+        index_t box_gen(index_t k) const {
+            return nb_vertices() + k;
+        }
+
+        bool is_box_gen(index_t g) const {
+            return g >= nb_vertices();
+        }
+
+        /**
+         * \brief Gets the corner of the box at the intersection of three
+         *  faces (with three different axes).
+         */
+        vec3 box_corner(index_t k1, index_t k2, index_t k3) const {
+            vec3 c;
+            index_t K[3] = {k1, k2, k3};
+            for(index_t i=0; i<3; ++i) {
+                index_t a = box_axis(K[i]);
+                c[a] = box_max_side(K[i]) ? box_max_[a] : box_min_[a];
+            }
+            return c;
+        }
+
+        /**
+         * \brief Clips a line or a ray by the box.
+         * \param[in] o , d origin and direction
+         * \param[in,out] tlo , thi the parameter interval, clipped in place
+         * \param[out] klo , khi the box faces that clip the interval, or
+         *  NO_INDEX if the bound was not changed.
+         * \retval true if the clipped interval is not empty
+         */
+        bool clip_by_box(
+            const vec3& o, const vec3& d,
+            double& tlo, double& thi, index_t& klo, index_t& khi
+        ) const {
+            klo = NO_INDEX;
+            khi = NO_INDEX;
+            for(index_t a=0; a<3; ++a) {
+                if(d[a] == 0.0) {
+                    if(o[a] < box_min_[a] || o[a] > box_max_[a]) {
+                        return false;
+                    }
                     continue;
                 }
-                vec3 c0 = tet_c_[t0];
-                vec3 c1 = tet_c_[t1];
-                vec3 D = c1 - c0;
-                double DD = length2(D);
-                double lambda = (DD == 0.0) ? 0.0 : dot(c_f_[f] - c0, D) / DD;
-                if(lambda > 0.0 && lambda < 1.0) {
-                    sv_f_[f] = SF(f);
-                    av_f_[f] = c_f_[f];
-                } else if(lambda <= 0.0) {
-                    sv_f_[f] = ST(t0);
-                    av_f_[f] = c0;
+                double t1 = (box_min_[a] - o[a]) / d[a];
+                double t2 = (box_max_[a] - o[a]) / d[a];
+                index_t k1 = 2*a;
+                index_t k2 = 2*a+1;
+                if(t1 > t2) {
+                    std::swap(t1, t2);
+                    std::swap(k1, k2);
+                }
+                if(t1 > tlo) {
+                    tlo = t1;
+                    klo = k1;
+                }
+                if(t2 < thi) {
+                    thi = t2;
+                    khi = k2;
+                }
+            }
+            return tlo <= thi;
+        }
+
+        /**
+         * \brief Computes the bounding box B.
+         * \details B needs to contain the Voronoi component z of each point
+         *  x = (1-s) y + s z of the skin surface, y in delta_X, z in nu_X.
+         *  The body is contained in conv(P) (+) ball(sqrt(Pmax)), hence
+         *  |x-y| <= diam + sqrt(Pmax) and |z-y| = |x-y|/s.
+         * \param[in] scale an additional scaling factor (used when
+         *  retrying after a consistency failure)
+         */
+        void compute_box(double scale) {
+            double Pmax = 0.0;
+            for(index_t a=0; a<3; ++a) {
+                box_min_[a] = Numeric::max_float64();
+                box_max_[a] = -Numeric::max_float64();
+            }
+            for(index_t v=0; v<nb_vertices(); ++v) {
+                vec3 p = point(v);
+                for(index_t a=0; a<3; ++a) {
+                    box_min_[a] = std::min(box_min_[a], p[a]);
+                    box_max_[a] = std::max(box_max_[a], p[a]);
+                }
+                Pmax = std::max(Pmax, weight(v));
+            }
+            double diam = 0.0;
+            for(index_t a=0; a<3; ++a) {
+                diam += geo_sqr(box_max_[a] - box_min_[a]);
+            }
+            diam = std::sqrt(diam);
+            double margin = scale * (1.05 * (diam + std::sqrt(Pmax)) / s_ + 1e-3*diam);
+            for(index_t a=0; a<3; ++a) {
+                box_min_[a] -= margin;
+                box_max_[a] += margin;
+            }
+            // Make sure no radical center is too close to the box boundary
+            // (so that the inside/outside decisions are unambiguous).
+            for(index_t iter=0; iter<30; ++iter) {
+                double eps = 1e-6 * (box_max_[0] - box_min_[0]);
+                bool ok = true;
+                for(index_t t=0; t<nb_tets(); ++t) {
+                    if(!tet_finite_[t]) {
+                        continue;
+                    }
+                    for(index_t a=0; a<3; ++a) {
+                        double c = tet_c_[t][a];
+                        if(
+                            std::fabs(c - box_min_[a]) < eps ||
+                            std::fabs(c - box_max_[a]) < eps
+                        ) {
+                            ok = false;
+                        }
+                    }
+                }
+                if(ok) {
+                    break;
+                }
+                for(index_t a=0; a<3; ++a) {
+                    double m = 0.5*(box_max_[a]+box_min_[a]);
+                    double h = 0.5*(box_max_[a]-box_min_[a]) * 1.1;
+                    box_min_[a] = m - h;
+                    box_max_[a] = m + h;
+                }
+            }
+            tet_in_box_.assign(nb_tets(), false);
+            for(index_t t=0; t<nb_tets(); ++t) {
+                if(!tet_finite_[t]) {
+                    continue;
+                }
+                bool inside = true;
+                for(index_t a=0; a<3; ++a) {
+                    double c = tet_c_[t][a];
+                    if(c <= box_min_[a] || c >= box_max_[a]) {
+                        inside = false;
+                    }
+                }
+                tet_in_box_[t] = inside;
+            }
+        }
+
+        /*****************************************************************/
+        /** Faces of the clipped power diagram                           */
+        /*****************************************************************/
+
+        /**
+         * \brief A face of the clipped power diagram Vor(P) inter B.
+         * \details A face is the intersection of some power cells (its
+         *  generators G) and some box faces (K). Its dimension is
+         *  3 - |G| - |K| + 1. It is identified by the set of generator ids
+         *  (points and box faces, that are numbered after the points).
+         */
+        struct VFace {
+            index_t dim;
+            vec3 center;             // c(G), center of the generators
+            vec3 normal;             // dim 2: normal of the supporting plane
+            vec3 pos;                // dim 0: position
+            index_t K[3];            // box faces the face lies on
+            index_t nK;
+            index_t gen[2];          // dim 1,2: the point generators (nG<=2),
+                                     // dim 3: gen[0] = the point
+            vector<index_t> verts;   // dim 1: 2 extremities,
+                                     // dim 2: vertices in cyclic order
+            vector<index_t> subs;    // dim 2: edges (edge k goes from
+                                     // verts[k] to verts[k+1]),
+                                     // dim 3: facets
+            vec3 av;                 // anchor point
+            index_t sv;              // face that contains av in its interior
+        };
+
+        /**
+         * \brief Identifies a face of the clipped power diagram by its
+         *  (sorted) set of generators.
+         */
+        struct FaceKey {
+            index_t g[4];
+            bool operator==(const FaceKey& rhs) const {
+                return g[0]==rhs.g[0] && g[1]==rhs.g[1] &&
+                       g[2]==rhs.g[2] && g[3]==rhs.g[3];
+            }
+        };
+
+        struct FaceKeyHash {
+            size_t operator()(const FaceKey& k) const noexcept {
+                Numeric::uint64 h = 0x9E3779B97F4A7C15ull;
+                for(index_t i=0; i<4; ++i) {
+                    h ^= Numeric::uint64(k.g[i]) + 0x7F4A7C159E3779B9ull +
+                         (h << 6) + (h >> 2);
+                    h *= 0xBF58476D1CE4E5B9ull;
+                }
+                return size_t(h);
+            }
+        };
+
+        static FaceKey make_key(
+            index_t g0, index_t g1=NO_INDEX, index_t g2=NO_INDEX, index_t g3=NO_INDEX
+        ) {
+            FaceKey k;
+            k.g[0] = g0; k.g[1] = g1; k.g[2] = g2; k.g[3] = g3;
+            std::sort(k.g, k.g+4); // NO_INDEX sorts last
+            return k;
+        }
+
+        /**
+         * \brief Gets a face from its key, or creates it.
+         * \param[out] created true if the face was created
+         */
+        index_t get_face(const FaceKey& key, index_t dim, bool& created) {
+            auto it = vf_map_.find(key);
+            if(it != vf_map_.end()) {
+                created = false;
+                return it->second;
+            }
+            created = true;
+            index_t result = vf_.size();
+            vf_map_[key] = result;
+            VFace F;
+            F.dim = dim;
+            F.nK = 0;
+            F.gen[0] = NO_INDEX;
+            F.gen[1] = NO_INDEX;
+            F.sv = NO_INDEX;
+            index_t ng = 0;
+            for(index_t i=0; i<4; ++i) {
+                if(key.g[i] == NO_INDEX) {
+                    continue;
+                }
+                if(is_box_gen(key.g[i])) {
+                    geo_debug_assert(F.nK < 3);
+                    F.K[F.nK++] = key.g[i] - nb_vertices();
                 } else {
-                    sv_f_[f] = ST(t1);
-                    av_f_[f] = c1;
+                    if(ng < 2) {
+                        F.gen[ng] = key.g[i];
+                    }
+                    ++ng;
+                }
+            }
+            vf_.push_back(F);
+            return result;
+        }
+
+        /**
+         * \brief Gets or creates a vertex of the clipped power diagram.
+         */
+        index_t get_vfvertex(const FaceKey& key, const vec3& pos) {
+            bool created;
+            index_t v = get_face(key, 0, created);
+            if(created) {
+                vf_[v].pos = pos;
+                vf_[v].av = pos;
+                vf_[v].sv = v;
+            }
+            return v;
+        }
+
+        /**
+         * \brief Gets or creates an edge of the clipped power diagram.
+         * \param[in] center the center c(G) of its point generators
+         */
+        index_t get_vfedge(
+            const FaceKey& key, index_t v0, index_t v1, const vec3& center
+        ) {
+            bool created;
+            index_t e = get_face(key, 1, created);
+            if(created) {
+                vf_[e].verts.push_back(v0);
+                vf_[e].verts.push_back(v1);
+                vf_[e].center = center;
+            }
+            return e;
+        }
+
+        /**
+         * \brief Tests whether a point is inside the power cell of a
+         *  point v (relative to its Delaunay neighbors), i.e. whether
+         *  it has smaller power distance to v than to its neighbors.
+         */
+        bool in_power_cell(index_t v, const vec3& x) const {
+            double dv = distance2(x, point(v)) - weight(v);
+            for(index_t k=v_edges_ptr_[v]; k<v_edges_ptr_[v+1]; ++k) {
+                index_t e = v_edges_[k];
+                index_t q = edge_v_[2*e] + edge_v_[2*e+1] - v;
+                if(distance2(x, point(q)) - weight(q) < dv) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * \brief Tests whether a point of the bisector plane of an
+         *  edge e is inside the power facet nu_e (relative to the
+         *  link of e).
+         */
+        bool in_power_facet(index_t e, const vec3& x) const {
+            index_t v = edge_v_[2*e];
+            double dv = distance2(x, point(v)) - weight(v);
+            index_t m = edge_nb_tets(e);
+            for(index_t k=0; k<m; ++k) {
+                index_t f = edge_tri(e,k);
+                if(f == NO_INDEX) {
+                    continue;
+                }
+                for(index_t i=0; i<3; ++i) {
+                    index_t r = tri_v_[3*f+i];
+                    if(r == edge_v_[2*e] || r == edge_v_[2*e+1]) {
+                        continue;
+                    }
+                    if(distance2(x, point(r)) - weight(r) < dv) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
+         * \brief Computes the clipped power edges nu_f inter B of all
+         *  the triangles (segments between radical centers, or rays for
+         *  the triangles on the convex hull).
+         * \details vf_tri_[f] receives the face id, or NO_INDEX if the
+         *  clipped power edge is empty. The first extremity of the face
+         *  is on the side of tri_t_[2*f].
+         */
+        void build_tri_segments() {
+            index_t nf = nb_tris();
+            vf_tri_.assign(nf, NO_INDEX);
+            for(index_t f=0; f<nf; ++f) {
+                index_t v0 = tri_v_[3*f];
+                index_t v1 = tri_v_[3*f+1];
+                index_t v2 = tri_v_[3*f+2];
+                index_t t0 = tri_t_[2*f];
+                index_t t1 = tri_t_[2*f+1];
+                bool fin0 = (t0 != NO_INDEX && tet_finite_[t0]);
+                bool fin1 = (t1 != NO_INDEX && tet_finite_[t1]);
+                if(!fin0 && !fin1) {
+                    continue;
+                }
+                vec3 o;
+                vec3 d;
+                double tlo = 0.0;
+                double thi;
+                index_t t_from = NO_INDEX; // tet at the origin of the ray
+                bool swapped = false;      // true if t_from is t1
+                if(fin0 && fin1) {
+                    o = tet_c_[t0];
+                    d = tet_c_[t1] - tet_c_[t0];
+                    thi = 1.0;
+                    t_from = t0;
+                } else {
+                    t_from = fin0 ? t0 : t1;
+                    swapped = !fin0;
+                    o = tet_c_[t_from];
+                    // ray direction: normal to the triangle pointing
+                    // away from the opposite vertex of the finite tet
+                    vec3 p0 = point(v0);
+                    vec3 n = cross(point(v1)-p0, point(v2)-p0);
+                    index_t opp = NO_INDEX;
+                    for(index_t lv=0; lv<4; ++lv) {
+                        index_t w = tet_vertex(t_from, lv);
+                        if(w != v0 && w != v1 && w != v2) {
+                            opp = w;
+                        }
+                    }
+                    if(dot(n, point(opp)-p0) > 0.0) {
+                        n = -1.0*n;
+                    }
+                    d = normalize(n);
+                    thi = Numeric::max_float64();
+                }
+                index_t klo, khi;
+                if(!clip_by_box(o, d, tlo, thi, klo, khi)) {
+                    continue;
+                }
+                // Extremities. Decisions on the radical centers are the
+                // global ones (tet_in_box_), consistent for all faces.
+                index_t a, b;
+                if(tet_in_box_[t_from]) {
+                    FaceKey k = make_key(
+                        tet_vertex(t_from,0), tet_vertex(t_from,1),
+                        tet_vertex(t_from,2), tet_vertex(t_from,3)
+                    );
+                    a = get_vfvertex(k, tet_c_[t_from]);
+                } else {
+                    if(klo == NO_INDEX) {
+                        continue; // should not happen
+                    }
+                    a = get_vfvertex(
+                        make_key(v0, v1, v2, box_gen(klo)), o + tlo*d
+                    );
+                }
+                index_t t_to = (fin0 && fin1) ? t1 : NO_INDEX;
+                if(t_to != NO_INDEX && tet_in_box_[t_to]) {
+                    FaceKey k = make_key(
+                        tet_vertex(t_to,0), tet_vertex(t_to,1),
+                        tet_vertex(t_to,2), tet_vertex(t_to,3)
+                    );
+                    b = get_vfvertex(k, tet_c_[t_to]);
+                } else {
+                    if(khi == NO_INDEX) {
+                        continue; // should not happen
+                    }
+                    b = get_vfvertex(
+                        make_key(v0, v1, v2, box_gen(khi)), o + thi*d
+                    );
+                }
+                if(a == b) {
+                    continue;
+                }
+                if(swapped) {
+                    std::swap(a, b);
+                }
+                vf_tri_[f] = get_vfedge(make_key(v0, v1, v2), a, b, c_f_[f]);
+            }
+        }
+
+        /**
+         * \brief Walks along the boundary of C = B inter (bisector plane
+         *  of e), from a vertex to another one (or all around C).
+         * \details Creates the vertices (on the edges of the box) and
+         *  the edges (on the faces of the box) of the clipped power
+         *  facet nu_e inter B that lie on the boundary of B.
+         * \param[in] e the edge
+         * \param[in] n the unit normal of the bisector plane
+         * \param[in] sigma +1 if the boundary of nu_e inter B is
+         *  traversed counterclockwise around n, -1 otherwise
+         * \param[in] from the vertex to start from, and k its box face
+         * \param[in] to the vertex to reach (on box face kto), or NO_INDEX
+         *  to walk all around C (then from needs to be on a box edge)
+         * \param[out] cycle_v , cycle_e the generated vertices and edges
+         *  are appended to these lists. The last vertex appended is \p to
+         *  (or \p from) and is not in the list.
+         * \retval true on success
+         * \retval false on inconsistency
+         */
+        bool walk_box_section(
+            index_t e, const vec3& n, double sigma,
+            index_t from, index_t k, index_t to, index_t kto,
+            vector<index_t>& cycle_v, vector<index_t>& cycle_e
+        ) {
+            index_t v = edge_v_[2*e];
+            index_t q = edge_v_[2*e+1];
+            index_t cur = from;
+            index_t kprev = NO_INDEX;
+            for(index_t iter=0; iter<8; ++iter) {
+                vec3 P = vf_[cur].pos;
+                vec3 dir = sigma * cross(n, box_normal(k));
+                double l = length(dir);
+                if(l < 1e-12) {
+                    return false;
+                }
+                dir = (1.0/l) * dir;
+                // next box face hit
+                double tmin = Numeric::max_float64();
+                index_t knext = NO_INDEX;
+                for(index_t k2=0; k2<6; ++k2) {
+                    if(box_axis(k2) == box_axis(k) || k2 == kprev) {
+                        continue;
+                    }
+                    double denom = dot(dir, box_normal(k2));
+                    if(denom <= 0.0) {
+                        continue;
+                    }
+                    double t = (box_offset(k2) - dot(box_normal(k2), P)) / denom;
+                    if(t < tmin) {
+                        tmin = t;
+                        knext = k2;
+                    }
+                }
+                if(knext == NO_INDEX) {
+                    return false;
+                }
+                double eps = 1e-9 * (1.0 + tmin);
+                if(to != NO_INDEX && kto == k) {
+                    double ta = dot(vf_[to].pos - P, dir);
+                    if(ta >= -eps && ta <= tmin + eps) {
+                        if(to != cur) {
+                            cycle_v.push_back(cur);
+                            cycle_e.push_back(get_vfedge(
+                                make_key(v, q, box_gen(k)), cur, to, c_e_[e]
+                            ));
+                        }
+                        return true;
+                    }
+                }
+                vec3 Q = P + tmin*dir;
+                FaceKey kq = make_key(v, q, box_gen(k), box_gen(knext));
+                index_t next = get_vfvertex(kq, Q);
+                if(to == NO_INDEX && next == from) {
+                    cycle_v.push_back(cur);
+                    cycle_e.push_back(get_vfedge(
+                        make_key(v, q, box_gen(k)), cur, from, c_e_[e]
+                    ));
+                    return true;
+                }
+                cycle_v.push_back(cur);
+                cycle_e.push_back(get_vfedge(
+                    make_key(v, q, box_gen(k)), cur, next, c_e_[e]
+                ));
+                kprev = k;
+                k = knext;
+                cur = next;
+            }
+            return false;
+        }
+
+        /**
+         * \brief Gets the box face a vertex of the clipped power diagram
+         *  lies on (the first one if it lies on several ones).
+         */
+        index_t vertex_box_face(index_t vv) const {
+            return (vf_[vv].nK == 0) ? NO_INDEX : vf_[vv].K[0];
+        }
+
+        /**
+         * \brief Computes the clipped power facet nu_e inter B of an
+         *  edge e (a convex polygon in the bisector plane).
+         * \details vf_edge_[e] receives the face id, or NO_INDEX if the
+         *  clipped power facet is empty.
+         * \retval true on success
+         * \retval false on inconsistency
+         */
+        bool build_edge_polygon(index_t e) {
+            index_t v = edge_v_[2*e];
+            index_t q = edge_v_[2*e+1];
+            vec3 n = normalize(point(q) - point(v));
+            index_t m = edge_nb_tets(e);
+
+            // Collect the non-empty clipped power edges around e, in
+            // cyclic order, oriented along the traversal.
+            vector<index_t> seg_f;   // face id
+            vector<index_t> seg_a;   // first vertex
+            vector<index_t> seg_b;   // second vertex
+            vector<index_t> seg_tri; // triangle
+            for(index_t k=0; k<m; ++k) {
+                index_t f = edge_tri(e,k);
+                if(f == NO_INDEX || vf_tri_[f] == NO_INDEX) {
+                    continue;
+                }
+                index_t S = vf_tri_[f];
+                index_t a = vf_[S].verts[0];
+                index_t b = vf_[S].verts[1];
+                if(tri_t_[2*f] != edge_tet(e,k)) {
+                    std::swap(a,b);
+                }
+                seg_f.push_back(S);
+                seg_a.push_back(a);
+                seg_b.push_back(b);
+                seg_tri.push_back(f);
+            }
+
+            vector<index_t> cycle_v;
+            vector<index_t> cycle_e;
+
+            if(seg_f.size() == 0) {
+                // No power edge crosses B: nu_e inter B is either empty
+                // or the whole section C = B inter plane.
+                index_t start = NO_INDEX;
+                index_t kstart = NO_INDEX;
+                for(index_t k1=0; k1<6 && start == NO_INDEX; ++k1) {
+                    for(index_t k2=k1+1; k2<6 && start == NO_INDEX; ++k2) {
+                        if(box_axis(k1) == box_axis(k2)) {
+                            continue;
+                        }
+                        // the box edge (k1,k2): find its two corners
+                        index_t a3 = 3 - box_axis(k1) - box_axis(k2);
+                        vec3 c1 = box_corner(k1, k2, 2*a3);
+                        vec3 c2 = box_corner(k1, k2, 2*a3+1);
+                        double s1 = dot(n, c1 - c_e_[e]);
+                        double s2 = dot(n, c2 - c_e_[e]);
+                        if(s1 * s2 >= 0.0) {
+                            continue;
+                        }
+                        vec3 x = c1 + (s1/(s1-s2))*(c2-c1);
+                        if(!in_power_facet(e, x)) {
+                            // C is entirely outside nu_e
+                            vf_edge_[e] = NO_INDEX;
+                            return true;
+                        }
+                        start = get_vfvertex(
+                            make_key(v, q, box_gen(k1), box_gen(k2)), x
+                        );
+                        // choose the face to walk on: the one along which
+                        // the direction does not immediately hit the other
+                        vec3 d1 = cross(n, box_normal(k1));
+                        kstart = (dot(d1, box_normal(k2)) > 0.0) ? k2 : k1;
+                    }
+                }
+                if(start == NO_INDEX) {
+                    vf_edge_[e] = NO_INDEX; // the plane misses the box
+                    return true;
+                }
+                if(!walk_box_section(
+                       e, n, 1.0, start, kstart, NO_INDEX, NO_INDEX,
+                       cycle_v, cycle_e
+                   )
+                ) {
+                    return false;
+                }
+            } else {
+                // Orientation of the traversal around n: the interior
+                // of nu_e is on the side of v relative to the third vertex
+                // r of the first triangle.
+                index_t f0 = seg_tri[0];
+                index_t r = NO_INDEX;
+                for(index_t i=0; i<3; ++i) {
+                    index_t w = tri_v_[3*f0+i];
+                    if(w != v && w != q) {
+                        r = w;
+                    }
+                }
+                vec3 in_dir = point(v) - point(r);
+                in_dir = in_dir - dot(in_dir, n)*n;
+                vec3 ab = vf_[seg_b[0]].pos - vf_[seg_a[0]].pos;
+                double sigma = (dot(n, cross(ab, in_dir)) >= 0.0) ? 1.0 : -1.0;
+                index_t ns = seg_f.size();
+                for(index_t i=0; i<ns; ++i) {
+                    cycle_v.push_back(seg_a[i]);
+                    cycle_e.push_back(seg_f[i]);
+                    index_t b = seg_b[i];
+                    index_t a_next = seg_a[(i+1)%ns];
+                    if(b == a_next) {
+                        continue;
+                    }
+                    // gap between b and a_next: along the boundary of B
+                    index_t kb = vertex_box_face(b);
+                    index_t ka = vertex_box_face(a_next);
+                    if(kb == NO_INDEX || ka == NO_INDEX) {
+                        return false;
+                    }
+                    if(!walk_box_section(
+                           e, n, sigma, b, kb, a_next, ka, cycle_v, cycle_e
+                       )
+                    ) {
+                        return false;
+                    }
+                }
+            }
+            if(cycle_v.size() < 3) {
+                return false;
+            }
+            bool created;
+            index_t F = get_face(make_key(v, q), 2, created);
+            geo_assert(created);
+            vf_[F].verts.swap(cycle_v);
+            vf_[F].subs.swap(cycle_e);
+            vf_[F].center = c_e_[e];
+            vf_[F].normal = n;
+            vf_edge_[e] = F;
+            return true;
+        }
+
+        /**
+         * \brief Computes the facet nu_v inter F_k of the clipped power
+         *  cell of v on the box face k.
+         * \details Its boundary is made of the box edges of the clipped
+         *  power facets nu_{vq} inter B that lie on F_k, and of pieces of
+         *  the edges of the box face.
+         * \return the face id, or NO_INDEX if empty
+         * \param[out] ok set to false on inconsistency
+         */
+        index_t build_box_facet(index_t v, index_t k, bool& ok) {
+            ok = true;
+            vec3 Nk = box_normal(k);
+            vec3 pv = point(v);
+
+            // The four box faces adjacent to k, in counterclockwise
+            // order around Nk.
+            index_t adj[4];
+            {
+                index_t a = box_axis(k);
+                vec3 u1(0.0,0.0,0.0);
+                vec3 u2(0.0,0.0,0.0);
+                u1[(a+1)%3] = 1.0;
+                u2[(a+2)%3] = 1.0;
+                if(!box_max_side(k)) {
+                    std::swap(u1,u2);
+                }
+                double angle[4];
+                index_t na = 0;
+                for(index_t j=0; j<6; ++j) {
+                    if(box_axis(j) == a) {
+                        continue;
+                    }
+                    vec3 Nj = box_normal(j);
+                    adj[na] = j;
+                    angle[na] = std::atan2(dot(Nj,u2), dot(Nj,u1));
+                    ++na;
+                }
+                for(index_t i=0; i<4; ++i) {
+                    for(index_t j=i+1; j<4; ++j) {
+                        if(angle[j] < angle[i]) {
+                            std::swap(angle[i], angle[j]);
+                            std::swap(adj[i], adj[j]);
+                        }
+                    }
                 }
             }
 
-            // Edges: nu_e is a convex polygon in the bisector plane,
-            // with vertices c_t for the tets t around e, and edges
-            // nu_f for the triangles f around e.
-            index_t ne = nb_edges();
-            av_e_.resize(ne);
-            sv_e_.resize(ne);
-            for(index_t e=0; e<ne; ++e) {
-                if(edge_open_[e]) {
-                    sv_e_[e] = SE(e);
-                    av_e_[e] = c_e_[e];
+            // Outgoing edge of each node of the boundary (node = vertex
+            // of the clipped diagram on F_k).
+            std::unordered_map<index_t, std::pair<index_t,index_t>> out;
+            // The box edges (sigma) of the power facets on F_k
+            index_t nb_sigma = 0;
+            vector<index_t> on_edge[4]; // vertices on each box edge of F_k
+            for(index_t kk=v_edges_ptr_[v]; kk<v_edges_ptr_[v+1]; ++kk) {
+                index_t e = v_edges_[kk];
+                index_t P = vf_edge_[e];
+                if(P == NO_INDEX) {
                     continue;
                 }
-                vec3 ce = c_e_[e];
-                vec3 d = point(edge_v_[2*e+1]) - point(edge_v_[2*e]);
-                index_t m = edge_nb_tets(e);
+                index_t q = edge_v_[2*e] + edge_v_[2*e+1] - v;
+                for(index_t s : vf_[P].subs) {
+                    const VFace& S = vf_[s];
+                    if(S.nK != 1 || S.K[0] != k) {
+                        continue;
+                    }
+                    ++nb_sigma;
+                    // orient the segment counterclockwise around Nk,
+                    // the interior (side of v) being on the left
+                    vec3 in_dir = pv - point(q);
+                    in_dir = in_dir - dot(in_dir,Nk)*Nk;
+                    vec3 d = cross(in_dir, Nk);
+                    index_t x = S.verts[0];
+                    index_t y = S.verts[1];
+                    if(dot(d, vf_[y].pos - vf_[x].pos) < 0.0) {
+                        std::swap(x,y);
+                    }
+                    if(out.find(x) != out.end()) {
+                        ok = false;
+                        return NO_INDEX;
+                    }
+                    out[x] = std::make_pair(y, s);
+                    // register the extremities that are on box edges
+                    for(index_t w : {x, y}) {
+                        const VFace& W = vf_[w];
+                        if(W.nK == 2) {
+                            index_t j = (W.K[0] == k) ? W.K[1] : W.K[0];
+                            for(index_t i=0; i<4; ++i) {
+                                if(adj[i] == j) {
+                                    on_edge[i].push_back(w);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Corners of F_k: corner i is between box edges i-1 and i.
+            index_t corner[4];
+            bool corner_in[4];
+            for(index_t i=0; i<4; ++i) {
+                index_t j1 = adj[(i+3)%4];
+                index_t j2 = adj[i];
+                vec3 c = box_corner(k, j1, j2);
+                corner_in[i] = in_power_cell(v, c);
+                corner[i] = corner_in[i] ?
+                    get_vfvertex(
+                        make_key(v, box_gen(k), box_gen(j1), box_gen(j2)), c
+                    ) : NO_INDEX;
+            }
+
+            if(nb_sigma == 0) {
+                index_t nin = 0;
+                for(index_t i=0; i<4; ++i) {
+                    nin += index_t(corner_in[i]);
+                }
+                if(nin == 0) {
+                    return NO_INDEX;
+                }
+                if(nin != 4) {
+                    ok = false;
+                    return NO_INDEX;
+                }
+            }
+
+            // Pieces of the box edges of F_k. Box edge i goes from
+            // corner i to corner i+1, in direction Nk x Nj.
+            vector<index_t> cycle_v;
+            vector<index_t> cycle_e;
+            for(index_t i=0; i<4; ++i) {
+                index_t j = adj[i];
+                vec3 dir = cross(Nk, box_normal(j));
+                vector<index_t>& pts = on_edge[i];
+                // remove duplicates and sort along dir
+                std::sort(pts.begin(), pts.end());
+                pts.erase(std::unique(pts.begin(), pts.end()), pts.end());
+                std::sort(
+                    pts.begin(), pts.end(),
+                    [&](index_t a, index_t b) {
+                        return dot(vf_[a].pos, dir) < dot(vf_[b].pos, dir);
+                    }
+                );
+                vector<index_t> seq;
+                if(corner_in[i]) {
+                    seq.push_back(corner[i]);
+                }
+                for(index_t p : pts) {
+                    seq.push_back(p);
+                }
+                if(corner_in[(i+1)%4]) {
+                    seq.push_back(corner[(i+1)%4]);
+                }
+                for(index_t p=0; p+1<seq.size(); ++p) {
+                    index_t x = seq[p];
+                    index_t y = seq[p+1];
+                    // the piece x->y is inside nu_v iff x is a corner or
+                    // the end of a sigma (then the boundary continues
+                    // along the box edge).
+                    bool x_is_corner = (vf_[x].nK == 3);
+                    bool x_is_end = false;
+                    for(auto& kv : out) {
+                        if(kv.second.first == x) {
+                            x_is_end = true;
+                            break;
+                        }
+                    }
+                    if(!(x_is_corner || x_is_end)) {
+                        continue;
+                    }
+                    if(out.find(x) != out.end()) {
+                        ok = false;
+                        return NO_INDEX;
+                    }
+                    index_t piece = get_vfedge(
+                        make_key(v, box_gen(k), box_gen(j)), x, y, pv
+                    );
+                    out[x] = std::make_pair(y, piece);
+                }
+            }
+
+            if(out.size() == 0) {
+                return NO_INDEX;
+            }
+
+            // Chain the boundary
+            index_t start = out.begin()->first;
+            index_t cur = start;
+            do {
+                auto it = out.find(cur);
+                if(it == out.end()) {
+                    ok = false;
+                    return NO_INDEX;
+                }
+                cycle_v.push_back(cur);
+                cycle_e.push_back(it->second.second);
+                cur = it->second.first;
+                if(cycle_v.size() > out.size()) {
+                    ok = false;
+                    return NO_INDEX;
+                }
+            } while(cur != start);
+            if(cycle_v.size() != out.size() || cycle_v.size() < 3) {
+                ok = false;
+                return NO_INDEX;
+            }
+
+            bool created;
+            index_t F = get_face(make_key(v, box_gen(k)), 2, created);
+            geo_assert(created);
+            vf_[F].verts.swap(cycle_v);
+            vf_[F].subs.swap(cycle_e);
+            vf_[F].center = pv;
+            vf_[F].normal = Nk;
+            return F;
+        }
+
+        /**
+         * \brief Computes the clipped power cell nu_v inter B of an atom.
+         * \retval true on success
+         * \retval false on inconsistency
+         */
+        bool build_vertex_polyhedron(index_t v) {
+            vector<index_t> facets;
+            for(index_t kk=v_edges_ptr_[v]; kk<v_edges_ptr_[v+1]; ++kk) {
+                index_t e = v_edges_[kk];
+                if(vf_edge_[e] != NO_INDEX) {
+                    facets.push_back(vf_edge_[e]);
+                }
+            }
+            for(index_t k=0; k<6; ++k) {
+                bool ok;
+                index_t F = build_box_facet(v, k, ok);
+                if(!ok) {
+                    return false;
+                }
+                if(F != NO_INDEX) {
+                    facets.push_back(F);
+                }
+            }
+            if(facets.size() == 0) {
+                vf_vertex_[v] = NO_INDEX;
+                return true;
+            }
+            if(facets.size() < 4) {
+                return false;
+            }
+            bool created;
+            index_t C = get_face(make_key(v), 3, created);
+            geo_assert(created);
+            vf_[C].subs.swap(facets);
+            vf_[C].center = point(v);
+            vf_vertex_[v] = C;
+            return true;
+        }
+
+        /**
+         * \brief Builds all the faces of the clipped power diagram that
+         *  are needed to mesh the mixed cells of the atoms.
+         * \retval true on success
+         * \retval false on inconsistency (then the box is enlarged and
+         *  the construction is restarted)
+         */
+        bool build_clipped_power_diagram() {
+            vf_.clear();
+            vf_map_.clear();
+            vf_tri_.clear();
+            vf_edge_.assign(nb_edges(), NO_INDEX);
+            vf_vertex_.assign(nb_vertices(), NO_INDEX);
+            build_tri_segments();
+            for(index_t e=0; e<nb_edges(); ++e) {
+                if(!build_edge_polygon(e)) {
+                    return false;
+                }
+            }
+            for(index_t v=0; v<nb_atoms_; ++v) {
+                if(!build_vertex_polyhedron(v)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /*****************************************************************/
+        /** Anchor points of the clipped power diagram                   */
+        /*****************************************************************/
+
+        /**
+         * \brief Computes for each face nu of the clipped power diagram
+         *  the point av of nu closest to the center c(G) of its point
+         *  generators, and the face sv that contains it in its relative
+         *  interior (Lemma 16, generalized to the clipped diagram).
+         */
+        void compute_voronoi_anchors() {
+            // Faces are created in order of increasing dimension within
+            // each construction step, but a facet of a polyhedron may be
+            // created after the polyhedron is... no: faces of dimension d
+            // only reference faces of dimension d-1 created before them.
+            // We nevertheless process by increasing dimension to be safe.
+            for(index_t dim=1; dim<=3; ++dim) {
+                for(index_t F=0; F<vf_.size(); ++F) {
+                    if(vf_[F].dim != dim) {
+                        continue;
+                    }
+                    compute_face_anchor(F);
+                }
+            }
+        }
+
+        void compute_face_anchor(index_t F) {
+            VFace& f = vf_[F];
+            if(f.dim == 1) {
+                vec3 a = vf_[f.verts[0]].pos;
+                vec3 b = vf_[f.verts[1]].pos;
+                vec3 D = b - a;
+                double DD = length2(D);
+                double lambda = (DD == 0.0) ? 0.0 : dot(f.center - a, D) / DD;
+                if(lambda > 0.0 && lambda < 1.0) {
+                    f.av = a + lambda*D;
+                    f.sv = F;
+                } else if(lambda <= 0.0) {
+                    f.av = a;
+                    f.sv = f.verts[0];
+                } else {
+                    f.av = b;
+                    f.sv = f.verts[1];
+                }
+            } else if(f.dim == 2) {
+                vec3 p0 = vf_[f.verts[0]].pos;
+                vec3 proj = f.center - dot(f.center - p0, f.normal)*f.normal;
+                index_t n = f.verts.size();
                 bool has_pos = false;
                 bool has_neg = false;
-                for(index_t k=0; k<m; ++k) {
-                    vec3 ck = tet_c_[edge_tet(e,k)];
-                    vec3 ck1 = tet_c_[edge_tet(e,(k+1)%m)];
-                    double sgn = dot(d, cross(ck1 - ck, ce - ck));
+                for(index_t k=0; k<n; ++k) {
+                    vec3 pk = vf_[f.verts[k]].pos;
+                    vec3 pk1 = vf_[f.verts[(k+1)%n]].pos;
+                    double sgn = dot(f.normal, cross(pk1-pk, proj-pk));
                     if(sgn > 0.0) {
                         has_pos = true;
                     } else {
                         has_neg = true;
                     }
                 }
-                bool inside = (m >= 3) && (has_pos != has_neg);
-                if(inside) {
-                    sv_e_[e] = SE(e);
-                    av_e_[e] = ce;
+                if(has_pos != has_neg) {
+                    f.av = proj;
+                    f.sv = F;
                 } else {
-                    double best_d2 = Numeric::max_float64();
-                    for(index_t k=0; k<m; ++k) {
-                        index_t f = edge_tri(e,k);
-                        double d2 = distance2(ce, av_f_[f]);
-                        if(d2 < best_d2) {
-                            best_d2 = d2;
-                            sv_e_[e] = sv_f_[f];
-                            av_e_[e] = av_f_[f];
+                    double best = Numeric::max_float64();
+                    for(index_t s : f.subs) {
+                        double d2 = distance2(f.center, vf_[s].av);
+                        if(d2 < best) {
+                            best = d2;
+                            f.av = vf_[s].av;
+                            f.sv = vf_[s].sv;
                         }
                     }
                 }
-            }
-
-            // Vertices: nu_v is a convex polyhedron with facets nu_e
-            // for the edges e incident to v.
-            index_t nv = nb_vertices();
-            av_v_.resize(nv);
-            sv_v_.resize(nv);
-            for(index_t v=0; v<nv; ++v) {
-                sv_v_[v] = SV(v);
-                av_v_[v] = point(v);
-                if(!is_atom(v)) {
-                    continue;
-                }
-                vec3 p = point(v);
-                double P = weight(v);
-                bool inside = true;
-                for(index_t k=v_edges_ptr_[v]; k<v_edges_ptr_[v+1]; ++k) {
-                    index_t e = v_edges_[k];
-                    if(edge_open_[e]) {
-                        Logger::err("skin")
-                            << "Power cell of atom " << v
-                            << " is unbounded (call close_cells() first)"
-                            << std::endl;
-                        return false;
-                    }
-                    index_t q = edge_v_[2*e] + edge_v_[2*e+1] - v;
-                    // p is inside nu_v iff pi(p_hat,p) < pi(q_hat,p)
-                    // for all neighbors q, i.e. -P < |p-q|^2 - Q
-                    if(distance2(p, point(q)) - weight(q) + P <= 0.0) {
+            } else {
+                vec3 p = f.center;
+                bool inside = in_power_cell(f.gen[0], p);
+                for(index_t a=0; a<3 && inside; ++a) {
+                    if(p[a] <= box_min_[a] || p[a] >= box_max_[a]) {
                         inside = false;
                     }
                 }
-                if(!inside) {
-                    double best_d2 = Numeric::max_float64();
-                    for(index_t k=v_edges_ptr_[v]; k<v_edges_ptr_[v+1]; ++k) {
-                        index_t e = v_edges_[k];
-                        double d2 = distance2(p, av_e_[e]);
-                        if(d2 < best_d2) {
-                            best_d2 = d2;
-                            sv_v_[v] = sv_e_[e];
-                            av_v_[v] = av_e_[e];
+                if(inside) {
+                    f.av = p;
+                    f.sv = F;
+                } else {
+                    double best = Numeric::max_float64();
+                    for(index_t s : f.subs) {
+                        double d2 = distance2(p, vf_[s].av);
+                        if(d2 < best) {
+                            best = d2;
+                            f.av = vf_[s].av;
+                            f.sv = vf_[s].sv;
                         }
                     }
                 }
             }
-            return true;
         }
 
         Simplex support_d(Simplex X) const {
@@ -917,24 +1896,6 @@ namespace {
             case 1: return ad_e_[X.id];
             case 2: return ad_f_[X.id];
             default: return ad_t_[X.id];
-            }
-        }
-
-        Simplex support_v(Simplex X) const {
-            switch(X.dim) {
-            case 0: return sv_v_[X.id];
-            case 1: return sv_e_[X.id];
-            case 2: return sv_f_[X.id];
-            default: return X;
-            }
-        }
-
-        vec3 anchor_v(Simplex X) const {
-            switch(X.dim) {
-            case 0: return av_v_[X.id];
-            case 1: return av_e_[X.id];
-            case 2: return av_f_[X.id];
-            default: return tet_c_[X.id];
             }
         }
 
@@ -996,20 +1957,22 @@ namespace {
         /**
          * \brief Gets (or creates) the vertex of the tetrahedral complex
          *  that corresponds to the anchor point of the polyhedral cell
-         *  mu_{X,X'} = (1-s) delta_X (+) s nu_X'.
-         * \param[in] X , Xp two Delaunay simplices with X a face of Xp
-         *  (or X == Xp)
+         *  (1-s) delta_X (+) s nu, where nu is a face of the clipped
+         *  power diagram.
+         * \param[in] X a Delaunay simplex whose vertices are generators
+         *  of \p nu
+         * \param[in] nu a face of the clipped power diagram
          * \param[in] q the index of the quadric of the mixed cell being
          *  processed, used to compute the value of the implicit function
          *  at the vertex (if it is created).
          */
-        index_t get_vertex(Simplex X, Simplex Xp, index_t q) {
-            VertexKey key{ support_d(X).key(), support_v(Xp).key() };
+        index_t get_vertex(Simplex X, index_t nu, index_t q) {
+            VertexKey key{ support_d(X).key(), Numeric::uint64(vf_[nu].sv) };
             auto it = cv_map_.find(key);
             if(it != cv_map_.end()) {
                 return it->second;
             }
-            vec3 p = (1.0 - s_)*anchor_d(X) + s_*anchor_v(Xp);
+            vec3 p = (1.0 - s_)*anchor_d(X) + s_*vf_[nu].av;
             index_t result = cv_pos_.size();
             cv_map_[key] = result;
             cv_pos_.push_back(p);
@@ -1074,42 +2037,40 @@ namespace {
         }
 
         /**
-         * \brief Triangulates a hyperbolic facet mu_{e,f} (a rectangle,
-         *  Figure 4(b)), split into its four quadrants.
-         * \details The rectangle is (1-s) delta_e (+) s nu_f, where nu_f
-         *  is the segment [c_ta, c_tb]. Its corners are the vertices
-         *  (v_i, t_j) of the mixed complex. Edge anchors are
-         *  (v_i, sv(f)) on the two sides parallel to the symmetry axis
-         *  of the hyperboloid of e and (sd(e), t_j) on the two sides
-         *  parallel to its symmetry plane. The facet anchor is
-         *  (sd(e), sv(f)). Quadrant (i,j) is the one that contains
-         *  corner (v_i, t_j), it is triangulated with the two triangles
+         * \brief Triangulates a hyperbolic facet (1-s) delta_e (+) s S,
+         *  where S is an edge of the clipped power diagram lying in the
+         *  bisector plane of e (a rectangle, Figure 4(b)), split into its
+         *  four quadrants.
+         * \details Corners are (v_i, w_j) where w_j are the extremities
+         *  of S. Edge anchors are (v_i, S) on the two sides parallel to
+         *  the symmetry axis of the hyperboloid of e, and (sd(e), w_j) on
+         *  the two sides parallel to its symmetry plane. The facet anchor
+         *  is (sd(e), sv(S)). Quadrant (i,j) is the one that contains
+         *  corner (v_i, w_j), it is triangulated with the two triangles
          *  (F, Et_j, Ev_i) and (Et_j, P_ij, Ev_i) : on the edge Et_j-Ev_i,
          *  the distance to one symmetry set increases while the distance
          *  to the other one decreases (monotonicity condition).
          * \param[in] e the edge
-         * \param[in] f a triangle incident to e
-         * \param[in] ta , tb the two tetrahedra incident to f
+         * \param[in] S an edge of the clipped power facet nu_e inter B
          * \param[in] q the quadric of the mixed cell being processed
          * \param[out] quad quad[i][j] receives the two triangles of
-         *  quadrant (i,j), i = extremity of e, j = ta (0) or tb (1).
+         *  quadrant (i,j), i = extremity of e, j = extremity of S.
          */
         void hyperbolic_facet(
-            index_t e, index_t f, index_t ta, index_t tb, index_t q,
-            vector<index_t> quad[2][2]
+            index_t e, index_t S, index_t q, vector<index_t> quad[2][2]
         ) {
             index_t v[2] = { edge_v_[2*e], edge_v_[2*e+1] };
-            index_t t[2] = { ta, tb };
-            index_t F = get_vertex(SE(e), SF(f), q);
+            index_t w[2] = { vf_[S].verts[0], vf_[S].verts[1] };
+            index_t F = get_vertex(SE(e), S, q);
             index_t Ev[2];
             index_t Et[2];
             for(index_t i=0; i<2; ++i) {
-                Ev[i] = get_vertex(SV(v[i]), SF(f), q);
-                Et[i] = get_vertex(SE(e), ST(t[i]), q);
+                Ev[i] = get_vertex(SV(v[i]), S, q);
+                Et[i] = get_vertex(SE(e), w[i], q);
             }
             for(index_t i=0; i<2; ++i) {
                 for(index_t j=0; j<2; ++j) {
-                    index_t P = get_vertex(SV(v[i]), ST(t[j]), q);
+                    index_t P = get_vertex(SV(v[i]), w[j], q);
                     vector<index_t>& Q = quad[i][j];
                     Q.resize(0);
                     Q.push_back(F);     Q.push_back(Et[j]); Q.push_back(Ev[i]);
@@ -1120,27 +2081,31 @@ namespace {
 
         /**
          * \brief Triangulates the mixed cell mu_v of an atom v
-         *  (type 0, shrunk power cell, contains a spherical patch).
-         * \details The facets are the polygons mu_{v,e} for the edges e
-         *  incident to v. They are circular facets. All the tetrahedra
-         *  are joined with the anchor point of the cell (the point of the
+         *  (type 0, shrunk clipped power cell, contains a spherical patch).
+         * \details The facets are the polygons (1-s) p_v + s F for the
+         *  facets F of the clipped power cell (power facets and box
+         *  facets). They are circular facets. All the tetrahedra are
+         *  joined with the anchor point of the cell (the point of the
          *  cell closest to the center of the sphere).
          */
         void process_vertex_cell(index_t v) {
+            index_t C = vf_vertex_[v];
+            if(C == NO_INDEX) {
+                return;
+            }
             index_t q = quadrics_.size();
             quadrics_.push_back(vertex_quadric(v));
-            index_t apex = get_vertex(SV(v), SV(v), q);
+            index_t apex = get_vertex(SV(v), C, q);
             vector<index_t> cycle;
             vector<index_t> tris;
-            for(index_t k=v_edges_ptr_[v]; k<v_edges_ptr_[v+1]; ++k) {
-                index_t e = v_edges_[k];
-                index_t F = get_vertex(SV(v), SE(e), q);
+            for(index_t Fi : vf_[C].subs) {
+                index_t F = get_vertex(SV(v), Fi, q);
                 cycle.resize(0);
                 tris.resize(0);
-                index_t m = edge_nb_tets(e);
-                for(index_t j=0; j<m; ++j) {
-                    cycle.push_back(get_vertex(SV(v), ST(edge_tet(e,j)), q));
-                    cycle.push_back(get_vertex(SV(v), SF(edge_tri(e,j)), q));
+                const VFace& P = vf_[Fi];
+                for(index_t k=0; k<P.verts.size(); ++k) {
+                    cycle.push_back(get_vertex(SV(v), P.verts[k], q));
+                    cycle.push_back(get_vertex(SV(v), P.subs[k], q));
                 }
                 fan(F, cycle, tris);
                 join(apex, tris, q);
@@ -1150,33 +2115,41 @@ namespace {
         /**
          * \brief Triangulates the mixed cell mu_e of an atom edge e
          *  (type 1, prism, contains an hyperboloid patch).
-         * \details The two bases mu_{v_i,e} are circular facets, the
-         *  side facets mu_{e,f} are hyperbolic facets. The prism is
-         *  split by the plane V through the anchor point of the cell,
-         *  parallel to its bases (the symmetry plane of the hyperboloid).
-         *  V contains the anchor points (sd(e),t) of the edges parallel to
-         *  the axis and the anchor points (sd(e),sv(f)) of the side facets,
-         *  and the new facet in V is a circular facet (a copy of nu_e).
-         *  Each half-prism is triangulated by joining the anchor point
-         *  of its base (v_i, sv(e)) with its boundary.
+         * \details The two bases (1-s) p_i + s (nu_e inter B) are circular
+         *  facets, the side facets (1-s) delta_e (+) s S, for the edges S
+         *  of the clipped polygon nu_e inter B (power edges or box
+         *  segments, all lying in the bisector plane) are hyperbolic
+         *  facets. The prism is split by the plane V through the anchor
+         *  point of the cell, parallel to its bases (the symmetry plane
+         *  of the hyperboloid). V contains the anchor points (sd(e),w) of
+         *  the edges parallel to the axis and the anchor points
+         *  (sd(e),sv(S)) of the side facets, and the new facet in V is a
+         *  circular facet (a copy of nu_e inter B). Each half-prism is
+         *  triangulated by joining the anchor point of its base
+         *  (v_i, sv(nu_e)) with its boundary.
          */
         void process_edge_cell(index_t e) {
+            index_t P = vf_edge_[e];
+            if(P == NO_INDEX) {
+                return;
+            }
             index_t q = quadrics_.size();
             quadrics_.push_back(edge_quadric(e));
             index_t v[2] = { edge_v_[2*e], edge_v_[2*e+1] };
-            index_t C = get_vertex(SE(e), SE(e), q);
+            index_t C = get_vertex(SE(e), P, q);
             index_t apex[2];
             for(index_t i=0; i<2; ++i) {
-                apex[i] = get_vertex(SV(v[i]), SE(e), q);
+                apex[i] = get_vertex(SV(v[i]), P, q);
             }
-            index_t m = edge_nb_tets(e);
+            const VFace& poly = vf_[P];
+            index_t m = poly.verts.size();
 
             // The splitting facet V (circular facet)
             vector<index_t> cycle;
             vector<index_t> tris;
             for(index_t k=0; k<m; ++k) {
-                cycle.push_back(get_vertex(SE(e), ST(edge_tet(e,k)), q));
-                cycle.push_back(get_vertex(SE(e), SF(edge_tri(e,k)), q));
+                cycle.push_back(get_vertex(SE(e), poly.verts[k], q));
+                cycle.push_back(get_vertex(SE(e), poly.subs[k], q));
             }
             fan(C, cycle, tris);
             join(apex[0], tris, q);
@@ -1186,10 +2159,7 @@ namespace {
             // into two halves by V.
             vector<index_t> quad[2][2];
             for(index_t k=0; k<m; ++k) {
-                index_t f = edge_tri(e,k);
-                index_t ta = edge_tet(e,k);
-                index_t tb = edge_tet(e,(k+1)%m);
-                hyperbolic_facet(e, f, ta, tb, q, quad);
+                hyperbolic_facet(e, poly.subs[k], q, quad);
                 for(index_t i=0; i<2; ++i) {
                     for(index_t j=0; j<2; ++j) {
                         join(apex[i], quad[i][j], q);
@@ -1204,32 +2174,39 @@ namespace {
         /**
          * \brief Triangulates the mixed cell mu_f of an atom triangle f
          *  (type 2, prism, contains an hyperboloid patch).
-         * \details The two bases mu_{f,t_j} are circular facets, the
-         *  three side facets mu_{e,f} are hyperbolic facets. The prism is
-         *  split by the plane V through the anchor point of the cell,
+         * \details The clipped power edge S = nu_f inter B is a segment
+         *  along the normal of f, with extremities w_0, w_1 (radical
+         *  centers or points on the box). The two bases
+         *  (1-s) delta_f + s w_j are circular facets, the three side
+         *  facets (1-s) delta_e (+) s S are hyperbolic facets. The prism
+         *  is split by the plane V through the anchor point of the cell,
          *  parallel to its bases (the plane of f, that is the symmetry
          *  plane of the hyperboloid). V contains the anchor points
-         *  (v_i, sv(f)) and (sd(e), sv(f)), the new facet in V is a
+         *  (v_i, sv(S)) and (sd(e), sv(S)), the new facet in V is a
          *  circular facet (a copy of delta_f). Each half-prism is
          *  triangulated by joining the anchor point of its base
-         *  (sd(f), t_j) with its boundary.
+         *  (sd(f), w_j) with its boundary.
          */
         void process_tri_cell(index_t f) {
+            index_t S = vf_tri_[f];
+            if(S == NO_INDEX) {
+                return;
+            }
             index_t q = quadrics_.size();
             quadrics_.push_back(tri_quadric(f));
-            index_t t[2] = { tri_t_[2*f], tri_t_[2*f+1] };
-            index_t C = get_vertex(SF(f), SF(f), q);
+            index_t w[2] = { vf_[S].verts[0], vf_[S].verts[1] };
+            index_t C = get_vertex(SF(f), S, q);
             index_t apex[2];
             for(index_t j=0; j<2; ++j) {
-                apex[j] = get_vertex(SF(f), ST(t[j]), q);
+                apex[j] = get_vertex(SF(f), w[j], q);
             }
 
             // The splitting facet V (circular facet)
             vector<index_t> cycle;
             vector<index_t> tris;
             for(index_t k=0; k<3; ++k) {
-                cycle.push_back(get_vertex(SV(tri_v_[3*f+k]), SF(f), q));
-                cycle.push_back(get_vertex(SE(tri_e_[3*f+k]), SF(f), q));
+                cycle.push_back(get_vertex(SV(tri_v_[3*f+k]), S, q));
+                cycle.push_back(get_vertex(SE(tri_e_[3*f+k]), S, q));
             }
             fan(C, cycle, tris);
             join(apex[0], tris, q);
@@ -1240,7 +2217,7 @@ namespace {
             vector<index_t> quad[2][2];
             for(index_t k=0; k<3; ++k) {
                 index_t e = tri_e_[3*f+k];
-                hyperbolic_facet(e, f, t[0], t[1], q, quad);
+                hyperbolic_facet(e, S, q, quad);
                 for(index_t i=0; i<2; ++i) {
                     for(index_t j=0; j<2; ++j) {
                         join(apex[j], quad[i][j], q);
@@ -1252,23 +2229,36 @@ namespace {
         /**
          * \brief Triangulates the mixed cell mu_t of an atom tetrahedron
          *  t (type 3, shrunk tetrahedron, contains a spherical patch).
-         * \details The four facets mu_{f,t} are circular facets. All
-         *  the tetrahedra are joined with the anchor point of the cell.
+         * \details Nothing to do if the radical center of t is outside B
+         *  (then the cell contains no part of the skin surface). The four
+         *  facets (1-s) delta_f + s c_t are circular facets. All the
+         *  tetrahedra are joined with the anchor point of the cell.
          */
         void process_tet_cell(index_t t) {
+            if(!tet_in_box_[t]) {
+                return;
+            }
+            FaceKey key = make_key(
+                tet_vertex(t,0), tet_vertex(t,1), tet_vertex(t,2), tet_vertex(t,3)
+            );
+            auto it = vf_map_.find(key);
+            if(it == vf_map_.end()) {
+                return; // isolated radical center (should not happen)
+            }
+            index_t W = it->second;
             index_t q = quadrics_.size();
             quadrics_.push_back(tet_quadric(t));
-            index_t apex = get_vertex(ST(t), ST(t), q);
+            index_t apex = get_vertex(ST(t), W, q);
             vector<index_t> cycle;
             vector<index_t> tris;
             for(index_t lf=0; lf<4; ++lf) {
                 index_t f = tri_of_tf_[4*t+lf];
-                index_t F = get_vertex(SF(f), ST(t), q);
+                index_t F = get_vertex(SF(f), W, q);
                 cycle.resize(0);
                 tris.resize(0);
                 for(index_t k=0; k<3; ++k) {
-                    cycle.push_back(get_vertex(SV(tri_v_[3*f+k]), ST(t), q));
-                    cycle.push_back(get_vertex(SE(tri_e_[3*f+k]), ST(t), q));
+                    cycle.push_back(get_vertex(SV(tri_v_[3*f+k]), W, q));
+                    cycle.push_back(get_vertex(SE(tri_e_[3*f+k]), W, q));
                 }
                 fan(F, cycle, tris);
                 join(apex, tris, q);
@@ -1280,6 +2270,13 @@ namespace {
          *  mixed cells incident to atoms only.
          */
         void build_tetrahedral_complex() {
+            cv_map_.clear();
+            cv_pos_.clear();
+            cv_val_.clear();
+            ct_v_.clear();
+            ct_q_.clear();
+            quadrics_.clear();
+            nb_degenerate_ = 0;
             // Type 0
             for(index_t v=0; v<nb_atoms_; ++v) {
                 process_vertex_cell(v);
@@ -1515,13 +2512,15 @@ namespace {
         vector<vec3>    ad_t_;
         vector<Simplex> sd_t_;
 
-        // Anchor points of the power cells
-        vector<vec3>    av_v_;
-        vector<Simplex> sv_v_;
-        vector<vec3>    av_e_;
-        vector<Simplex> sv_e_;
-        vector<vec3>    av_f_;
-        vector<Simplex> sv_f_;
+        // Bounding box and clipped power diagram
+        double box_min_[3];
+        double box_max_[3];
+        vector<bool> tet_in_box_;     // radical center inside the box
+        vector<VFace> vf_;            // faces of the clipped diagram
+        std::unordered_map<FaceKey, index_t, FaceKeyHash> vf_map_;
+        vector<index_t> vf_tri_;      // clipped power edge of each triangle
+        vector<index_t> vf_edge_;     // clipped power facet of each edge
+        vector<index_t> vf_vertex_;   // clipped power cell of each atom
 
         // Tetrahedral complex
         vector<Quadric> quadrics_;
