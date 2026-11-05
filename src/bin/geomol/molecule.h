@@ -66,6 +66,19 @@ namespace GEO {
 	    CELL_TYPE_NB=4
 	};
 
+	struct MeshingParameters {
+	    bool debug = false; // set to true to save all steps
+	    index_t subdivide_steps=3;
+	    enum PostProcessing {
+		NONE, REFINE, REMESH
+	    } post_processing = REMESH;
+	    struct {
+		index_t nb_vertices=0;
+		index_t normals_steps=0;
+		double anisotropy = 0.01;
+	    } remesh;
+	};
+
 	Molecule();
 	~Molecule();
 
@@ -139,9 +152,13 @@ namespace GEO {
 	    return cells_[type].visible();
 	}
 
-	index_t nb_drawn_triangles() const { return nb_triangles_; }
+	index_t nb_drawn_quadrics() const { return nb_quadrics_; }
 
 	/**************************************************************/
+
+	MeshingParameters& meshing_parameters() {
+	    return meshing_parameters_;
+	}
 
 	/**************************************************************/
 
@@ -574,7 +591,9 @@ namespace GEO {
 	vector<double> atom_weight_;
 	vector<vec3> tet_dual_; // the radical point dual to each tet
 	SmartPointer<PowerDiagram> diagram_;
-	mutable index_t nb_triangles_; // number of drawn triangles
+	mutable index_t nb_quadrics_; // number of drawn quadrics
+
+	MeshingParameters meshing_parameters_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;

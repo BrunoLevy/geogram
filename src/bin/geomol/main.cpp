@@ -134,6 +134,9 @@ namespace {
 		    "For debugging an optimization: "
 		    "early discard empty cells (on by default)"
 		);
+		ImGui::Checkbox(
+		    "mesher", &molecule_.meshing_parameters().debug
+		);
 		if(ImGui::TreeNode("Danger zone!!!")) {
 		    ImGui::Checkbox("full imps", &molecule_.full_imposters());
 		    ImGui::SetItemTooltip(
@@ -183,7 +186,42 @@ namespace {
 			"##mesh_width", &molecule_.mesh_width(), 1, 10
 		    );
 		}
-		ImGui::Text("triangles: %u",molecule_.nb_drawn_triangles());
+		ImGui::Text("quadrics: %u",molecule_.nb_drawn_quadrics());
+	    }
+	    if(ImGui::TreeNode("Meshing")) {
+		auto& params = molecule_.meshing_parameters();
+		ImGui::Text("Subdivisions");
+		ImGui::SliderInt(
+		    "##sbd", (int*)&params.subdivide_steps, 0, 4
+		);
+		ImGui::Text("Post-processing");
+		ImGui::Combo(
+		    "##post", (int*)&params.post_processing,
+		    "none\0refine\0remesh\0\0"
+		);
+		switch(params.post_processing) {
+		case Molecule::MeshingParameters::NONE:
+		    break;
+		case Molecule::MeshingParameters::REFINE:
+		    break;
+		case Molecule::MeshingParameters::REMESH:
+		    ImGui::Text("nb vertices");
+		    ImGui::InputInt(
+			"##Nv",(int*)&params.remesh.nb_vertices
+		    );
+		    /*
+		    ImGui::Text("normals smoothing");
+		    ImGui::SliderInt(
+			"##Sm", (int*)&params.remesh.normals_steps, 0, 4
+		    );
+		    */
+		    ImGui::Text("anisotropy");
+		    ImGui::InputDouble(
+			"##ani",&params.remesh.anisotropy
+		    );
+		    break;
+		};
+		ImGui::TreePop();
 	    }
 	    if(animate()) {
 		double fps = double(frame_) / (Stopwatch::now() - start_time_);

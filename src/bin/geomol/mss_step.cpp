@@ -65,7 +65,8 @@ namespace {
         // faces[i]: CCW (about outward n_i) vertex ring of plane i
     };
 
-    // My version, based on ConvexCell
+    // [Bruno] Replaced Claude's version with mine, based on ConvexCell
+    // (more robust)
     Polytope build_polytope(const std::vector<HalfSpace>& H) {
 	ConvexCell C;
 	C.use_exact_predicates(true);

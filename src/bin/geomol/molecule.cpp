@@ -162,23 +162,59 @@ namespace GEO {
 	    );
 	    Mesh coarse, fine, quality;
 	    mesher.compute(coarse);
-	    mesher.subdivide(fine,3);
 
-	    // mesh_save(coarse, "coarse.obj");
-	    // mesh_save(fine, "fine.obj");
+	    const MeshingParameters& params = meshing_parameters_;
 
-	    compute_normals(fine);
-	    // simple_Laplacian_smooth(fine,3,true); // not good
-	    set_anisotropy(fine, 0.01);
-	    remesh_smooth(fine, quality, fine.vertices.nb()/10);
+	    if(params.debug) {
+		mesh_save(coarse, "MSS_coarse.obj");
+	    }
 
-	    /* // alternative Delaunay-refinement based method as in article
-	    mesher.refine(quality);
-	    index_t bad = mesher.check_isotopy();
-	    Logger::out("Mesher") << bad << " bad" << std::endl;
-	    */
+	    if(params.subdivide_steps == 0) {
+		fine.copy(coarse);
+	    } else {
+		// there is room for improvement in this Claude-generated
+		// function that is slow
+		// (uses a std::ordered_map to keep track of per-edge
+		// subdivided vertices)
+		mesher.subdivide(fine,params.subdivide_steps);
+		if(params.debug) {
+		    mesh_save(fine, "MSS_fine.obj");
+		}
+	    }
 
-	    return mesh_save(quality, filename);
+	    bool OK = true;
+	    switch(params.post_processing) {
+	    case Molecule::MeshingParameters::NONE: {
+		OK = mesh_save(fine, filename);
+	    } break;
+	    case Molecule::MeshingParameters::REFINE: {
+		// alternative Delaunay-refinement based method as in article
+		mesher.refine(quality);
+		index_t bad = mesher.check_isotopy();
+		Logger::out("Mesher") << bad << " bad elements" << std::endl;
+		OK = mesh_save(quality, filename);
+	    } break;
+	    case Molecule::MeshingParameters::REMESH: {
+                // here we could use normals to actual surface
+		compute_normals(fine);
+		if(params.remesh.normals_steps != 0) {
+		    simple_Laplacian_smooth(
+			fine,params.remesh.normals_steps,true
+		    );
+		}
+		set_anisotropy(fine, params.remesh.anisotropy);
+		index_t nb_vertices = params.remesh.nb_vertices;
+		if(nb_vertices == 0) {
+		    nb_vertices = fine.vertices.nb()/10;
+		}
+		remesh_smooth(fine, quality, nb_vertices);
+		OK = mesh_save(quality, filename);
+	    } break;
+	    }
+
+	    Logger::out("Mesher") << "done." << std::endl;
+
+	    return OK;
 	}
 	return false;
     }
@@ -827,7 +863,7 @@ namespace GEO {
 
 	// All the rest of this function is for drawing
 	// the molecular skin surface
-	nb_triangles_ = 0;
+	nb_quadrics_ = 0;
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
@@ -1053,7 +1089,7 @@ namespace GEO {
 	    glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(nb_cells()));
 	    glBindVertexArray(0);
 	    glUseProgram(0);
-	    molecule_.nb_triangles_ += 2*nb_cells();
+	    molecule_.nb_quadrics_ += nb_cells();
 	    return;
 	}
 
@@ -1092,7 +1128,6 @@ namespace GEO {
 		    glupVertex3fv(v1.data());
 		    glupVertex3fv(v2.data());
 		    glupVertex3fv(v.data());
-		    ++molecule_.nb_triangles_;
 		    v2 = v;
 		}
 	    }
