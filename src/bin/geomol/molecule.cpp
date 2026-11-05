@@ -139,82 +139,22 @@ namespace GEO {
 	return load_geogram(filename);
     }
 
-    bool Molecule::save(const std::string& filename) const {
+    bool Molecule::save(const std::string& filename) {
 	if(
 	    FileSystem::extension(filename) == "stp" ||
 	    FileSystem::extension(filename) == "step"
 	) {
 	    double threshold = 1e-5;
-	    return MSS_Claude::save_molecule_STEP(
-		const_cast<Molecule&>(*this),filename,threshold
-	    );
+	    return MSS_Claude::save_molecule_STEP(*this, filename, threshold);
 	}
 
 	// At this point we suppose it is a mesh file format,
 	// so we mesh the MSS and save the mesh.
 	{
-	    SkinSurfaceMesher mesher(
-		*diagram_,
-		atom_pos_[0].data(),
-		atom_weight_.data(),
-		nb_atoms(),
-		shrink_factor_
-	    );
-	    Mesh coarse, fine, quality;
-	    mesher.compute(coarse);
-
-	    const MeshingParameters& params = meshing_parameters_;
-
-	    if(params.debug) {
-		mesh_save(coarse, "MSS_coarse.obj");
+	    if(mesh_.vertices.nb() == 0) {
+		generate_mesh();
 	    }
-
-	    if(params.subdivide_steps == 0) {
-		fine.copy(coarse);
-	    } else {
-		// there is room for improvement in this Claude-generated
-		// function that is slow
-		// (uses a std::ordered_map to keep track of per-edge
-		// subdivided vertices)
-		mesher.subdivide(fine,params.subdivide_steps);
-		if(params.debug) {
-		    mesh_save(fine, "MSS_fine.obj");
-		}
-	    }
-
-	    bool OK = true;
-	    switch(params.post_processing) {
-	    case Molecule::MeshingParameters::NONE: {
-		OK = mesh_save(fine, filename);
-	    } break;
-	    case Molecule::MeshingParameters::REFINE: {
-		// alternative Delaunay-refinement based method as in article
-		mesher.refine(quality);
-		index_t bad = mesher.check_isotopy();
-		Logger::out("Mesher") << bad << " bad elements" << std::endl;
-		OK = mesh_save(quality, filename);
-	    } break;
-	    case Molecule::MeshingParameters::REMESH: {
-                // here we could use normals to actual surface
-		compute_normals(fine);
-		if(params.remesh.normals_steps != 0) {
-		    simple_Laplacian_smooth(
-			fine,params.remesh.normals_steps,true
-		    );
-		}
-		set_anisotropy(fine, params.remesh.anisotropy);
-		index_t nb_vertices = params.remesh.nb_vertices;
-		if(nb_vertices == 0) {
-		    nb_vertices = fine.vertices.nb()/10;
-		}
-		remesh_smooth(fine, quality, nb_vertices);
-		OK = mesh_save(quality, filename);
-	    } break;
-	    }
-
-	    Logger::out("Mesher") << "done." << std::endl;
-
-	    return OK;
+	    return mesh_save(mesh_, filename);
 	}
 	return false;
     }
@@ -341,6 +281,8 @@ namespace GEO {
 	    Stopwatch W("cells",verbose_);
 	    update_cells();
 	}
+	mesh_.clear();
+	mesh_gfx_.set_mesh(&mesh_);
     }
 
     bool Molecule::close_cells() {
@@ -859,6 +801,11 @@ namespace GEO {
 	    return;
 	}
 
+	if(draw_mode_ == DRAW_MESH) {
+	    mesh_gfx_.draw_surface();
+	    return;
+	}
+
 	create_shaders_if_needed();
 
 	// All the rest of this function is for drawing
@@ -887,7 +834,7 @@ namespace GEO {
 	);
 
 	bool clip=glupIsEnabled(GLUP_CLIPPING) || glupIsEnabled(GLUP_DRAW_MESH);
-	clip = clip && draw_mss_;
+	clip = clip && (draw_mode_ == DRAW_MSS);
 
 	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
 	GLSL::set_program_uniform_by_name(
@@ -895,7 +842,7 @@ namespace GEO {
 	);
 	cells_[CELL_TYPE_S0].draw(mode);
 
-	if(draw_mss_) {
+	if(draw_mode_ == DRAW_MSS) {
 	    GLSL::set_program_uniform_by_name(
 		H_program_, "max_clip_planes", clip ? 1024 : 2
 	    );
@@ -916,6 +863,65 @@ namespace GEO {
 
 	glDisable(GL_CULL_FACE);
 	glupDisable(GLUP_DRAW_MESH);
+    }
+
+    /************************************************************************/
+
+    void Molecule::generate_mesh() {
+	SkinSurfaceMesher mesher(
+	    *diagram_,
+	    atom_pos_[0].data(),
+	    atom_weight_.data(),
+	    nb_atoms(),
+	    shrink_factor_
+	);
+	Mesh coarse;
+	Mesh fine;
+	Mesh quality;
+	mesher.compute(coarse);
+
+	const MeshingParameters& params = meshing_parameters_;
+
+	if(params.subdivide_steps == 0) {
+	    fine.copy(coarse);
+	} else {
+	    // there is room for improvement in this Claude-generated
+	    // function that is slow
+	    // (uses a std::ordered_map to keep track of per-edge
+	    // subdivided vertices)
+	    mesher.subdivide(fine,params.subdivide_steps);
+	}
+
+	switch(params.post_processing) {
+	case Molecule::MeshingParameters::NONE: {
+	    mesh_.copy(fine);
+	} break;
+	case Molecule::MeshingParameters::REFINE: {
+	    // alternative Delaunay-refinement based method as in article
+	    mesher.refine(quality);
+	    index_t bad = mesher.check_isotopy();
+	    Logger::out("Mesher") << bad << " bad elements" << std::endl;
+	    mesh_.copy(quality);
+	} break;
+	case Molecule::MeshingParameters::REMESH: {
+	    // here we could use normals to actual surface
+	    compute_normals(fine);
+	    if(params.remesh.normals_steps != 0) {
+		simple_Laplacian_smooth(
+		    fine,params.remesh.normals_steps,true
+		);
+	    }
+	    set_anisotropy(fine, params.remesh.anisotropy);
+	    index_t nb_vertices = params.remesh.nb_vertices;
+	    if(nb_vertices == 0) {
+		nb_vertices = fine.vertices.nb()/10;
+	    }
+	    remesh_smooth(fine, quality, nb_vertices);
+	    mesh_.copy(quality);
+	} break;
+	}
+	Logger::out("Mesher") << "done." << std::endl;
+	mesh_gfx_.set_mesh(&mesh_);
     }
 
     /************************************************************************/

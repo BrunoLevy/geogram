@@ -137,6 +137,9 @@ namespace {
 		ImGui::Checkbox(
 		    "mesher", &molecule_.meshing_parameters().debug
 		);
+		ImGui::SetItemTooltip(
+		    "save intermediary meshing results"
+		);
 		if(ImGui::TreeNode("Danger zone!!!")) {
 		    ImGui::Checkbox("full imps", &molecule_.full_imposters());
 		    ImGui::SetItemTooltip(
@@ -163,8 +166,10 @@ namespace {
 		    "constant color", molecule_.constant_color().data()
 		);
 	    }
-	    ImGui::Checkbox("skin surface", &molecule_.draw_mss());
-	    if(molecule_.draw_mss()) {
+	    ImGui::Combo(
+		"mode", (int*)&molecule_.draw_mode(), "atoms\0MSS\0mesh\0\0"
+	    );
+	    if(molecule_.draw_mode() == Molecule::DRAW_MSS) {
 		float sf = float(molecule_.shrink_factor());
 		if(ImGui::SliderFloat("shrink", &sf, 0.05f, 0.95f, "%.2f")) {
 		    molecule_.shrink_factor() = double(sf);
@@ -189,10 +194,14 @@ namespace {
 		ImGui::Text("quadrics: %u",molecule_.nb_drawn_quadrics());
 	    }
 	    if(ImGui::TreeNode("Meshing")) {
+		if(ImGui::Button("Generate mesh")) {
+		    molecule_.generate_mesh();
+		    molecule_.draw_mode() = Molecule::DRAW_MESH;
+		}
 		auto& params = molecule_.meshing_parameters();
 		ImGui::Text("Subdivisions");
 		ImGui::SliderInt(
-		    "##sbd", (int*)&params.subdivide_steps, 0, 4
+		    "##sbd", (int*)&params.subdivide_steps, 0, 5
 		);
 		ImGui::Text("Post-processing");
 		ImGui::Combo(

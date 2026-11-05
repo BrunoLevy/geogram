@@ -81,6 +81,11 @@ namespace GLUP {
          */
         void setup() override;
 
+        /**
+         * \copydoc Context::primitive_supports_array_mode()
+         */
+	bool primitive_supports_array_mode(GLUPprimitive prim) const override;
+
     protected:
         /**
          * \copydoc Context::setup_GLUP_POINTS()
@@ -161,6 +166,11 @@ namespace GLUP {
          * \copydoc Context::setup()
          */
         void setup() override;
+
+        /**
+         * \copydoc Context::primitive_supports_array_mode()
+         */
+	bool primitive_supports_array_mode(GLUPprimitive prim) const override;
 
     protected:
         /**

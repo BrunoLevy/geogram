@@ -44,6 +44,7 @@
 #include <geogram/basic/range.h>
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
+#include <geogram_gfx/mesh/mesh_gfx.h>
 #include "power_diagram.h"
 #include "TBO.h"
 
@@ -55,6 +56,10 @@ namespace GEO {
      */
     class Molecule {
     public:
+
+	enum DrawMode {
+	    DRAW_ATOMS, DRAW_MSS, DRAW_MESH
+	};
 
 	enum AtomColoring {
 	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM,
@@ -88,7 +93,7 @@ namespace GEO {
 	 */
 	bool load(const std::string& filename);
 
-	bool save(const std::string& filename) const;
+	bool save(const std::string& filename);
 
 	void initialize_demo();
 
@@ -134,7 +139,7 @@ namespace GEO {
 	int&          mesh_width() { return mesh_width_; }
 
 	/** \brief draw the molecular skin surface */
-	bool&         draw_mss()       { return draw_mss_; }
+	DrawMode&     draw_mode()  { return draw_mode_; }
 
 	/** \brief displays some statistics when updaring */
 	bool&         verbose()        { return verbose_; }
@@ -153,6 +158,12 @@ namespace GEO {
 	}
 
 	index_t nb_drawn_quadrics() const { return nb_quadrics_; }
+
+	/**
+	 * \brief Converts the Molecular Skin Surface into a Mesh
+	 * \details Uses the parameters in meshing_parameters()
+	 */
+	void generate_mesh();
 
 	/**************************************************************/
 
@@ -593,6 +604,8 @@ namespace GEO {
 	SmartPointer<PowerDiagram> diagram_;
 	mutable index_t nb_quadrics_; // number of drawn quadrics
 
+	Mesh mesh_;
+	MeshGfx mesh_gfx_;
 	MeshingParameters meshing_parameters_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
@@ -603,7 +616,7 @@ namespace GEO {
 	int  mesh_width_ = 1;
 	bool draw_mesh_ = false;
 
-	bool draw_mss_ = false;
+	DrawMode draw_mode_ = DRAW_ATOMS;
 	bool verbose_ = false;
 
 	bool show_imposters_ = false;

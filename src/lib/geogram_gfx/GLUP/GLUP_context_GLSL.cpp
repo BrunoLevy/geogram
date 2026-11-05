@@ -58,6 +58,15 @@ namespace GLUP {
         Context::setup();
     }
 
+    bool Context_GLSL140::primitive_supports_array_mode(
+	GLUPprimitive prim
+    ) const {
+	if(prim == GLUP_TRIANGLES) { // because of mesh!
+	    return false;
+	}
+	return Context::primitive_supports_array_mode(prim);
+    }
+
     const char* Context_GLSL140::profile_name() const {
         return "GLUP140";
     }
@@ -235,6 +244,12 @@ namespace GLUP {
         marching_prism_.create_UBO();
         marching_pyramid_.create_UBO();
         marching_connector_.create_UBO();
+    }
+
+    bool Context_GLSL150::primitive_supports_array_mode(
+	GLUPprimitive prim
+    ) const {
+	return Context::primitive_supports_array_mode(prim);
     }
 
     const char* Context_GLSL150::profile_name() const {
