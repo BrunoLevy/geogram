@@ -212,6 +212,9 @@ namespace {
 		    break;
 		case Molecule::MeshingParameters::REMESH:
 		    ImGui::Text("nb vertices");
+		    ImGui::SetItemTooltip(
+			"Desired number of vertices, 0 for auto."
+		    );
 		    ImGui::InputInt(
 			"##Nv",(int*)&params.remesh.nb_vertices
 		    );
