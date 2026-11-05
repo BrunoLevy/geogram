@@ -137,9 +137,6 @@ namespace {
 		ImGui::Checkbox(
 		    "mesher", &molecule_.meshing_parameters().debug
 		);
-		ImGui::SetItemTooltip(
-		    "save intermediary meshing results"
-		);
 		if(ImGui::TreeNode("Danger zone!!!")) {
 		    ImGui::Checkbox("full imps", &molecule_.full_imposters());
 		    ImGui::SetItemTooltip(
@@ -181,7 +178,7 @@ namespace {
 		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
-		ImGui::Checkbox("mesh",&molecule_.draw_mesh());
+		ImGui::Checkbox("patches",&molecule_.draw_mesh());
 		if(molecule_.draw_mesh()) {
 		    ImGui::ColorEdit3WithPalette(
 			"##mesh_color", molecule_.mesh_color().data()
@@ -218,16 +215,16 @@ namespace {
 		    ImGui::InputInt(
 			"##Nv",(int*)&params.remesh.nb_vertices
 		    );
-		    /*
-		    ImGui::Text("normals smoothing");
-		    ImGui::SliderInt(
-			"##Sm", (int*)&params.remesh.normals_steps, 0, 4
-		    );
-		    */
-		    ImGui::Text("anisotropy");
-		    ImGui::InputDouble(
-			"##ani",&params.remesh.anisotropy
-		    );
+		    if(molecule_.meshing_parameters().debug) {
+			ImGui::Text("normals smoothing");
+			ImGui::SliderInt(
+			    "##Sm", (int*)&params.remesh.normals_steps, 0, 4
+			);
+			ImGui::Text("anisotropy");
+			ImGui::InputDouble(
+			    "##ani",&params.remesh.anisotropy
+			);
+		    }
 		    break;
 		};
 		ImGui::TreePop();
