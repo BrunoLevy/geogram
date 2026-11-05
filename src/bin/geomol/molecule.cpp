@@ -283,6 +283,9 @@ namespace GEO {
 	}
 	mesh_.clear();
 	mesh_gfx_.set_mesh(&mesh_);
+	if(draw_mode_ == DRAW_MESH) {
+	    draw_mode_ = DRAW_MSS;
+	}
     }
 
     bool Molecule::close_cells() {
