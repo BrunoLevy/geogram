@@ -223,7 +223,9 @@ namespace GEO {
          * \param[out] skin receives the refined mesh
          * \pre compute() was called and succeeded
          */
-        bool refine(Mesh& skin, const SkinRefineParams& params = SkinRefineParams());
+        bool refine(
+	    Mesh& skin, const SkinRefineParams& params = SkinRefineParams()
+	);
 
         /**
          * \brief Checks the isotopy condition of Lemma 23 on all the

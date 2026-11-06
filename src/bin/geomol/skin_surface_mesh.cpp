@@ -501,6 +501,15 @@ namespace GEO {
 
     private:
 
+	// [Bruno Levy] for multi-threading repair_transversality()
+	struct Context {
+	    vector<index_t> tmp_cand_;
+	    vector<vec3> tmp_clip_;
+	    vector<vec3> tmp_poly_;
+	    vector<index_t> tet_mark_;
+	    index_t tet_stamp_ = 0;
+	};
+
         /*****************************************************************/
         /** Access to the Delaunay triangulation and to the points       */
         /*****************************************************************/
@@ -3190,8 +3199,12 @@ namespace GEO {
          */
         void clip_triangle_by_tet(
             index_t t, const vec3& p0, const vec3& p1, const vec3& p2,
-            vector<vec3>& poly
-        ) {
+            vector<vec3>& poly, Context* context = nullptr
+        ) const {
+	    if(context == nullptr) {
+		context = &context_;
+	    }
+	    auto& tmp_poly_ = context->tmp_poly_;
             poly.resize(0);
             poly.push_back(p0);
             poly.push_back(p1);
@@ -3233,8 +3246,13 @@ namespace GEO {
          */
         void candidate_tets(
             const index_t* verts, index_t nv, bool two_rings,
-            vector<index_t>& tets
-        ) {
+            vector<index_t>& tets, Context* context = nullptr
+        ) const {
+	    if(context == nullptr) {
+		context = &context_;
+	    }
+	    auto& tet_mark_ = context->tet_mark_;
+	    auto& tet_stamp_ = context->tet_stamp_;
             tets.resize(0);
             ++tet_stamp_;
             if(tet_mark_.size() != nb_complex_tets()) {
@@ -3275,8 +3293,13 @@ namespace GEO {
          *  point, among the candidates of some mesh vertices.
          */
         index_t find_tet_containing(
-            const index_t* verts, index_t nv, const vec3& x, index_t hint
+            const index_t* verts, index_t nv, const vec3& x, index_t hint,
+	    Context* context = nullptr
         ) {
+	    if(context == nullptr) {
+		context = &context_;
+	    }
+	    auto& tmp_cand_ = context->tmp_cand_;
             if(hint != NO_INDEX && ct_contains_point(hint, x)) {
                 return hint;
             }
@@ -3320,8 +3343,14 @@ namespace GEO {
          *  part of the triangle
          */
         bool isotopy_test(
-            index_t v0, index_t v1, index_t v2, index_t& carrier
-        ) {
+            index_t v0, index_t v1, index_t v2, index_t& carrier,
+	    Context* context = nullptr
+        ) const {
+	    if(context == nullptr) {
+		context = &context_;
+	    }
+	    auto& tmp_cand_ = context->tmp_cand_;
+	    auto& tmp_clip_ = context->tmp_clip_;
             const vec3& p0 = rv_[v0].p;
             const vec3& p1 = rv_[v1].p;
             const vec3& p2 = rv_[v2].p;
@@ -3724,20 +3753,6 @@ namespace GEO {
 	    // If not ok we pretend the edge exists to be conservative
 	    // (but normally this should not happen).
 	    return !ok || result;
-
-	    /*
-            if(!triangles_around(p, t_start, tmp_tris_)) {
-                return true; // be conservative
-            }
-            for(index_t tp : tmp_tris_) {
-                for(index_t i=0; i<3; ++i) {
-                    if(rt_vertex(tp,i) == q) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-	    */
         }
 
         /*****************************************************************/
@@ -4737,13 +4752,15 @@ namespace GEO {
         vector<index_t> rt_carrier_;  // complex tet containing the triangle
         vector<index_t> cv_tets_ptr_; // complex tets incident to each
         vector<index_t> cv_tets_;     //   complex vertex (CRS)
-        vector<index_t> tmp_tets_;
-        vector<index_t> tmp_tris_;
-        vector<index_t> tmp_cand_;
-        vector<vec3> tmp_clip_;
-        vector<vec3> tmp_poly_;
-        vector<index_t> tet_mark_;
-        index_t tet_stamp_ = 0;
+	mutable Context context_;
+
+	/*
+        mutable vector<index_t> tmp_cand_;
+        mutable vector<vec3> tmp_clip_;
+        mutable vector<vec3> tmp_poly_;
+        mutable vector<index_t> tet_mark_;
+        mutable index_t tet_stamp_ = 0;
+	*/
         index_t nb_flips_wanted_ = 0, nb_flips_refused_ = 0, nb_flips_done_ = 0;
         index_t nb_locate_failures_ = 0, nb_project_failures_ = 0, nb_insert_failures_ = 0;
         SkinRefineParams refine_params_;
