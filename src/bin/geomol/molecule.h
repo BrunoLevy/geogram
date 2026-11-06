@@ -73,7 +73,7 @@ namespace GEO {
 
 	struct MeshingParameters {
 	    bool debug = false; // set to true to save all steps
-	    index_t subdivide_steps=3;
+	    index_t subdivide_steps=0;
 	    enum PostProcessing {
 		NONE, REFINE, REMESH
 	    } post_processing = REMESH;

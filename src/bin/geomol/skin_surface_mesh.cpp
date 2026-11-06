@@ -467,7 +467,7 @@ namespace GEO {
             if(rt_v_.size() == 0) {
                 return false;
             }
-            Stopwatch W("skin:subdivide", verbose_);
+            Stopwatch W("skin:subd", verbose_);
             if(!subdivide(n)) {
                 return false;
             }
@@ -3502,7 +3502,6 @@ namespace GEO {
 		    geo_assert(four == 4);
 		    move_to_surface_jobs.push_back({U,c,rid});
 		    return true;
-		    // return move_to_surface(U,four,c,rv_[rid].p);
 	    };
 
             auto edge_vertices = [&](index_t u, index_t v) -> index_t {

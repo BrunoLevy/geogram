@@ -197,8 +197,11 @@ namespace {
 		}
 		auto& params = molecule_.meshing_parameters();
 		ImGui::Text("Subdivisions");
+		    ImGui::SetItemTooltip(
+			"Number of subdivisions, 0 for auto."
+		    );
 		ImGui::SliderInt(
-		    "##sbd", (int*)&params.subdivide_steps, 1, 5
+		    "##sbd", (int*)&params.subdivide_steps, 0, 5
 		);
 		ImGui::Text("Post-processing");
 		ImGui::Combo(

@@ -871,6 +871,7 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::generate_mesh() {
+	Stopwatch W("Meshing");
 	SkinSurfaceMesher mesher(
 	    *diagram_,
 	    atom_pos_[0].data(),
@@ -885,14 +886,24 @@ namespace GEO {
 
 	const MeshingParameters& params = meshing_parameters_;
 
-	if(params.subdivide_steps == 0) {
+	if(params.subdivide_steps == 1) {
 	    fine.copy(coarse);
 	} else {
+	    index_t subdivide_steps = params.subdivide_steps;
+	    if(subdivide_steps == 0) {
+		if(nb_atoms() > 100000) {
+		    subdivide_steps = 1;
+		} else if(nb_atoms() > 10000) {
+		    subdivide_steps = 2;
+		} else {
+		    subdivide_steps = 3;
+		}
+	    }
 	    // there is room for improvement in this Claude-generated
 	    // function that is slow
 	    // (uses a std::ordered_map to keep track of per-edge
 	    // subdivided vertices)
-	    mesher.subdivide(fine,params.subdivide_steps);
+	    mesher.subdivide(fine,subdivide_steps);
 	}
 
 	switch(params.post_processing) {
