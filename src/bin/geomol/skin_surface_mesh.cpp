@@ -2749,8 +2749,11 @@ namespace GEO {
 	    auto triangle_edge_key =
 		[this](const TriangleEdge& TE)->Numeric::uint64 {
 		    geo_debug_assert(rt_alive_[TE.t]);
-                    index_t u = rt_vertex(TE.t,(TE.le + 1)%3);
-                    index_t v = rt_vertex(TE.t,(TE.le + 2)%3);
+		    // note: Claude did not follow triangular mesh
+		    // convention here! (it followed geogram plygonal
+		    // meshes convention I think)
+                    index_t u = rt_vertex(TE.t,(TE.le)%3);
+                    index_t v = rt_vertex(TE.t,(TE.le+1)%3);
 		    return edge_key(u,v);
 		};
 
@@ -2791,10 +2794,8 @@ namespace GEO {
 		}
 		b=e;
 	    }
-
-
-	    // Claude generated version, kept for reference
 	    /*
+	    // Claude generated version, kept for reference
             std::unordered_map<Numeric::uint64, index_t> edge_tri;
             for(index_t t=0; t<nb_rtriangles(); ++t) {
                 if(!rt_alive_[t]) {
