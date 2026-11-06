@@ -905,6 +905,7 @@ namespace GEO {
 	    index_t bad = mesher.check_isotopy();
 	    Logger::out("Mesher") << bad << " bad elements" << std::endl;
 	    mesh_.copy(quality);
+	    mesh_save(quality,"quality.obj");
 	} break;
 	case Molecule::MeshingParameters::REMESH: {
 	    // here we could use normals to actual surface

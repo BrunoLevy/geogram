@@ -3427,7 +3427,28 @@ namespace GEO {
          *  the transversality condition (see isotopy_test()).
          */
         index_t check_isotopy() {
-            index_t nb_bad = 0;
+	    Stopwatch W("check_isotopy");
+	    std::atomic<index_t> nb_bad = 0;
+	    parallel_for_slice(
+		0, nb_rtriangles(), [&](index_t b, index_t e) {
+		    Context C;
+		    for(index_t t=b; t<e; ++t) {
+			if(!rt_alive_[t]) {
+			    continue;
+			}
+			index_t carrier;
+			if(!isotopy_test(
+			       rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2),
+			       carrier, &C
+			   )
+			  ) {
+			    ++nb_bad;
+			}
+		    }
+		}
+	    );
+	    return nb_bad;
+	    /*
             for(index_t t=0; t<nb_rtriangles(); ++t) {
                 if(!rt_alive_[t]) {
                     continue;
@@ -3441,6 +3462,7 @@ namespace GEO {
                 }
             }
             return nb_bad;
+	    */
         }
 
         /*****************************************************************/
@@ -3463,7 +3485,7 @@ namespace GEO {
             // key: (u,v) with u<v, the n-1 vertices from u to v.
             std::unordered_map<Numeric::uint64, index_t> edge_pts;
             vector<index_t> epts;
-            index_t nb_failed = 0;
+	    index_t nb_failed = 0;
 
 	    // [Bruno Levy: let us parallelize this costly operation]
 	    struct MoveToSurfaceJob {
@@ -3604,15 +3626,16 @@ namespace GEO {
 
 	    {
 		Stopwatch W("move_to_surface");
+		std::atomic<index_t> nb_failed_moves = 0;
 		parallel_for(
 		    0, index_t(move_to_surface_jobs.size()), [&](index_t i) {
 			const MoveToSurfaceJob& J = move_to_surface_jobs[i];
 			geo_assert(J.rid != NO_INDEX);
 			if(!move_to_surface(J.U, 4, J.c, rv_[J.rid].p)) {
-			    ++nb_failed; // we should use an atomic var here
-			                 // but well...
+			    ++nb_failed_moves;
 			}
 		    });
+		nb_failed += nb_failed_moves;
 	    }
 
             rebuild_adjacency();
@@ -3621,7 +3644,23 @@ namespace GEO {
                     << nb_failed << " vertices could not be moved to the surface"
                     << std::endl;
             }
-            repair_transversality();
+            // Note: the result is not repaired here (this would alter the
+            // subdivision pattern). In tetrahedra with two inside and two
+            // outside vertices, a few sliver sub-triangles may not pass the
+            // local transversality certificate (Lemma 24 still applies as
+            // in the paper); refine() repairs them if needed.
+            if(verbose_) {
+                index_t nb_bad = check_isotopy();
+                if(nb_bad != 0) {
+                    Logger::out("skin")
+                        << nb_bad << " subdivided triangles do not pass the "
+                        << "transversality certificate (2-2 tetrahedra)"
+                        << std::endl;
+                } else {
+		    Logger::out("skin") << "transversality certificate OK"
+					<< std::endl;
+		}
+            }
             return true;
         }
 
@@ -3677,6 +3716,7 @@ namespace GEO {
 			    isotopy_test(v, p, q, cn)
 			) {
                             index_t nt[2];
+			    std::cerr << 'F' << std::flush;
                             flip_edge(t, k, ct, cn, nt);
                             repaired = true;
                         }
@@ -3695,6 +3735,7 @@ namespace GEO {
                         });
                         for(index_t i=0; i<3 && !repaired; ++i) {
                             if(try_collapse(t, order[i], around)) {
+				std::cerr << 'C' << std::flush;
                                 repaired = true;
                             } else {
                                 // try the other direction
@@ -3709,6 +3750,7 @@ namespace GEO {
 					kn != NO_INDEX &&
 					try_collapse(n, kn, around)
 				    ) {
+					std::cerr << 'C' << std::flush;
                                         repaired = true;
                                     }
                                 }
@@ -3725,6 +3767,7 @@ namespace GEO {
                     break;
                 }
             }
+
             if(verbose_ && (nb_repaired != 0 || nb_bad != 0)) {
                 Logger::out("skin")
                     << "Transversality repair: " << nb_repaired
