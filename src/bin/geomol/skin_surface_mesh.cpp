@@ -3721,6 +3721,8 @@ namespace GEO {
 		    }
 		}
 	    );
+	    // If not ok we pretend the edge exists to be conservative
+	    // (but normally this should not happen).
 	    return !ok || result;
 
 	    /*
