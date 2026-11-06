@@ -3199,7 +3199,7 @@ namespace GEO {
          */
         void clip_triangle_by_tet(
             index_t t, const vec3& p0, const vec3& p1, const vec3& p2,
-            vector<vec3>& poly, Context* context = nullptr
+            vector<vec3>& poly, Context* context
         ) const {
 	    if(context == nullptr) {
 		context = &context_;
@@ -3246,7 +3246,7 @@ namespace GEO {
          */
         void candidate_tets(
             const index_t* verts, index_t nv, bool two_rings,
-            vector<index_t>& tets, Context* context = nullptr
+            vector<index_t>& tets, Context* context
         ) const {
 	    if(context == nullptr) {
 		context = &context_;
@@ -3304,7 +3304,7 @@ namespace GEO {
                 return hint;
             }
             for(index_t pass=0; pass<2; ++pass) {
-                candidate_tets(verts, nv, pass==1, tmp_cand_);
+                candidate_tets(verts, nv, pass==1, tmp_cand_, context);
                 for(index_t t : tmp_cand_) {
                     if(ct_contains_point(t, x)) {
                         return t;
@@ -3344,7 +3344,7 @@ namespace GEO {
          */
         bool isotopy_test(
             index_t v0, index_t v1, index_t v2, index_t& carrier,
-	    Context* context = nullptr
+	    Context* context=nullptr
         ) const {
 	    if(context == nullptr) {
 		context = &context_;
@@ -3364,7 +3364,7 @@ namespace GEO {
             index_t verts[3] = {v0, v1, v2};
             carrier = NO_INDEX;
             for(index_t pass=0; pass<2; ++pass) {
-                candidate_tets(verts, 3, pass==1, tmp_cand_);
+                candidate_tets(verts, 3, pass==1, tmp_cand_, context);
                 double area = 0.0;
                 double best_area = 0.0;
                 for(index_t t : tmp_cand_) {
@@ -3383,7 +3383,7 @@ namespace GEO {
                     if(out) {
                         continue;
                     }
-                    clip_triangle_by_tet(t, p0, p1, p2, tmp_clip_);
+                    clip_triangle_by_tet(t, p0, p1, p2, tmp_clip_, context);
                     if(tmp_clip_.size() < 3) {
                         continue;
                     }
