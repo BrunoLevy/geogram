@@ -242,6 +242,7 @@ namespace GEO {
          *   last point to insert
          */
         void set_work(index_t b, index_t e) {
+            geo_debug_assert(work_size() == 0);
             work_begin_ = b;
             // e is one position past the last point index
             // to insert.
@@ -2741,6 +2742,7 @@ namespace GEO {
         thread0->run();
 
         index_t first_lvl = lvl;
+        index_t nb_sequential_points = 0;
 
         // Insert points in all BRIO levels
         for(; lvl<levels_.size()-1; ++lvl) {
@@ -2770,6 +2772,38 @@ namespace GEO {
                 b = e;
             }
             Process::run_threads(threads_);
+
+            // Drain overflowed work before the next level replaces its range.
+            // Outside Process::run_threads(), the memory pool can grow.
+            index_t nb_level_sequential_points = 0;
+            for(index_t t=0; t<threads_.size(); ++t) {
+                Delaunay3dThread* thread =
+                    static_cast<Delaunay3dThread*>(threads_[t].get());
+                index_t remaining = thread->work_size();
+                if(remaining == 0) {
+                    continue;
+                }
+                nb_level_sequential_points += remaining;
+                if(t != 0) {
+                    thread->initialize_from(thread0);
+                }
+                thread->run();
+                geo_debug_assert(thread->work_size() == 0);
+                if(t != 0) {
+                    thread0->initialize_from(thread);
+                }
+            }
+            nb_sequential_points += nb_level_sequential_points;
+
+            // All workers need the grown storage bound before parallel work
+            // resumes, including workers whose own ranges were completed.
+            if(nb_level_sequential_points != 0) {
+                for(index_t t=1; t<threads_.size(); ++t) {
+                    Delaunay3dThread* thread =
+                        static_cast<Delaunay3dThread*>(threads_[t].get());
+                    thread->initialize_from(thread0);
+                }
+            }
         }
 
 
@@ -2795,45 +2829,6 @@ namespace GEO {
                                 << tot_failed_locate << " restarted locate"
                                 << std::endl;
         }
-
-        // Run threads sequentialy, to insert missing points if
-        // memory overflow was encountered (in sequential mode,
-        // dynamic memory growing works)
-
-        index_t nb_sequential_points = 0;
-        for(index_t t=0; t<threads_.size(); ++t) {
-            Delaunay3dThread* t1 =
-                static_cast<Delaunay3dThread*>(threads_[t].get());
-
-            nb_sequential_points += t1->work_size();
-
-            if(t != 0) {
-                // We need to copy max_t_ from previous thread,
-                // since the memory pool may have grown.
-                Delaunay3dThread* t2 =
-                    static_cast<Delaunay3dThread*>(threads_[t-1].get());
-                t1->initialize_from(t2);
-            }
-            t1->run();
-        }
-
-        //  If some tetrahedra were created in sequential mode, then
-        // the maximum valid tetrahedron index was increased by all
-        // the threads in increasing number, so we copy it from the
-        // last thread into thread0 since we use thread0 afterwards
-        // to do the "compaction" afterwards.
-
-        if(nb_sequential_points != 0) {
-            Delaunay3dThread* t0 =
-                static_cast<Delaunay3dThread*>(threads_[0].get());
-            Delaunay3dThread* tn =
-                static_cast<Delaunay3dThread*>(
-                    threads_[threads_.size()-1].get()
-                );
-            t0->initialize_from(tn);
-        }
-
-
 
         if(benchmark_mode_) {
             if(nb_sequential_points != 0) {

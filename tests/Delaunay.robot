@@ -58,6 +58,9 @@ joint.off (periodic but not periodic)
     [Tags]    daily_valgrind
     Run Test Periodic But Not Periodic   joint.off
 
+PDEL BRIO vertex coverage
+    run command    test_delaunay_3d
+
 
 *** Keywords ***
 Run Test
