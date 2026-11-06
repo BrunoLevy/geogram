@@ -3344,7 +3344,10 @@ namespace GEO {
                     for(index_t lf=0; lf<4 && !out; ++lf) {
                         vec3 p, nn;
                         ct_facet_plane(t, lf, p, nn);
-                        if(dot(nn,p0-p) < 0.0 && dot(nn,p1-p) < 0.0 && dot(nn,p2-p) < 0.0) {
+                        if(
+			    dot(nn,p0-p) < 0.0 &&
+			    dot(nn,p1-p) < 0.0 &&
+			    dot(nn,p2-p) < 0.0) {
                             out = true;
                         }
                     }
@@ -3432,6 +3435,24 @@ namespace GEO {
             std::unordered_map<Numeric::uint64, index_t> edge_pts;
             vector<index_t> epts;
             index_t nb_failed = 0;
+
+	    // [Bruno Levy: let us parallelize this costly operation]
+	    struct MoveToSurfaceJob {
+		const index_t* U;
+		index_t c;
+		index_t rid; // r vertex id, index in rv_ array.
+	    };
+	    std::vector<MoveToSurfaceJob> move_to_surface_jobs;
+	    auto move_to_surface_later =
+		[&](
+		    const index_t* U, index_t four, index_t c, index_t rid
+		)->bool {
+		    geo_assert(four == 4);
+		    move_to_surface_jobs.push_back({U,c,rid});
+		    return true;
+		    // return move_to_surface(U,four,c,rv_[rid].p);
+	    };
+
             auto edge_vertices = [&](index_t u, index_t v) -> index_t {
                 Numeric::uint64 key = edge_key(u,v);
                 auto it = edge_pts.find(key);
@@ -3455,15 +3476,17 @@ namespace GEO {
                     }
                     hint = c;
                     const index_t* U = &(ct_v_[4*c]);
-                    if(!move_to_surface(U, 4, c, x)) {
+                    epts.push_back(new_rvertex(x, U, 4));
+		    if(!move_to_surface_later(U, 4, c, *epts.rbegin())) {
                         ++nb_failed;
                     }
-                    epts.push_back(new_rvertex(x, U, 4));
                 }
                 edge_pts[key] = first;
                 return first;
             };
 
+	    {
+  	    Stopwatch W("lattice"); // 44s on 1AON (TODO room for improvement)
             vector<index_t> lattice((n+1)*(n+2)/2);
             for(index_t t=0; t<nt0; ++t) {
                 if(!rt_alive_[t]) {
@@ -3514,10 +3537,10 @@ namespace GEO {
                             continue;
                         }
                         const index_t* U = &(ct_v_[4*c]);
-                        if(!move_to_surface(U, 4, c, x)) {
+                        lattice[idx(i,j)] = new_rvertex(x, U, 4);
+                        if(!move_to_surface_later(U, 4, c, lattice[idx(i,j)])) {
                             ++nb_failed;
                         }
-                        lattice[idx(i,j)] = new_rvertex(x, U, 4);
                     }
                 }
                 // sub-triangles
@@ -3548,6 +3571,21 @@ namespace GEO {
                 }
                 rt_alive_[t] = false;
             }
+	    }
+
+	    {
+		Stopwatch W("move_to_surface");
+		parallel_for(
+		    0, index_t(move_to_surface_jobs.size()), [&](index_t i) {
+			const MoveToSurfaceJob& J = move_to_surface_jobs[i];
+			geo_assert(J.rid != NO_INDEX);
+			if(!move_to_surface(J.U, 4, J.c, rv_[J.rid].p)) {
+			    ++nb_failed; // we should use an atomic var here
+			                 // but well...
+			}
+		    });
+	    }
+
             rebuild_adjacency();
             if(nb_failed != 0 && verbose_) {
                 Logger::warn("skin")
@@ -3568,6 +3606,7 @@ namespace GEO {
          * \return the number of triangles that could not be repaired
          */
         index_t repair_transversality() {
+	    Stopwatch W("repair_transversality");
             index_t nb_bad = 0;
             index_t nb_repaired = 0;
             vector<index_t> around;
@@ -3578,7 +3617,11 @@ namespace GEO {
                         continue;
                     }
                     index_t c;
-                    if(isotopy_test(rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2), c)) {
+                    if(
+			isotopy_test(
+			    rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2), c
+			)
+		    ) {
                         continue;
                     }
                     bool repaired = false;
@@ -3600,7 +3643,10 @@ namespace GEO {
                             continue;
                         }
                         index_t ct, cn;
-                        if(isotopy_test(u, q, p, ct) && isotopy_test(v, p, q, cn)) {
+                        if(
+			    isotopy_test(u, q, p, ct) &&
+			    isotopy_test(v, p, q, cn)
+			) {
                             index_t nt[2];
                             flip_edge(t, k, ct, cn, nt);
                             repaired = true;
@@ -3611,7 +3657,9 @@ namespace GEO {
                         index_t order[3] = {0, 1, 2};
                         double len[3];
                         for(index_t k=0; k<3; ++k) {
-                            len[k] = length(rv_[rt_vertex(t,k+1)].p - rv_[rt_vertex(t,k)].p);
+                            len[k] = length(
+				rv_[rt_vertex(t,k+1)].p - rv_[rt_vertex(t,k)].p
+			    );
                         }
                         std::sort(order, order+3, [&](index_t a, index_t b) {
                             return len[a] < len[b];
@@ -3624,9 +3672,14 @@ namespace GEO {
                                 index_t n = rt_adjacent(t, order[i]);
                                 if(n != NO_INDEX) {
                                     index_t kn = rt_side(
-                                        n, rt_vertex(t,order[i]+1), rt_vertex(t,order[i])
+                                        n,
+					rt_vertex(t,order[i]+1),
+					rt_vertex(t,order[i])
                                     );
-                                    if(kn != NO_INDEX && try_collapse(n, kn, around)) {
+                                    if(
+					kn != NO_INDEX &&
+					try_collapse(n, kn, around)
+				    ) {
                                         repaired = true;
                                     }
                                 }
@@ -3657,6 +3710,20 @@ namespace GEO {
          *  turning around p starting from a triangle incident to p.
          */
         bool edge_exists(index_t p, index_t q, index_t t_start) {
+	    // [Bruno Levy] my version that does not use a vector
+	    bool result = false;
+	    bool ok = triangles_around(
+		p, t_start, [&](index_t tp) {
+		    for(index_t i=0; i<3; ++i) {
+			if(rt_vertex(tp,i) == q) {
+			    result=true;
+			}
+		    }
+		}
+	    );
+	    return !ok || result;
+
+	    /*
             if(!triangles_around(p, t_start, tmp_tris_)) {
                 return true; // be conservative
             }
@@ -3668,6 +3735,7 @@ namespace GEO {
                 }
             }
             return false;
+	    */
         }
 
         /*****************************************************************/
@@ -3893,10 +3961,18 @@ namespace GEO {
             index_t n1 = new_rtriangle(w, u, q, cn);
             rt_v_[3*t] = u;   rt_v_[3*t+1] = w;   rt_v_[3*t+2] = p;
             rt_v_[3*n] = v;   rt_v_[3*n+1] = w;   rt_v_[3*n+2] = q;
-            rt_adjacent(t,0) = n1;     rt_adjacent(t,1) = t1;     rt_adjacent(t,2) = t_out2;
-            rt_adjacent(t1,0) = n;     rt_adjacent(t1,1) = t_out1; rt_adjacent(t1,2) = t;
-            rt_adjacent(n,0) = t1;     rt_adjacent(n,1) = n1;     rt_adjacent(n,2) = n_out2;
-            rt_adjacent(n1,0) = t;     rt_adjacent(n1,1) = n_out1; rt_adjacent(n1,2) = n;
+            rt_adjacent(t,0) = n1;
+	    rt_adjacent(t,1) = t1;
+	    rt_adjacent(t,2) = t_out2;
+            rt_adjacent(t1,0) = n;
+	    rt_adjacent(t1,1) = t_out1;
+	    rt_adjacent(t1,2) = t;
+            rt_adjacent(n,0) = t1;
+	    rt_adjacent(n,1) = n1;
+	    rt_adjacent(n,2) = n_out2;
+            rt_adjacent(n1,0) = t;
+	    rt_adjacent(n1,1) = n_out1;
+	    rt_adjacent(n1,2) = n;
             rt_replace_adjacent(t_out1, t, t1);
             rt_replace_adjacent(n_out1, n, n1);
             new_tris[0] = t;
@@ -3930,8 +4006,12 @@ namespace GEO {
             // t = (u,q,p), n = (v,p,q)
             rt_v_[3*t] = u;   rt_v_[3*t+1] = q;   rt_v_[3*t+2] = p;
             rt_v_[3*n] = v;   rt_v_[3*n+1] = p;   rt_v_[3*n+2] = q;
-            rt_adjacent(t,0) = n_out1; rt_adjacent(t,1) = n;      rt_adjacent(t,2) = t_out2;
-            rt_adjacent(n,0) = t_out1; rt_adjacent(n,1) = t;      rt_adjacent(n,2) = n_out2;
+            rt_adjacent(t,0) = n_out1;
+	    rt_adjacent(t,1) = n;
+	    rt_adjacent(t,2) = t_out2;
+            rt_adjacent(n,0) = t_out1;
+	    rt_adjacent(n,1) = t;
+	    rt_adjacent(n,2) = n_out2;
             rt_replace_adjacent(n_out1, n, t);
             rt_replace_adjacent(t_out1, t, n);
             rt_carrier_[t] = carrier_t;
@@ -4302,6 +4382,42 @@ namespace GEO {
             }
             return false;
         }
+
+        /**
+         * \brief Gets the triangles around a vertex, in order.
+	 * \details This version by [Bruno Levy], that takes a lambda instead
+	 *  of storing in a vector
+         * \retval true on success
+         * \retval false if the vertex is not surrounded by a closed fan
+         */
+        bool triangles_around(
+	    index_t u, index_t t0,
+	    std::function<void(index_t)> one_triangle
+	) {
+            index_t t = t0;
+            for(index_t iter=0; iter<1000; ++iter) {
+                one_triangle(t);
+                index_t lu = NO_INDEX;
+                for(index_t k=0; k<3; ++k) {
+                    if(rt_vertex(t,k) == u) {
+                        lu = k;
+                    }
+                }
+                if(lu == NO_INDEX) {
+                    return false;
+                }
+                index_t next = rt_adjacent(t, lu);
+                if(next == NO_INDEX) {
+                    return false;
+                }
+                if(next == t0) {
+                    return true;
+                }
+                t = next;
+            }
+            return false;
+        }
+
 
         /**
          * \brief Collapses the edge (side k of triangle t) by merging
