@@ -46,6 +46,7 @@
 #include <geogram/basic/logger.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/assert.h>
+#include <geogram/basic/algorithm.h>
 
 #include <unordered_map>
 #include <algorithm>
@@ -2724,6 +2725,67 @@ namespace GEO {
          * \brief Recomputes all the adjacencies from scratch.
          */
         void rebuild_adjacency() {
+	    Logger::out("adjacency") << "nb triangles=" << nb_rtriangles()
+				     << std::endl;
+	    Stopwatch W("adjacency");
+
+	    // [Bruno Levy] this version written by hand, 10x faster than
+	    // Claude generated one.
+
+	    struct TriangleEdge {
+		index_t t;
+		index_t le;
+	    };
+
+	    auto triangle_edge_key =
+		[this](const TriangleEdge& TE)->Numeric::uint64 {
+		    geo_debug_assert(rt_alive_[TE.t]);
+                    index_t u = rt_vertex(TE.t,(TE.le + 1)%3);
+                    index_t v = rt_vertex(TE.t,(TE.le + 2)%3);
+		    return edge_key(u,v);
+		};
+
+	    std::vector<TriangleEdge> triangle_edges;
+	    triangle_edges.reserve(nb_rtriangles()*3);
+	    for(index_t t=0; t<nb_rtriangles(); ++t) {
+                if(!rt_alive_[t]) {
+                    continue;
+                }
+                for(index_t le=0; le<3; ++le) {
+                    rt_adjacent(t,le) = NO_INDEX;
+		    triangle_edges.push_back({t,le});
+                }
+	    }
+
+	    GEO::sort(
+		triangle_edges.begin(), triangle_edges.end(),
+		[&](const TriangleEdge& TE1, const TriangleEdge& TE2)->bool {
+		    return triangle_edge_key(TE1) < triangle_edge_key(TE2);
+		}
+	    );
+
+	    auto b = triangle_edges.begin();
+	    while(b!=triangle_edges.end()) {
+		auto e = b;
+		while(
+		    e != triangle_edges.end() &&
+		    triangle_edge_key(*e) == triangle_edge_key(*b)
+		) {
+		    ++e;
+		}
+		geo_assert(e-b < 3);
+		if(e-b == 2) {
+		    auto TE1 = b;
+		    auto TE2 = b+1;
+		    rt_adjacent(TE1->t,TE1->le) = TE2->t;
+		    rt_adjacent(TE2->t,TE2->le) = TE1->t;
+		}
+		b=e;
+	    }
+
+
+	    // Claude generated version, kept for reference
+	    /*
             std::unordered_map<Numeric::uint64, index_t> edge_tri;
             for(index_t t=0; t<nb_rtriangles(); ++t) {
                 if(!rt_alive_[t]) {
@@ -2754,6 +2816,7 @@ namespace GEO {
                     }
                 }
             }
+	    */
         }
 
         /**
@@ -3406,7 +3469,9 @@ namespace GEO {
                 if(!rt_alive_[t]) {
                     continue;
                 }
-                index_t v[3] = { rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2) };
+                index_t v[3] = {
+		    rt_vertex(t,0), rt_vertex(t,1), rt_vertex(t,2)
+		};
                 index_t carrier = rt_carrier_[t];
                 // lattice point (i,j): barycentric (i/n, j/n, 1-i/n-j/n)
                 // on vertices (v1, v2, v0). index = j*(n+1) - j(j-1)/2 + i
@@ -3440,7 +3505,8 @@ namespace GEO {
                     for(index_t i=1; i+j<n; ++i) {
                         double a = double(i)/double(n);
                         double b = double(j)/double(n);
-                        vec3 x = (1.0-a-b)*rv_[v[0]].p + a*rv_[v[1]].p + b*rv_[v[2]].p;
+                        vec3 x = (1.0-a-b)*rv_[v[0]].p +
+			    a*rv_[v[1]].p + b*rv_[v[2]].p;
                         index_t c = find_tet_containing(v, 3, x, carrier);
                         if(c == NO_INDEX) {
                             ++nb_failed;
@@ -3466,9 +3532,17 @@ namespace GEO {
                 };
                 for(index_t j=0; j<n; ++j) {
                     for(index_t i=0; i+j<n; ++i) {
-                        add_sub(lattice[idx(i,j)], lattice[idx(i+1,j)], lattice[idx(i,j+1)]);
+                        add_sub(
+			    lattice[idx(i,j)],
+			    lattice[idx(i+1,j)],
+			    lattice[idx(i,j+1)]
+			);
                         if(i+j+1 < n) {
-                            add_sub(lattice[idx(i+1,j)], lattice[idx(i+1,j+1)], lattice[idx(i,j+1)]);
+                            add_sub(
+				lattice[idx(i+1,j)],
+				lattice[idx(i+1,j+1)],
+				lattice[idx(i,j+1)]
+			    );
                         }
                     }
                 }
