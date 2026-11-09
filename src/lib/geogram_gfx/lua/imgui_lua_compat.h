@@ -7,8 +7,8 @@
 
 #if IMGUI_VERSION_NUM >= 19298
 static constexpr ImGuiPopupFlags ImGuiPopupFlags_MouseButtonDefault_ = ImGuiPopupFlags_MouseButtonRight;
-static constexpr ImDrawFlags ImDrawFlags_RoundCornersDefault_ = ImDrawFlags_RoundCornersAll;
-static constexpr ImDrawFlags ImDrawFlags_RoundCornersMask_ = ImDrawFlags_RoundCornersAll | ImDrawFlags_RoundCornersNone;
+static constexpr ImDrawFlags ImDrawFlags_RoundCornersDefault_ = ImDrawFlags_RoundAll;
+static constexpr ImDrawFlags ImDrawFlags_RoundCornersMask_ = ImDrawFlags_RoundAll | ImDrawFlags_RoundNone;
 #endif
 
 #endif
