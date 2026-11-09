@@ -109,6 +109,14 @@ COMPONENT devkit-full
 FILES_MATCHING PATTERN *.h
 )
 
+if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR AND GEOGRAM_WITH_LUA)
+  foreach(component devkit devkit-full)
+    install(FILES "${PROJECT_BINARY_DIR}/src/lib/geogram_gfx/lua/luawrap_runtime.h"
+      DESTINATION include/${VORPALINE_INCLUDE_SUBPATH}/geogram_gfx/lua
+      COMPONENT ${component})
+  endforeach()
+endif()
+
 install(
 FILES "${PROJECT_BINARY_DIR}/geogram_gfx${VORPALINE_VERSION_MAJOR}.pc"
 DESTINATION lib${LIB_SUFFIX}/pkgconfig
