@@ -1,0 +1,5 @@
+#pragma once
+
+// This mode is part of the public editor layout; installed consumers must use
+// the same choice as geogram_gfx even without CMake compile definitions.
+#cmakedefine GEOGRAM_USE_SYSTEM_TEXT_EDITOR 1

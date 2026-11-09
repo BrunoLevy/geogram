@@ -26,7 +26,9 @@ endif()
 
 aux_source_directories(SOURCES "Source Files"            .)
 aux_source_directories(SOURCES "Source Files\\glad"      glad)
-aux_source_directories(SOURCES "Source Files\\ImGuiColorTextEdit" ImGuiColorTextEdit_geogram )
+if(NOT GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  aux_source_directories(SOURCES "Source Files\\ImGuiColorTextEdit" ImGuiColorTextEdit_geogram )
+endif()
 
 if(GEOGRAM_WITH_LUA)
    aux_source_directories(SOURCES "Source Files\\imgui_lua_bindings_gomgen" imgui_lua_bindings_gomgen)
@@ -34,6 +36,7 @@ endif()
 
 add_library(geogram_gfx_third_party OBJECT ${SOURCES})
 
+if(NOT GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
 target_sources(
   geogram_gfx_third_party PRIVATE
     imgui/imgui.cpp
@@ -41,18 +44,28 @@ target_sources(
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
-    imgui/misc/cpp/imgui_stdlib.cpp
 )
+endif()
+
+# The std::string adapter and platform backends are not part of ImGui's core.
+# Keep building them, but link the external core once in system-editor mode.
+target_sources(geogram_gfx_third_party PRIVATE imgui/misc/cpp/imgui_stdlib.cpp)
+if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  target_link_libraries(geogram_gfx_third_party PRIVATE ImGuiColorTextEdit::ImGuiColorTextEdit)
+  target_compile_features(geogram_gfx_third_party PRIVATE cxx_std_17)
+endif()
 
 target_sources(
   geogram_gfx_third_party PRIVATE
     imgui/backends/imgui_impl_opengl3.cpp
 )
 
+if(NOT GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
 target_include_directories(
   geogram_gfx_third_party PRIVATE
   ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui
 )
+endif()
 
 if(ANDROID)
 #  target_sources(

@@ -1,8 +1,35 @@
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 
+configure_file(basic/config.h.in basic/config.h)
+include_directories(${PROJECT_BINARY_DIR}/src/lib)
+foreach(component devkit devkit-full)
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/basic/config.h"
+    DESTINATION include/${VORPALINE_INCLUDE_SUBPATH}/geogram_gfx/basic
+    COMPONENT ${component})
+endforeach()
+
 configure_file(geogram_gfx.pc.in ${PROJECT_BINARY_DIR}/geogram_gfx${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
-add_definitions(-DIMGUI_USER_CONFIG="geogram_imconfig.h")
+if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  find_package(ImGuiColorTextEdit CONFIG REQUIRED)
+  if(NOT ImGuiColorTextEdit_GEOGRAM_ENABLED)
+    message(FATAL_ERROR "ImGuiColorTextEdit must be built with ENABLE_GEOGRAM=ON")
+  endif()
+  include(CheckCXXSourceCompiles)
+  set(CMAKE_REQUIRED_LIBRARIES ImGuiColorTextEdit::ImGuiColorTextEdit)
+  check_cxx_source_compiles("#include <imgui.h>
+    #ifndef IMGUI_HAS_DOCK
+    #error Geogram requires ImGui docking
+    #endif
+    int main() { return 0; }" GEOGRAM_SYSTEM_IMGUI_HAS_DOCKING)
+  unset(CMAKE_REQUIRED_LIBRARIES)
+  if(NOT GEOGRAM_SYSTEM_IMGUI_HAS_DOCKING)
+    message(FATAL_ERROR "Geogram requires an ImGui docking build compatible with its backends")
+  endif()
+  add_definitions(-DGEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+else()
+  add_definitions(-DIMGUI_USER_CONFIG="geogram_imconfig.h")
+endif()
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"                .)
@@ -25,8 +52,16 @@ endif()
 
 add_library(geogram_gfx ${SOURCES} $<TARGET_OBJECTS:geogram_gfx_third_party>)
 
+if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  target_link_libraries(geogram_gfx ImGuiColorTextEdit::ImGuiColorTextEdit)
+  target_compile_features(geogram_gfx PUBLIC cxx_std_17)
+  target_compile_definitions(geogram_gfx PUBLIC GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+endif()
+
 target_include_directories(geogram_gfx PUBLIC ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party)
-target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui)
+if(NOT GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui)
+endif()
 
 if(ANDROID)
 target_include_directories(geogram_gfx PRIVATE
