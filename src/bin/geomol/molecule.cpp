@@ -804,10 +804,13 @@ namespace GEO {
 	    return;
 	}
 
+	// GLUP140 profile not supported yet in Emscripten
+	#ifndef GEO_OS_EMSCRIPTEN
 	if(draw_mode_ == DRAW_MESH) {
 	    mesh_gfx_.draw_surface();
 	    return;
 	}
+	#endif
 
 	create_shaders_if_needed();
 
