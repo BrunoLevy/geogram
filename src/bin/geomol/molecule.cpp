@@ -282,7 +282,9 @@ namespace GEO {
 	    update_cells();
 	}
 	mesh_.clear();
+#ifndef GEO_OS_EMSCRIPTEN
 	mesh_gfx_.set_mesh(&mesh_);
+#endif
 	if(draw_mode_ == DRAW_MESH) {
 	    draw_mode_ = DRAW_MSS;
 	}
@@ -938,7 +940,9 @@ namespace GEO {
 	} break;
 	}
 	Logger::out("Mesher") << "done." << std::endl;
+#ifndef GEO_OS_EMSCRIPTEN
 	mesh_gfx_.set_mesh(&mesh_);
+#endif
     }
 
     /************************************************************************/
