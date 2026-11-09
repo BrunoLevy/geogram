@@ -38,6 +38,7 @@ cmake -S "$root" -B "$root/.ci-geogram-build" \
     -DGEOGRAM_USE_SYSTEM_GLFW3=ON -DGEOGRAM_WITH_LUA=OFF \
     -DGEOGRAM_LIB_ONLY=ON -DVORPALINE_BUILD_DYNAMIC=ON
 cmake --build "$root/.ci-geogram-build" --parallel 2
+cmake --install "$root/.ci-geogram-build" --component devkit
 cmake --install "$root/.ci-geogram-build" --component devkit-full
 
 cmake -S "$root/tests/standalone-text-editor" -B "$root/.ci-consumer-build" \
