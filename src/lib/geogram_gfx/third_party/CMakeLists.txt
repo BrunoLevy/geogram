@@ -45,7 +45,7 @@ if(GEOGRAM_WITH_LUA)
      message(FATAL_ERROR "The ImGui Lua runtime changed; review the system-ImGui adapter")
    endif()
    string(REPLACE "#include <geogram_gfx/third_party/imgui/imgui.h>"
-     "#include <imgui.h>" _lua_runtime "${_lua_runtime}")
+     "#include <geogram_gfx/lua/imgui_lua_compat.h>" _lua_runtime "${_lua_runtime}")
    file(WRITE ${_lua_bindings_adapter}/luawrap_runtime.h "${_lua_runtime}")
    foreach(_binding imgui_lua_bindings.cpp imdrawlist_lua_bindings.cpp)
      configure_file(${_lua_bindings_source}/${_binding}
