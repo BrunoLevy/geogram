@@ -7,7 +7,8 @@ endif()
 # Test adapter only: do not alter the maintainer's CMake, packaging or sources.
 add_library(imgui SHARED
   "${IMGUI_SOURCE_DIR}/imgui.cpp" "${IMGUI_SOURCE_DIR}/imgui_draw.cpp"
-  "${IMGUI_SOURCE_DIR}/imgui_tables.cpp" "${IMGUI_SOURCE_DIR}/imgui_widgets.cpp")
+  "${IMGUI_SOURCE_DIR}/imgui_tables.cpp" "${IMGUI_SOURCE_DIR}/imgui_widgets.cpp"
+  "${IMGUI_SOURCE_DIR}/imgui_demo.cpp")
 target_compile_features(imgui PUBLIC cxx_std_11)
 target_include_directories(imgui PUBLIC
   $<BUILD_INTERFACE:${IMGUI_SOURCE_DIR}> $<INSTALL_INTERFACE:include/imgui>)

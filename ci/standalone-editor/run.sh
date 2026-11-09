@@ -15,7 +15,8 @@ git clone --single-branch --branch sis_in \
 git submodule update --init --depth 1 \
     src/lib/geogram/third_party/OpenNL src/lib/geogram/third_party/amgcl \
     src/lib/geogram/third_party/libMeshb src/lib/geogram/third_party/rply \
-    src/lib/geogram_gfx/third_party/imgui src/lib/geogram_gfx/third_party/imoguizmo
+    src/lib/geogram_gfx/third_party/imgui src/lib/geogram_gfx/third_party/imoguizmo \
+    src/lib/geogram_gfx/third_party/imgui_lua_bindings_gomgen
 
 cmake -S "$root/ci/standalone-editor/imgui" -B "$root/.ci-imgui-build" \
     -DIMGUI_SOURCE_DIR="$root/.ci-imgui" -DCMAKE_INSTALL_PREFIX="$prefix" \
@@ -35,7 +36,7 @@ cmake --install "$root/.ci-editor-build"
 cmake -S "$root" -B "$root/.ci-geogram-build" \
     -DCMAKE_PREFIX_PATH="$prefix" -DCMAKE_INSTALL_PREFIX="$prefix" \
     -DCMAKE_BUILD_TYPE=Release -DGEOGRAM_USE_SYSTEM_TEXT_EDITOR=ON \
-    -DGEOGRAM_USE_SYSTEM_GLFW3=ON -DGEOGRAM_WITH_LUA=OFF \
+    -DGEOGRAM_USE_SYSTEM_GLFW3=ON -DGEOGRAM_WITH_LUA=ON \
     -DGEOGRAM_LIB_ONLY=ON -DVORPALINE_BUILD_DYNAMIC=ON
 cmake --build "$root/.ci-geogram-build" --parallel 2
 cmake --install "$root/.ci-geogram-build" --component devkit
@@ -43,7 +44,7 @@ cmake --install "$root/.ci-geogram-build" --component devkit-full
 
 cmake -S "$root/tests/standalone-text-editor" -B "$root/.ci-consumer-build" \
     -DGEOGRAM_INSTALL_PREFIX="$prefix" -DCMAKE_PREFIX_PATH="$prefix" \
-    -DCMAKE_MODULE_PATH="$prefix/lib/cmake/modules"
+    -DCMAKE_MODULE_PATH="$prefix/lib/cmake/modules" -DGEOGRAM_CHECK_LUA=ON
 cmake --build "$root/.ci-consumer-build" --parallel 2
 LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
     ctest --test-dir "$root/.ci-consumer-build" --output-on-failure \
