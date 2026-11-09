@@ -41,7 +41,11 @@
 #define H_GEOGRAM_GFX_GUI_TEXT_EDITOR_H
 
 #include <geogram_gfx/basic/common.h>
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <TextEditor.h>
+#else
 #include <geogram_gfx/third_party/ImGuiColorTextEdit_geogram/TextEditor.h>
+#endif
 
 /**
  * \file geogram_gfx/gui/text_editor.h

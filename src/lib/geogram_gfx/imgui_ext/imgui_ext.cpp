@@ -51,7 +51,11 @@
 #endif
 #endif
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <imgui_internal.h>
+#else
 #include <geogram_gfx/third_party/imgui/imgui_internal.h>
+#endif
 
 #if defined(GEO_COMPILER_GCC_FAMILY)
 #pragma GCC diagnostic pop

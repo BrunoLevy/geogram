@@ -289,7 +289,8 @@ namespace GEO {
             copy = ImGui::SimpleButton(icon_UTF8("copy").c_str());
             ImGui::Tooltip("copy");
             ImGui::SameLine();
-            filter_.Draw((icon_UTF8("filter")+" Filter").c_str(), -200.0f);
+            ImGui::SetNextItemWidth(-200.0f);
+            filter_.Draw((icon_UTF8("filter")+" Filter").c_str());
             ImGui::Separator();
         }
 

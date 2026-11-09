@@ -74,7 +74,11 @@ namespace GEO {
         impl_.SetCursorPosition(
             ::TextEditor::CursorPosition(0,0)
         );
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetLanguage(::TextEditor::LookupLanguage("Lua"));
+#else
         impl_.SetLanguage(::TextEditor::Language::Lua());
+#endif
         impl_.SetPalette(::TextEditor::GetDarkPalette());
 	impl_.set_callback(text_editor_callback, this);
         fixed_layout_ = true;

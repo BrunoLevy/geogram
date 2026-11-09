@@ -53,7 +53,11 @@
 #endif
 #endif
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <imgui.h>
+#else
 #include <geogram_gfx/third_party/imgui/imgui.h>
+#endif
 #include <geogram_gfx/third_party/imgui/misc/cpp/imgui_stdlib.h>
 
 #if defined(GEO_COMPILER_GCC_FAMILY)

@@ -40,6 +40,8 @@
 #ifndef GEOGRAM_GFX_BASIC_COMMON
 #define GEOGRAM_GFX_BASIC_COMMON
 
+#include <geogram_gfx/basic/config.h>
+
 #include <geogram/basic/common.h>
 #include <geogram_gfx/api/defs.h>
 #include <geogram_gfx/basic/GL.h>
