@@ -66,7 +66,18 @@
 #  define GEO_GL_150
 #  define GEO_GL_NO_DOUBLES
 #else
+
+#  ifdef GEO_COMPILER_CLANG
+#     pragma GCC diagnostic push
+#     pragma GCC diagnostic ignored "-Wreserved-identifier"
+#  endif
+
 #  include <geogram_gfx/third_party/glad/glad.h>
+
+#  ifdef GEO_COMPILER_CLANG
+#     pragma GCC diagnostic pop
+#  endif
+
 #  define GEO_GL_TEXTURE_3D
 #  define GEO_GL_140
 #  define GEO_GL_150
