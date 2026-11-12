@@ -64,8 +64,9 @@
 #include <new>
 
 // MUSL does not have execinfo (so we won't have backtrace with MUSL)
+// Android declares backtrace() only from API level 33.
 #if defined(__has_include)
-#if __has_include(<execinfo.h>)
+#if __has_include(<execinfo.h>) && (!defined(__ANDROID__) || __ANDROID_API__ >= 33)
 #include <execinfo.h>
 #define HAS_EXECINFO
 #endif
