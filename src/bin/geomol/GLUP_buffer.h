@@ -48,10 +48,8 @@
 #include <vector>
 #include <typeinfo>
 
-// GEO_TBO_SUPPORTED
-// GEO_SSBO_SUPPORTED
-
 #define GEO_TBO_SUPPORTED
+// #define GEO_SSBO_SUPPORTED
 
 // Note: for molecules with 2.5M atoms, it is FASTER
 // using standard texture than TBOs (with GEO_TBO_SUPPORTED *deactivated*
@@ -64,10 +62,15 @@
 // TODO: test with SSBOs
 
 #ifdef GEO_OS_EMSCRIPTEN
-#include <GLES3/gl3.h>
    #ifdef GEO_TBO_SUPPORTED
    #undef GEO_TBO_SUPPORTED
    #endif
+   #ifdef GEO_SSBO_SUPPORTED
+   #undef GEO_SSBO_SUPPORTED
+   #endif
+#endif
+
+#ifdef GEO_OS_APPLE
    #ifdef GEO_SSBO_SUPPORTED
    #undef GEO_SSBO_SUPPORTED
    #endif
@@ -77,72 +80,76 @@ namespace GLUP {
     using namespace GEO;
 
     /**
-     * \brief Easy to use wrapper around BufferObject
-     * \details BufferObject is a portable way of sending large arrays
-     *  of datas to shaders. It can be used when OpenGL 4.3's SSBOs (Shared
-     *  Storage Buffer Objects) are not available, as for instance in
-     *  OpenGL 4.1 which is the highest version of OpenGL supported by Macs.
-     *  A Texture Buffer Object corresponds to an OpenGL texture that refers
-     *  to some data stored in a Vertex Buffer Object.
-     *  The Texture Buffer Object is manipulated through an OpenGL texture ID,
-     *  returned by TBO(), that can be bound to a texture unit and accessed
-     *  through texelFetch() in shaders.
-     *  The BufferObject class manages a Vertex Buffer Object / Texture
-     *  Buffer Object pair.
-     *
-     *  Creation:
-     *  \code
-     *    std::vector<vec3f> V = ...;
-     *    glActiveTexture(texture_unit);
-     *    tbo.create_or_update(V);
-     *  \endcode
-     *
-     *  Usage (CPU side):
-     *  \code
-     *    glActiveTexture(texture_unit);
-     *    glBindTexture(GL_TEXTURE_BUFFER, tbo.TBO());
-     *    GLSL::set_program_uniform_by_name(
-     *	      program_, "my_TBO", texture_unit // note: texture_unit, not TBO!
-     *	  );
-     *  \endcode
-     *
-     *  Usage (GPU shader size):
-     *  \code
-     *    uniform samplerBuffer  my_TBO;  // float,vec2,vec3,vec4
-     *    uniform isamplerBuffer my_iTBO; // int, uint, vec2i, vec3i, vec4i
-     *    ...
-     *    int index = ...;
-     *    vec3 p = texelFetch(my_TBO, index).xyz;
-     *    int  i = texelFetch(my_iTBO, index).x;
-     *  \endcode
-     *
+     * \brief Wrapper class around the different type of buffers used by the GPU.
+     * \details Wraps either a 2D texture, a TBO (Texture Buffer Object) or an
+     *  SSBO, depending on what is supported and on user-specified gfx:buffers
+     *  command line argument.
      */
     class BufferObject {
     public:
 	enum Type {UNINITIALIZED, TEXTURE_2D, TBO, SSBO};
 
+	/**
+	 * \brief BufferObject constructor
+	 * \details Constructs an uninitialized BufferObject
+	 */
         BufferObject() {
 	}
 
+	/**
+	 * \brief BufferObject destructor
+	 */
 	~BufferObject() {
 	    reset();
 	}
 
+	/**
+	 * \brief Gets the type of a BufferObject
+	 * \return one of UNINITIALIZED, TEXTURE_2D, TBO, SSBO
+	 */
 	Type type() const {
 	    return type_;
 	};
 
+	/**
+	 * \brief Tests whether a BufferObject is initialized
+	 * \retval true if this BufferObject is initialized, that is, has
+	 *  associated data in GPU memory
+	 * \retval false otherwise
+	 */
 	bool initialized() const {
 	    return type_ != UNINITIALIZED;
 	}
 
+	/**
+	 * \brief Initializes static class variables
+	 * \details Needs to be called after OpenGL is initialized and before
+	 *  any BufferObject is created.
+	 */
 	static void initialize_class();
+
+	/**
+	 * \brief Gets the default type for BufferObjects
+	 * \return one of TEXTURE_2D, TBO, SSBO
+	 */
 	static Type default_type();
 
+	/**
+	 * \brief Resets a BufferObject
+	 * \details Releases all memory and objects allocated on the GPU by this
+	 *  BufferObject.
+	 */
 	void reset();
 
-	// Note: there should be an active texture unit when calling this
-	// function the 1st time.
+	/**
+	 * \brief Creates an uninitialized BufferObject or updates an initialized
+	 *  one with new data.
+	 * \details There should be an active unit when calling this function the
+	 *  first time
+	 * \param[in] nb number of items
+	 * \param[in] data a pointer to a contiguous array of \p nb items
+	 * \see activate()
+	 */
 	template <class T> void create_or_update(index_t nb, const T* data) {
 	    Type type = default_type();
 	    switch(type) {
@@ -169,9 +176,26 @@ namespace GLUP {
 	    create_or_update(v.size(), v.data());
 	}
 
+	/**
+	 * \brief Activates a unit
+	 * \param[in] unit a unit id (either a texture unit or a buffer unit,
+	 *  depending on default buffer type).
+	 */
+	static void activate(GLuint unit);
+
+	/**
+	 * \brief Binds this buffer to a unit.
+	 * \details Calls activate(unit).
+	 * \param[in] unit a unit id (either a texture unit or a buffer unit,
+	 *  depending on default buffer type).
+	 */
 	void bind(GLuint unit);
 
     protected:
+	static void activate_TEXTURE_2D(GLuint unit);
+	static void activate_TBO(GLuint unit);
+	static void activate_SSBO(GLuint unit);
+
 	void reset_TEXTURE_2D();
 	void reset_TBO();
 	void reset_SSBO();

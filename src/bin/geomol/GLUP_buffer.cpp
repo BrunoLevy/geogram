@@ -91,9 +91,42 @@ namespace GLUP {
 	// TODO
     }
 
+    /**************** activate() ****************************/
+
+    void BufferObject::activate(GLuint unit) {
+	switch(default_type()) {
+	case UNINITIALIZED:
+	    geo_assert_not_reached;
+	    break;
+	case TEXTURE_2D:
+	    activate_TEXTURE_2D(unit);
+	    break;
+	case TBO:
+	    activate_TBO(unit);
+	    break;
+	case SSBO:
+	    activate_SSBO(unit);
+	    break;
+	}
+    }
+
+    void BufferObject::activate_TEXTURE_2D(GLuint unit) {
+	glActiveTexture(unit);
+    }
+
+    void BufferObject::activate_TBO(GLuint unit) {
+	glActiveTexture(unit);
+    }
+
+    void BufferObject::activate_SSBO(GLuint unit) {
+	geo_argused(unit);
+	geo_assert_not_reached;
+    }
+
     /**************** bind() ****************************/
 
     void BufferObject::bind(GLuint unit) {
+	activate(unit);
 	switch(type_) {
 	case UNINITIALIZED:
 	    geo_assert_not_reached;
@@ -112,13 +145,13 @@ namespace GLUP {
 
     void BufferObject::bind_TEXTURE_2D(GLuint unit) {
 	geo_debug_assert(texture_ != 0);
-	glActiveTexture(unit);
+	geo_argused(unit);
 	glBindTexture(GL_TEXTURE_2D, texture_);
     }
 
     void BufferObject::bind_TBO(GLuint unit) {
 	geo_debug_assert(VBO_ != 0 && texture_ != 0);
-	glActiveTexture(unit);
+	geo_argused(unit);
 	glBindTexture(GL_TEXTURE_BUFFER, texture_);
     }
 
