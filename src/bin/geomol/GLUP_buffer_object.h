@@ -49,7 +49,7 @@
 #include <typeinfo>
 
 #define GEO_TBO_SUPPORTED
-// #define GEO_SSBO_SUPPORTED
+#define GEO_SSBO_SUPPORTED
 
 // Note: for molecules with 2.5M atoms, it is FASTER
 // using standard texture than TBOs (with GEO_TBO_SUPPORTED *deactivated*
@@ -325,14 +325,14 @@ namespace GLUP {
 	    type_ = TBO;
 	    geo_assert(GLint(nb) < max_TBO_size_);
 	    update_or_check_buffer_object(
-		VBO_, GL_ARRAY_BUFFER,
+		BO_, GL_ARRAY_BUFFER,
 		nb * sizeof(T), data,
 		true
 	    );
 	    if(texture_ == 0) {
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_BUFFER, texture_);
-		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
+		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), BO_);
 	    }
 #else
 	    geo_argused(nb);
@@ -344,11 +344,15 @@ namespace GLUP {
 	template <class T> void create_or_update_SSBO(
 	    index_t nb, const T* data
 	) {
-#ifdef GEO_TBO_SUPPORTED
-	    // TODO
-	    geo_argused(nb);
-	    geo_argused(data);
-	    geo_assert_not_reached;
+#ifdef GEO_SSBO_SUPPORTED
+	    geo_debug_assert(type_ == TBO || type_ == UNINITIALIZED);
+	    type_ = TBO;
+	    geo_assert(GLint(nb) < max_TBO_size_);
+	    update_or_check_buffer_object(
+		BO_, GL_SHADER_STORAGE_BUFFER,
+		nb * sizeof(T), data,
+		true
+	    );
 #else
 	    geo_argused(nb);
 	    geo_argused(data);
@@ -392,7 +396,7 @@ namespace GLUP {
     private:
 	Type type_ = UNINITIALIZED;
 	GLuint texture_ = 0;
-	GLuint VBO_ = 0;
+	GLuint BO_ = 0;
 	GLsizei width_ = 0;
 	GLsizei height_ = 0;
 
@@ -400,6 +404,7 @@ namespace GLUP {
 	static GLint max_TBO_size_;     // in texels.
 	static GLint max_texture_size_; // in texels.
 	static Type default_type_;
+	static GLuint active_unit_;
     };
 }
 

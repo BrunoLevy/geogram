@@ -47,6 +47,7 @@ namespace GLUP {
     GLint BufferObject::max_TBO_size_ = 0;
     GLint BufferObject::max_texture_size_ = 0;
     BufferObject::Type BufferObject::default_type_ = UNINITIALIZED;
+    GLuint BufferObject::active_unit_ = 0;
 
     /**************** reset() ****************************/
 
@@ -82,19 +83,27 @@ namespace GLUP {
 	    glDeleteTextures(1, &texture_);
 	    texture_ = 0;
 	}
-	if(VBO_ != 0) {
-	    glDeleteBuffers(1,&VBO_);
-	    VBO_ = 0;
+	if(BO_ != 0) {
+	    glDeleteBuffers(1,&BO_);
+	    BO_ = 0;
 	}
     }
 
     void BufferObject::reset_SSBO() {
-	// TODO
+#ifdef GEO_SSBO_SUPPORTED
+	if(BO_ != 0) {
+	    glDeleteBuffers(1,&BO_);
+	    BO_ = 0;
+	}
+#else
+	geo_assert_not_reached;
+#endif
     }
 
     /**************** active_unit() ****************************/
 
     void BufferObject::active_unit(GLuint unit) {
+	active_unit_ = unit;
 	switch(default_type()) {
 	case UNINITIALIZED:
 	    geo_assert_not_reached;
@@ -121,7 +130,8 @@ namespace GLUP {
 
     void BufferObject::active_unit_SSBO(GLuint unit) {
 	geo_argused(unit);
-	geo_assert_not_reached;
+	// Does nothing, unit is memorized as active_unit_,
+	// then bind() does the job.
     }
 
     /**************** bind() ****************************/
@@ -129,6 +139,8 @@ namespace GLUP {
     void BufferObject::bind(GLuint unit) {
 	if(unit != 0) {
 	    active_unit(unit);
+	} else {
+	    unit = active_unit_;
 	}
 	switch(type_) {
 	case UNINITIALIZED:
@@ -155,7 +167,7 @@ namespace GLUP {
     void BufferObject::bind_TBO(GLuint unit) {
 	geo_argused(unit);
 #ifdef GEO_TBO_SUPPORTED
-	geo_debug_assert(VBO_ != 0 && texture_ != 0);
+	geo_debug_assert(BO_ != 0 && texture_ != 0);
 	glBindTexture(GL_TEXTURE_BUFFER, texture_);
 #else
 	geo_assert_not_reached;
@@ -163,9 +175,12 @@ namespace GLUP {
     }
 
     void BufferObject::bind_SSBO(GLuint unit) {
-	// TODO
+#ifdef GEO_SSBO_SUPPORTED
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER,unit,BO_);
+#else
 	geo_argused(unit);
 	geo_assert_not_reached;
+#endif
     }
 
     /**************************************************************************/
@@ -174,6 +189,8 @@ namespace GLUP {
 	if(class_initialized_) {
 	    return;
 	}
+
+	class_initialized_ = true;
 
 #ifdef GEO_TBO_SUPPORTED
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_TBO_size_);
@@ -243,14 +260,10 @@ namespace GLUP {
 	}
 	Logger::out("GLUP") << "Buffers: using " << default_type_str
 			    << std::endl;
-	class_initialized_ = true;
     }
 
     BufferObject::Type BufferObject::default_type() {
-	if(max_TBO_size_ != 0) {
-	    return TBO;
-	}
-	return TEXTURE_2D;
+	return default_type_;
     }
 
     void BufferObject::set_program_buffer_unit_by_name(
@@ -265,8 +278,22 @@ namespace GLUP {
 	    // Note: needs to be a GLint, doew not work with GLuint (why?)
 	    GLSL::set_program_uniform_by_name(program, name, GLint(unit));
 	    break;
-	case SSBO:
-	    break;
+	case SSBO: {
+#ifdef GEO_SSBO_SUPPORTED
+	    GLuint block_index = glGetProgramResourceIndex(
+		program, GL_SHADER_STORAGE_BLOCK, name
+	    );
+	    std::cerr << name << ":" << block_index << std::endl;
+	    if(block_index == GLuint(-1)) {
+		Logger::err("GLUP") << name << ": no such SSBO block"
+				    << std::endl;
+		return;
+	    }
+	    glShaderStorageBlockBinding(program, block_index, unit);
+#else
+	    geo_assert_not_reached;
+#endif
+	} break;
 	}
     }
 
@@ -317,7 +344,28 @@ namespace GLUP {
 
           )"
           );
+	} else if(default_type() == SSBO) {
+	  GEO::GLSL::register_GLSL_include_file("GLUP/buffers.h",
+          R"(
+          #define GLUP_SSBO
+          #define glup_Buffer  float
+          #define glup_iBuffer int
+          #define glup_uBuffer uint
+          vec4 glup_fetch(in glup_Buffer B, in int idx) {
+             return vec4(0.0,0.0,0.0,0.0);
+          }
+
+          ivec4 glup_fetch(in glup_iBuffer B, in int idx) {
+             return ivec4(0,0,0,0);
+          }
+
+          uvec4 glup_fetch(in glup_uBuffer B, in int idx) {
+             return uvec4(0u,0u,0u,0u);
+          }
+          )"
+	  );
 	}
+
     }
 
     /***************************************************************************/
