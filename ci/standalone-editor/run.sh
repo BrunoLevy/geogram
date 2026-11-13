@@ -26,7 +26,7 @@ cmake --install "$root/.ci-imgui-build"
 
 cmake -S "$root/.ci-editor" -B "$root/.ci-editor-build" \
     -DCMAKE_PREFIX_PATH="$prefix" -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DENABLE_GEOGRAM=ON -DENABLE_BALAZS=ON -DBUILD_TESTING=ON \
+    -DBUILD_TESTING=ON \
     -DCMAKE_BUILD_TYPE=Release
 cmake --build "$root/.ci-editor-build" --parallel 2
 ctest --test-dir "$root/.ci-editor-build" --output-on-failure \

@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           repository: malbajun/ImGuiColorTextEdit
-          ref: feature/optional-fork-features
+          ref: merge/bruno-optional-features
           path: .ci-editor
           persist-credentials: false
       - name: Install build dependencies
@@ -50,9 +50,14 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           path = Path('artifacts/standalone-editor/build.log')
           if path.exists():
-              message = '\n'.join(path.read_text(errors='replace').splitlines()[-35:])[-6000:]
+              lines = path.read_text(errors='replace').splitlines()
+              errors = [line for line in lines if re.search(
+                  r'error:|fatal error|undefined reference|CMake Error|FAILED:|Assertion failed|cannot open shared object',
+                  line, re.IGNORECASE)]
+              message = '\n'.join(errors)[:4000] + '\n' + '\n'.join(lines[-20:])[-2000:]
               message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
               print(f'::error title=Geogram integration::{message}')
           PY
