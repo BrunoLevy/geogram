@@ -440,7 +440,13 @@ struct GeoAssertNoFpContract {
 #endif
     }
     static bool fp_contraction_enabled() {
+#if defined(__i386__) && !defined(__SSE2_MATH__)
+        // x87 has no fused multiply-add. Its extended intermediates can
+        // nevertheless produce the same residual as FMA in this probe.
+        return false;
+#else
 	return (a2plusb(0x1.0000002p0, -0x1.0000004p0) != 0.0);
+#endif
     }
     __attribute__((noipa)) static double a2plusb(double a, double b) {
 	return a * a + b;
