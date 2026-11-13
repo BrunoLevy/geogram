@@ -38,6 +38,7 @@
  */
 
 #include "GLUP_buffer.h"
+#include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/command_line.h>
 
 namespace GLUP {
@@ -249,4 +250,34 @@ namespace GLUP {
 	}
 	return TEXTURE_2D;
     }
+
+    /***************************************************************************/
+
+    void BufferObject::register_GLSL_sources() {
+	if(default_type() == TEXTURE_2D) {
+	    GEO::GLSL::register_GLSL_include_file("GLUP/buffers.h",
+            R"(
+            #define glup_Buffer  sampler2D
+            #define glup_iBuffer isampler2D
+            #define glup_uBuffer usampler2D
+            #define glup_fetch(B,idx) texelFetch(B,ivec2( \
+                       int(idx)%textureSize(B,0).x, \
+                       int(idx)/textureSize(B,0).x  \
+                    ),0)
+            )"
+            );
+	} else if(default_type() == TBO) {
+	  GEO::GLSL::register_GLSL_include_file("GLUP/buffers.h",
+          R"(
+          #define glup_Buffer  samplerBuffer
+          #define glup_iBuffer isamplerBuffer
+          #define glup_uBuffer usamplerBuffer
+          #define glup_fetch(B,idx) texelFetch(B,int(idx))
+          )"
+          );
+	}
+    }
+
+    /***************************************************************************/
+
 }

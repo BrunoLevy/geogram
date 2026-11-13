@@ -109,7 +109,7 @@ namespace GLUP {
 	 */
 	Type type() const {
 	    return type_;
-	};
+	}
 
 	/**
 	 * \brief Tests whether a BufferObject is initialized
@@ -120,6 +120,13 @@ namespace GLUP {
 	bool initialized() const {
 	    return type_ != UNINITIALIZED;
 	}
+
+	/**
+	 * \brief Registers GLSL sources for using portable wrappers around
+	 *  buffers.
+	 * \TODOC
+	 */
+	static void register_GLSL_sources();
 
 	/**
 	 * \brief Initializes static class variables
