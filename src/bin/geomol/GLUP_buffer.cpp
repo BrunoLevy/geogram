@@ -150,9 +150,13 @@ namespace GLUP {
     }
 
     void BufferObject::bind_TBO(GLuint unit) {
-	geo_debug_assert(VBO_ != 0 && texture_ != 0);
 	geo_argused(unit);
+#ifdef GEO_TBO_SUPPORTED
+	geo_debug_assert(VBO_ != 0 && texture_ != 0);
 	glBindTexture(GL_TEXTURE_BUFFER, texture_);
+#else
+	geo_assert_not_reached;
+#endif
     }
 
     void BufferObject::bind_SSBO(GLuint unit) {
