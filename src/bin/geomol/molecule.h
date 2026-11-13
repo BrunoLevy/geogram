@@ -46,7 +46,7 @@
 #include <geogram_gfx/GLUP/GLUP.h>
 #include <geogram_gfx/mesh/mesh_gfx.h>
 #include "power_diagram.h"
-#include "TBO.h"
+#include "GLUP_buffer.h"
 
 namespace GEO {
 
@@ -499,14 +499,14 @@ namespace GEO {
 	     *  create it with the specified vector \p V. Note that if \p tbo is
 	     *  initialized then \p V is ignored. One needs to call tbo.reset()
 	     *  before in order to load new values of \p V.
-	     *  \param[in] tbo the TextureBufferObject to be bound
+	     *  \param[in] tbo the GLUP::BufferObject to be bound
 	     *  \param[in] V the vector of values to initialize \p tbo the first
 	     *   time it is called or each time \p tbo is uninitialized
 	     *  \param texture_unit one of 0,1,2,...N. Note: it is different
 	     *   from GL_TEXTURE0, GL_TEXTURE1, ... GL_TEXTUREN.
 	     */
 	    template <class T> static void bind_tbo(
-		TextureBufferObject& tbo, const vector<T>& V, GLint texture_unit
+		GLUP::BufferObject& tbo, const vector<T>& V, GLint texture_unit
 	    ) {
 		GLenum unit = GLenum(GL_TEXTURE0 + texture_unit);
 		glActiveTexture(unit);
@@ -548,14 +548,14 @@ namespace GEO {
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage
 	     */
-	    mutable TextureBufferObject cell_facet_ptr_tbo_;
-	    mutable TextureBufferObject cell_facet_plane_tbo_;
+	    mutable GLUP::BufferObject cell_facet_ptr_tbo_;
+	    mutable GLUP::BufferObject cell_facet_plane_tbo_;
 
-	    mutable TextureBufferObject cell_eqn_1_tbo_;
-	    mutable TextureBufferObject cell_eqn_2_tbo_;
+	    mutable GLUP::BufferObject cell_eqn_1_tbo_;
+	    mutable GLUP::BufferObject cell_eqn_2_tbo_;
 
-	    mutable TextureBufferObject cell_imposter_1_tbo_;
-	    mutable TextureBufferObject cell_imposter_2_tbo_;
+	    mutable GLUP::BufferObject cell_imposter_1_tbo_;
+	    mutable GLUP::BufferObject cell_imposter_2_tbo_;
 
 	    vec3 color_ = {1.0, 1.0, 1.0};
 	    GLuint program_ = 0;

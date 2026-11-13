@@ -37,8 +37,8 @@
  *
  */
 
-#ifndef TBO_H
-#define TBO_H
+#ifndef GLUP_BUFFER_H
+#define GLUP_BUFFER_H
 
 #include <geogram/basic/geometry.h>
 #include <geogram_gfx/basic/common.h>
@@ -47,6 +47,9 @@
 #include <geogram/basic/logger.h>
 #include <vector>
 #include <typeinfo>
+
+// GEO_TBO_SUPPORTED
+// GEO_SSBO_SUPPORTED
 
 #define GEO_TBO_SUPPORTED
 
@@ -65,13 +68,17 @@
    #ifdef GEO_TBO_SUPPORTED
    #undef GEO_TBO_SUPPORTED
    #endif
+   #ifdef GEO_SSBO_SUPPORTED
+   #undef GEO_SSBO_SUPPORTED
+   #endif
 #endif
 
-namespace GEO {
+namespace GLUP {
+    using namespace GEO;
 
     /**
-     * \brief Easy to use wrapper around TextureBufferObject
-     * \details TextureBufferObject is a portable way of sending large arrays
+     * \brief Easy to use wrapper around BufferObject
+     * \details BufferObject is a portable way of sending large arrays
      *  of datas to shaders. It can be used when OpenGL 4.3's SSBOs (Shared
      *  Storage Buffer Objects) are not available, as for instance in
      *  OpenGL 4.1 which is the highest version of OpenGL supported by Macs.
@@ -80,7 +87,7 @@ namespace GEO {
      *  The Texture Buffer Object is manipulated through an OpenGL texture ID,
      *  returned by TBO(), that can be bound to a texture unit and accessed
      *  through texelFetch() in shaders.
-     *  The TextureBufferObject class manages a Vertex Buffer Object / Texture
+     *  The BufferObject class manages a Vertex Buffer Object / Texture
      *  Buffer Object pair.
      *
      *  Creation:
@@ -110,55 +117,78 @@ namespace GEO {
      *  \endcode
      *
      */
-    class TextureBufferObject {
+    class BufferObject {
     public:
-        TextureBufferObject() {
+	enum Type {UNINITIALIZED, TEXTURE_2D, TBO, SSBO};
+
+        BufferObject() {
 	}
 
-	~TextureBufferObject() {
+	~BufferObject() {
 	    reset();
 	}
 
+	Type type() const {
+	    return type_;
+	};
+
 	bool initialized() const {
-	    return TBO_ != 0;
+	    return type_ != UNINITIALIZED;
 	}
 
-	void reset() {
-	    if(TBO_ != 0) {
-		glDeleteTextures(1, &TBO_);
-		TBO_ = 0;
-	    }
-	    if(VBO_ != 0) {
-		glDeleteBuffers(1,&VBO_);
-		VBO_ = 0;
-	    }
-#ifndef GEO_TBO_SUPPORTED
-	    width_ = 0;
-	    height_ = 0;
-#endif
-	}
+	static void initialize_class();
+	static Type default_type();
+
+	void reset();
 
 	// Note: there should be an active texture unit when calling this
 	// function the 1st time.
 	template <class T> void create_or_update(index_t nb, const T* data) {
-	    initialize(); // gets max TBO size or max texture size
-#ifdef GEO_TBO_SUPPORTED
-	    geo_assert(GLint(nb) < max_TBO_size_);
-	    update_or_check_buffer_object(
-		VBO_, GL_ARRAY_BUFFER,
-		nb * sizeof(T), data,
-		true
-	    );
-	    if(TBO_ == 0) {
-		glGenTextures(1, &TBO_);
-		glBindTexture(GL_TEXTURE_BUFFER, TBO_);
-		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
+	    Type type = default_type();
+	    switch(type) {
+	    case UNINITIALIZED:
+		geo_assert_not_reached;
+		break;
+	    case TEXTURE_2D:
+		create_or_update_TEXTURE_2D(nb, data);
+		break;
+	    case TBO:
+		create_or_update_TBO(nb,data);
+		break;
+	    case SSBO:
+		create_or_update_SSBO(nb,data);
+		break;
 	    }
-#else
-	    if(TBO_ == 0) {
-		glGenTextures(1, &TBO_);
+	}
+
+	template <class T> void create_or_update(const std::vector<T>& v) {
+	    create_or_update(index_t(v.size()), v.data());
+	}
+
+	template <class T> void create_or_update(const GEO::vector<T>& v) {
+	    create_or_update(v.size(), v.data());
+	}
+
+	void bind(GLuint unit);
+
+    protected:
+	void reset_TEXTURE_2D();
+	void reset_TBO();
+	void reset_SSBO();
+
+	void bind_TEXTURE_2D(GLuint unit);
+	void bind_TBO(GLuint unit);
+	void bind_SSBO(GLuint unit);
+
+	template <class T> void create_or_update_TEXTURE_2D(
+	    index_t nb, const T* data
+	) {
+	    geo_debug_assert(type_ == TEXTURE_2D || type_ == UNINITIALIZED);
+	    type_ = TEXTURE_2D;
+	    if(texture_ == 0) {
+		glGenTextures(1, &texture_);
 	    }
-	    glBindTexture(GL_TEXTURE_2D, TBO_);
+	    glBindTexture(GL_TEXTURE_2D, texture_);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	    GLsizei width = GLsizei(nb);
@@ -214,35 +244,48 @@ namespace GEO {
 		    data + (height-1)*width
 		);
 	    }
+	}
+
+	template <class T> void create_or_update_TBO(
+	    index_t nb, const T* data
+	) {
+#ifdef GEO_TBO_SUPPORTED
+	    geo_debug_assert(type_ == TBO || type_ == UNINITIALIZED);
+	    type_ = TBO;
+	    geo_assert(GLint(nb) < max_TBO_size_);
+	    update_or_check_buffer_object(
+		VBO_, GL_ARRAY_BUFFER,
+		nb * sizeof(T), data,
+		true
+	    );
+	    if(texture_ == 0) {
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_BUFFER, texture_);
+		glTexBuffer(GL_TEXTURE_BUFFER, internal_format(T()), VBO_);
+	    }
+#else
+	    geo_argused(nb);
+	    geo_argused(data);
+	    geo_assert_not_reached;
 #endif
 	}
 
-	template <class T> void create_or_update(const std::vector<T>& v) {
-	    create_or_update(index_t(v.size()), v.data());
-	}
-
-	template <class T> void create_or_update(const GEO::vector<T>& v) {
-	    create_or_update(v.size(), v.data());
-	}
-
-	void bind(GLuint texture_unit) {
+	template <class T> void create_or_update_SSBO(
+	    index_t nb, const T* data
+	) {
 #ifdef GEO_TBO_SUPPORTED
-	    geo_debug_assert(VBO_ != 0 && TBO_ != 0);
-	    glActiveTexture(texture_unit);
-	    glBindTexture(GL_TEXTURE_BUFFER, TBO_);
+	    // TODO
+	    geo_argused(nb);
+	    geo_argused(data);
+	    geo_assert_not_reached;
 #else
-	    geo_debug_assert(TBO_ != 0);
-	    glActiveTexture(texture_unit);
-	    glBindTexture(GL_TEXTURE_2D, TBO_);
+	    geo_argused(nb);
+	    geo_argused(data);
+	    geo_assert_not_reached;
 #endif
 	}
 
     protected:
-	/**
-	 * \brief Queries max tbo size and max texture size
-	 */
-	static void initialize();
-
 	// Just to map geogram types to OpenGL storage
 	static GLuint internal_format(uint32_t) { return GL_R32UI;   }
 	static GLuint internal_format(int32_t)  { return GL_R32I;    }
@@ -276,15 +319,16 @@ namespace GEO {
 
 
     private:
-	GLuint TBO_ = 0;
+	Type type_ = UNINITIALIZED;
+	GLuint texture_ = 0;
 	GLuint VBO_ = 0;
-#ifdef GEO_TBO_SUPPORTED
-	static GLint max_TBO_size_; // in texels.
-#else
-	static GLint max_texture_size_; // in texels.
 	GLsizei width_ = 0;
 	GLsizei height_ = 0;
-#endif
+
+	static bool class_initialized_;
+	static GLint max_TBO_size_;     // in texels.
+	static GLint max_texture_size_; // in texels.
+	static Type default_type_;
     };
 }
 

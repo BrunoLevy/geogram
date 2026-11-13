@@ -83,6 +83,11 @@ namespace {
 
     protected:
 
+	void GL_initialize() override {
+	    SimpleApplication::GL_initialize();
+	    GLUP::BufferObject::initialize_class();
+	}
+
 	/**
 	 * \brief Turns the object around one of the three screen axes.
 	 * \param[in] axis 0 for the horizontal of the screen, 1 for its

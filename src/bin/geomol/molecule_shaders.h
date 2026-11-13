@@ -1,37 +1,38 @@
 
-#include "TBO.h"
+#include "GLUP_buffer.h"
 #include <geogram_gfx/basic/GLSL.h>
 
 
 namespace {
 
     void register_geomol_shader_utilities() {
+	// Portable abstraction of "buffers", that can be implemented as:
+	// - a TBO (Texture Buffer Object) if GEO_TBO_SUPPORTED is defined
+	// - or an integer or floating-point texture otherwise
+	GLUP::BufferObject::Type bufftype = GLUP::BufferObject::default_type();
 
-          // Portable abstraction of "buffers", that can be implemented as:
-          // - a TBO (Texture Buffer Object) if GEO_TBO_SUPPORTED is defined
-          // - or an integer or floating-point texture otherwise
-#ifdef GEO_TBO_SUPPORTED
-	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
+	if(bufftype == GLUP::BufferObject::TEXTURE_2D) {
+	    GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
+            R"(
+            #define glup_Buffer  sampler2D
+            #define glup_iBuffer isampler2D
+            #define glup_uBuffer usampler2D
+            #define glup_fetch(B,idx) texelFetch(B,ivec2( \
+                       int(idx)%textureSize(B,0).x, \
+                       int(idx)/textureSize(B,0).x  \
+                    ),0)
+            )"
+            );
+	} else if(bufftype == GLUP::BufferObject::TBO) {
+	  GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
           R"(
           #define glup_Buffer  samplerBuffer
           #define glup_iBuffer isamplerBuffer
           #define glup_uBuffer usamplerBuffer
           #define glup_fetch(B,idx) texelFetch(B,int(idx))
           )"
-        );
-#else
-	GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
-          R"(
-          #define glup_Buffer  sampler2D
-          #define glup_iBuffer isampler2D
-          #define glup_uBuffer usampler2D
-          #define glup_fetch(B,idx) texelFetch(B,ivec2( \
-                     int(idx)%textureSize(B,0).x, \
-                     int(idx)/textureSize(B,0).x  \
-                  ),0)
-          )"
-        );
-#endif
+          );
+	}
 
         // Utilities for fragment shaders:
         // - clipping by cells and clipping by user clip plane
