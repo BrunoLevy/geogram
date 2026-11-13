@@ -40,7 +40,10 @@ int main() {
     editor.clear();
     if(!editor.text().empty()) { return 2; }
 
-    IMGUI_CHECKVERSION();
+    if(!IMGUI_CHECKVERSION()) {
+        std::cerr << "ImGui headers and library have incompatible layouts\n";
+        return 5;
+    }
     ImGui::CreateContext();
     auto& io = ImGui::GetIO();
     io.IniFilename = nullptr;
