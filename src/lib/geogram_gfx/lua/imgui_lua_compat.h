@@ -6,9 +6,12 @@
 #include <imgui.h>
 
 #if IMGUI_VERSION_NUM >= 19298
-static constexpr ImGuiPopupFlags ImGuiPopupFlags_MouseButtonDefault_ = ImGuiPopupFlags_MouseButtonRight;
-static constexpr ImDrawFlags ImDrawFlags_RoundCornersDefault_ = ImDrawFlags_RoundAll;
-static constexpr ImDrawFlags ImDrawFlags_RoundCornersMask_ = ImDrawFlags_RoundAll | ImDrawFlags_RoundNone;
+// These spellings are local to generated Lua binding translation units.
+// Map references after including imgui.h rather than declaring globals: some
+// 1.93 snapshots retain enum members with the same legacy names.
+#define ImGuiPopupFlags_MouseButtonDefault_ ImGuiPopupFlags_MouseButtonRight
+#define ImDrawFlags_RoundCornersDefault_ ImDrawFlags_RoundAll
+#define ImDrawFlags_RoundCornersMask_ (ImDrawFlags_RoundAll | ImDrawFlags_RoundNone)
 #endif
 
 #endif
