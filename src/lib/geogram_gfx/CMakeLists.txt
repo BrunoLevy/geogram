@@ -72,6 +72,11 @@ VERSION ${VORPALINE_VERSION}
 SOVERSION ${VORPALINE_VERSION_MAJOR}
 FOLDER "GEOGRAM")
 
+if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
+  # GEO::TextEditor embeds the editor, whose new class layout changes our ABI.
+  set_property(TARGET geogram_gfx PROPERTY SOVERSION 2)
+endif()
+
 if(NOT ANDROID)
 target_link_libraries(geogram_gfx glfw)
 endif()
