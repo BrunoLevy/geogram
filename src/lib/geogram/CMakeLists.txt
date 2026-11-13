@@ -64,14 +64,29 @@ ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
 target_link_libraries(geogram mini-gmp-plus)
 endif()
 
+# Links a third-party library and includes its headers as system headers,
+# so that the warnings enabled for geogram's own sources (clang -Weverything)
+# are not reported inside them. The include directories of a non-imported
+# target (e.g. TBB built in the same project with FetchContent) are
+# otherwise passed with -I.
+function(geogram_link_third_party_library lib)
+   if(TARGET ${lib})
+      get_target_property(lib_include_dirs ${lib} INTERFACE_INCLUDE_DIRECTORIES)
+      if(lib_include_dirs)
+         target_include_directories(geogram SYSTEM PRIVATE ${lib_include_dirs})
+      endif()
+   endif()
+   target_link_libraries(geogram ${lib})
+endfunction()
+
 if(GEOGRAM_WITH_TBB)
-target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
+geogram_link_third_party_library(TBB::tbb) # TODO: Use PRIVATE keyword here
 target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
 # For now here (quick and dirty fix, for using parallel STL)
-if(LINUX AND NOT GEOGRAM_WITH_EMSCRIPTEN) 
-target_link_libraries(geogram tbb)
+if(LINUX AND NOT GEOGRAM_WITH_EMSCRIPTEN)
+geogram_link_third_party_library(tbb)
 endif()
 
 # Jeremie/Maxence: avoids the need to redeclare geogram include
