@@ -40,7 +40,7 @@ namespace {
               if(c >= max_clip_planes) {
                  return true;
               }
-              vec4 P = glup_fetch(facet_plane_TBO, k);
+              vec4 P = glup_fetch(facet_plane_TBO, int(k));
               if(dot(vec4(p,1.0),P) > 0.0) {
                  return false;
               }
@@ -89,7 +89,7 @@ namespace {
            uint b = glup_fetch(facet_ptr_TBO, cell_id).x;
            uint e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
            for(uint k=b; k<e; ++k) {
-              vec4 P = glup_fetch(facet_plane_TBO, k);
+              vec4 P = glup_fetch(facet_plane_TBO, int(k));
               float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
               result = smin(result, this_dist, GLUP.mesh_width/1000.0);
            }

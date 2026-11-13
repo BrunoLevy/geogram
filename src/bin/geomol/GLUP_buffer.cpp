@@ -260,10 +260,21 @@ namespace GLUP {
             #define glup_Buffer  sampler2D
             #define glup_iBuffer isampler2D
             #define glup_uBuffer usampler2D
-            #define glup_fetch(B,idx) texelFetch(B,ivec2( \
-                       int(idx)%textureSize(B,0).x, \
-                       int(idx)/textureSize(B,0).x  \
-                    ),0)
+
+            vec4 glup_fetch(in glup_Buffer B, in int idx) {
+               int W = textureSize(B,0).x;
+               return texelFetch(B, ivec2(idx%W,idx/W),0);
+            }
+
+            ivec4 glup_fetch(in glup_iBuffer B, in int idx) {
+               int W = textureSize(B,0).x;
+               return texelFetch(B, ivec2(idx%W,idx/W),0);
+            }
+
+            uvec4 glup_fetch(in glup_uBuffer B, in int idx) {
+               int W = textureSize(B,0).x;
+               return texelFetch(B, ivec2(idx%W,idx/W),0);
+            }
             )"
             );
 	} else if(default_type() == TBO) {
@@ -272,7 +283,19 @@ namespace GLUP {
           #define glup_Buffer  samplerBuffer
           #define glup_iBuffer isamplerBuffer
           #define glup_uBuffer usamplerBuffer
-          #define glup_fetch(B,idx) texelFetch(B,int(idx))
+
+          vec4 glup_fetch(in samplerBuffer B, in int idx) {
+             return texelFetch(B,idx);
+          }
+
+          ivec4 glup_fetch(in isamplerBuffer B, in int idx) {
+             return texelFetch(B,idx);
+          }
+
+          uvec4 glup_fetch(in usamplerBuffer B, in int idx) {
+             return texelFetch(B,idx);
+          }
+
           )"
           );
 	}
