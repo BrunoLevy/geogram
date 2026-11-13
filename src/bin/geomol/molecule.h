@@ -46,7 +46,7 @@
 #include <geogram_gfx/GLUP/GLUP.h>
 #include <geogram_gfx/mesh/mesh_gfx.h>
 #include "power_diagram.h"
-#include "GLUP_buffer.h"
+#include "GLUP_buffer_object.h"
 
 namespace GEO {
 

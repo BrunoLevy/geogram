@@ -37,8 +37,8 @@
  *
  */
 
-#ifndef GLUP_BUFFER_H
-#define GLUP_BUFFER_H
+#ifndef GLUP_BUFFER_OBJECT_H
+#define GLUP_BUFFER_OBJECT_H
 
 #include <geogram/basic/geometry.h>
 #include <geogram_gfx/basic/common.h>
