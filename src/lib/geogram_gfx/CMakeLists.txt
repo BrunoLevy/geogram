@@ -12,9 +12,6 @@ configure_file(geogram_gfx.pc.in ${PROJECT_BINARY_DIR}/geogram_gfx${VORPALINE_VE
 
 if(GEOGRAM_USE_SYSTEM_TEXT_EDITOR)
   find_package(ImGuiColorTextEdit CONFIG REQUIRED)
-  if(NOT ImGuiColorTextEdit_GEOGRAM_ENABLED)
-    message(FATAL_ERROR "ImGuiColorTextEdit must be built with ENABLE_GEOGRAM=ON")
-  endif()
   include(CheckCXXSourceCompiles)
   set(CMAKE_REQUIRED_LIBRARIES ImGuiColorTextEdit::ImGuiColorTextEdit)
   check_cxx_source_compiles("#include <imgui.h>
