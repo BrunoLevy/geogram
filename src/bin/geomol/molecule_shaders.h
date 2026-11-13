@@ -14,8 +14,8 @@ namespace {
 	// - drawing imposter (for debugging)
 	GEO::GLSL::register_GLSL_include_file("geomol/fragment_shader_utils.h",
         R"(
-        uniform glup_uBuffer facet_ptr_TBO;
-        uniform glup_Buffer facet_plane_TBO;
+        uniform glup_uBuffer facet_ptr_BO;
+        uniform glup_Buffer facet_plane_BO;
         uniform bool show_imposters;
         uniform int max_clip_planes; // max number of clipping planes to test
 
@@ -34,13 +34,13 @@ namespace {
               return true;
            }
            int c = 0;
-           uint b = glup_fetch(facet_ptr_TBO, cell_id).x;
-           uint e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
+           uint b = glup_fetch(facet_ptr_BO, cell_id).x;
+           uint e = glup_fetch(facet_ptr_BO, cell_id+1).x;
            for(uint k=b; k<e; ++k,++c) {
               if(c >= max_clip_planes) {
                  return true;
               }
-              vec4 P = glup_fetch(facet_plane_TBO, int(k));
+              vec4 P = glup_fetch(facet_plane_BO, int(k));
               if(dot(vec4(p,1.0),P) > 0.0) {
                  return false;
               }
@@ -86,10 +86,10 @@ namespace {
         // \return smoothed minimum distance to cell's clipping planes
         float min_dist(in int cell_id, in vec3 M) {
            float result = 1e6;
-           uint b = glup_fetch(facet_ptr_TBO, cell_id).x;
-           uint e = glup_fetch(facet_ptr_TBO, cell_id+1).x;
+           uint b = glup_fetch(facet_ptr_BO, cell_id).x;
+           uint e = glup_fetch(facet_ptr_BO, cell_id+1).x;
            for(uint k=b; k<e; ++k) {
-              vec4 P = glup_fetch(facet_plane_TBO, int(k));
+              vec4 P = glup_fetch(facet_plane_BO, int(k));
               float this_dist = abs(dot(M,P.xyz)+P.w)/length(P.xyz);
               result = smin(result, this_dist, GLUP.mesh_width/1000.0);
            }
@@ -164,9 +164,9 @@ namespace {
         //import <GLUP/buffers.h>
         //import <geomol/vertex_shader_utils.h>
 
-        uniform glup_Buffer cell_eqn_1_TBO;
-        uniform glup_Buffer cell_imposter_1_TBO;
-        uniform bool replace_imposter; // if set, use cell_imposter_1_TBO
+        uniform glup_Buffer cell_eqn_1_BO;
+        uniform glup_Buffer cell_imposter_1_BO;
+        uniform bool replace_imposter; // if set, use cell_imposter_1_BO
 
         glup_flat glup_out vec4 focus_R;
         glup_flat glup_out int cell_id;
@@ -234,9 +234,9 @@ namespace {
 
 	void main() {
             cell_id = gl_VertexID / 6;
-            focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
+            focus_R = glup_fetch(cell_eqn_1_BO,cell_id);
             vec4 imp_focus_R = replace_imposter ?
-                               glup_fetch(cell_imposter_1_TBO,cell_id) : focus_R;
+                               glup_fetch(cell_imposter_1_BO,cell_id) : focus_R;
             vec2 center_c;
             float R_c;
             project_sphere(imp_focus_R.xyz, imp_focus_R.w, center_c, R_c);
@@ -333,10 +333,10 @@ namespace {
         //import <GLUP/buffers.h>
         //import <geomol/vertex_shader_utils.h>
 
-        uniform glup_Buffer cell_eqn_1_TBO;
-        uniform glup_Buffer cell_eqn_2_TBO;
-        uniform glup_Buffer cell_imposter_1_TBO;
-        uniform glup_Buffer cell_imposter_2_TBO;
+        uniform glup_Buffer cell_eqn_1_BO;
+        uniform glup_Buffer cell_eqn_2_BO;
+        uniform glup_Buffer cell_imposter_1_BO;
+        uniform glup_Buffer cell_imposter_2_BO;
 
         glup_flat glup_out vec3  C;  // focus
         glup_flat glup_out vec3  n;  // axis
@@ -426,10 +426,10 @@ namespace {
 
 	void main() {
             cell_id = gl_VertexID / 6;
-            vec4 focus_R = glup_fetch(cell_eqn_1_TBO,cell_id);
+            vec4 focus_R = glup_fetch(cell_eqn_1_BO,cell_id);
             C = focus_R.xyz;
             R2 = focus_R.w;
-            n = glup_fetch(cell_eqn_2_TBO,cell_id).xyz;
+            n = glup_fetch(cell_eqn_2_BO,cell_id).xyz;
 
             vec2 offset = imposter_offset[gl_VertexID%6];
             if(full_imposters) {
@@ -437,8 +437,8 @@ namespace {
                return;
             }
 
-            vec4 imp1 = glup_fetch(cell_imposter_1_TBO,cell_id);
-            vec4 imp2 = glup_fetch(cell_imposter_2_TBO,cell_id);
+            vec4 imp1 = glup_fetch(cell_imposter_1_BO,cell_id);
+            vec4 imp2 = glup_fetch(cell_imposter_2_BO,cell_id);
 
             vec4 UV1 = GLUP.modelviewprojection_matrix * vec4(imp1.xyz,1.0);
             vec4 UV2 = GLUP.modelviewprojection_matrix * vec4(imp2.xyz,1.0);

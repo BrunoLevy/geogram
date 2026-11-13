@@ -425,14 +425,14 @@ namespace GEO {
 	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
 	    // does not seem to work to set a texture unit, that seems to be
 	    // expected to be a *signed* integer (no idea why).
-	    static constexpr GLint FACET_PTR_TEX_UNIT       = 4;
-	    static constexpr GLint FACET_PLANE_TEX_UNIT     = 5;
-	    static constexpr GLint CELL_EQN_1_TEX_UNIT      = 6;
-	    static constexpr GLint CELL_EQN_2_TEX_UNIT      = 7;
-	    static constexpr GLint CELL_IMPOSTER_1_TEX_UNIT = 8;
-	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
+	    static constexpr GLint FACET_PTR_UNIT       = 4;
+	    static constexpr GLint FACET_PLANE_UNIT     = 5;
+	    static constexpr GLint CELL_EQN_1_UNIT      = 6;
+	    static constexpr GLint CELL_EQN_2_UNIT      = 7;
+	    static constexpr GLint CELL_IMPOSTER_1_UNIT = 8;
+	    static constexpr GLint CELL_IMPOSTER_2_UNIT = 9;
 
-	    void bind_tbos() const;
+	    void bind_buffers() const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -494,27 +494,26 @@ namespace GEO {
 	    const PowerDiagram& diagram() const { return *(molecule_.diagram_); }
 
 	    /**
-	     * \brief Binds a texture buffer object to the specified texture unit
-	     * \details If the texture buffer object \p tbo is uninitialized,
-	     *  create it with the specified vector \p V. Note that if \p tbo is
-	     *  initialized then \p V is ignored. One needs to call tbo.reset()
+	     * \brief Binds a buffer object to the specified texture unit
+	     * \details If the buffer object \p bo is uninitialized,
+	     *  create it with the specified vector \p V. Note that if \p bo is
+	     *  initialized then \p V is ignored. One needs to call bo.reset()
 	     *  before in order to load new values of \p V.
-	     *  \param[in] tbo the GLUP::BufferObject to be bound
-	     *  \param[in] V the vector of values to initialize \p tbo the first
-	     *   time it is called or each time \p tbo is uninitialized
-	     *  \param texture_unit one of 0,1,2,...N. Note: it is different
+	     *  \param[in] bo the GLUP::BufferObject to be bound
+	     *  \param[in] V the vector of values to initialize \p bo the first
+	     *   time it is called or each time \p bo is uninitialized
+	     *  \param unit one of 0,1,2,...N. Note: it is different
 	     *   from GL_TEXTURE0, GL_TEXTURE1, ... GL_TEXTUREN.
 	     */
-	    template <class T> static void bind_tbo(
-		GLUP::BufferObject& tbo, const vector<T>& V, GLint texture_unit
+	    template <class T> static void bind_buffer(
+		GLUP::BufferObject& bo, const vector<T>& V, GLuint unit
 	    ) {
-		GLenum unit = GLenum(GL_TEXTURE0 + texture_unit);
-		glActiveTexture(unit);
-		if(!tbo.initialized()) {
-		    tbo.create_or_update(V);
+		GLUP::BufferObject::active_unit(unit);
+		if(!bo.initialized()) {
+		    bo.create_or_update(V);
 		}
-		tbo.bind(unit);
-		glActiveTexture(GL_TEXTURE0);
+		bo.bind();
+		GLUP::BufferObject::active_unit(0);
 	    }
 
 	private:
@@ -548,14 +547,14 @@ namespace GEO {
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage
 	     */
-	    mutable GLUP::BufferObject cell_facet_ptr_tbo_;
-	    mutable GLUP::BufferObject cell_facet_plane_tbo_;
+	    mutable GLUP::BufferObject cell_facet_ptr_bo_;
+	    mutable GLUP::BufferObject cell_facet_plane_bo_;
 
-	    mutable GLUP::BufferObject cell_eqn_1_tbo_;
-	    mutable GLUP::BufferObject cell_eqn_2_tbo_;
+	    mutable GLUP::BufferObject cell_eqn_1_bo_;
+	    mutable GLUP::BufferObject cell_eqn_2_bo_;
 
-	    mutable GLUP::BufferObject cell_imposter_1_tbo_;
-	    mutable GLUP::BufferObject cell_imposter_2_tbo_;
+	    mutable GLUP::BufferObject cell_imposter_1_bo_;
+	    mutable GLUP::BufferObject cell_imposter_2_bo_;
 
 	    vec3 color_ = {1.0, 1.0, 1.0};
 	    GLuint program_ = 0;

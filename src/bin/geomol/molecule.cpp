@@ -1038,62 +1038,63 @@ namespace GEO {
 	cell_eqn_2_.resize(0);
 	cell_imposter_1_.resize(0);
 	cell_imposter_2_.resize(0);
-	cell_facet_ptr_tbo_.reset();
-	cell_facet_plane_tbo_.reset();
-	cell_eqn_1_tbo_.reset();
-	cell_eqn_2_tbo_.reset();
-	cell_imposter_1_tbo_.reset();
-	cell_imposter_2_tbo_.reset();
+	cell_facet_ptr_bo_.reset();
+	cell_facet_plane_bo_.reset();
+	cell_eqn_1_bo_.reset();
+	cell_eqn_2_bo_.reset();
+	cell_imposter_1_bo_.reset();
+	cell_imposter_2_bo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos() const {
+    void Molecule::MixedComplexCells::bind_buffers() const {
 	bool eqn1 = (cell_eqn_1_.size() != 0);
 	bool eqn2 = (cell_eqn_2_.size() != 0);
 	bool imposters1 = (cell_imposter_1_.size() != 0);
 	bool imposters2 = (cell_imposter_2_.size() != 0);
 
-	bind_tbo(cell_facet_ptr_tbo_, cell_facet_ptr_, FACET_PTR_TEX_UNIT);
-	bind_tbo(cell_facet_plane_tbo_, cell_facet_plane_, FACET_PLANE_TEX_UNIT);
+	bind_buffer(cell_facet_ptr_bo_, cell_facet_ptr_, FACET_PTR_UNIT);
+	bind_buffer(cell_facet_plane_bo_, cell_facet_plane_, FACET_PLANE_UNIT);
+
 	if(eqn1) {
-	    bind_tbo(cell_eqn_1_tbo_, cell_eqn_1_, CELL_EQN_1_TEX_UNIT);
+	    bind_buffer(cell_eqn_1_bo_, cell_eqn_1_, CELL_EQN_1_UNIT);
 	}
 	if(eqn2) {
-	    bind_tbo(cell_eqn_2_tbo_, cell_eqn_2_, CELL_EQN_2_TEX_UNIT);
+	    bind_buffer(cell_eqn_2_bo_, cell_eqn_2_, CELL_EQN_2_UNIT);
 	}
 	if(imposters1) {
-	    bind_tbo(
-		cell_imposter_1_tbo_, cell_imposter_1_, CELL_IMPOSTER_1_TEX_UNIT
+	    bind_buffer(
+		cell_imposter_1_bo_, cell_imposter_1_, CELL_IMPOSTER_1_UNIT
 	    );
 	}
 	if(imposters2) {
-	    bind_tbo(
-		cell_imposter_2_tbo_, cell_imposter_2_, CELL_IMPOSTER_2_TEX_UNIT
+	    bind_buffer(
+		cell_imposter_2_bo_, cell_imposter_2_, CELL_IMPOSTER_2_UNIT
 	    );
 	}
-	GLSL::set_program_uniform_by_name(
-	    program_, "facet_ptr_TBO", FACET_PTR_TEX_UNIT
+	GLUP::BufferObject::set_program_buffer_unit_by_name(
+	    program_, "facet_ptr_BO", FACET_PTR_UNIT
 	);
-	GLSL::set_program_uniform_by_name(
-	    program_, "facet_plane_TBO", FACET_PLANE_TEX_UNIT
+	GLUP::BufferObject::set_program_buffer_unit_by_name(
+	    program_, "facet_plane_BO", FACET_PLANE_UNIT
 	);
 	if(eqn1) {
-	    GLSL::set_program_uniform_by_name(
-		program_, "cell_eqn_1_TBO", CELL_EQN_1_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_eqn_1_BO", CELL_EQN_1_UNIT
 	    );
 	}
 	if(eqn2) {
-	    GLSL::set_program_uniform_by_name(
-		program_, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_eqn_2_BO", CELL_EQN_2_UNIT
 	    );
 	}
 	if(imposters1) {
-	    GLSL::set_program_uniform_by_name(
-		program_, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_imposter_1_BO", CELL_IMPOSTER_1_UNIT
 	    );
 	}
 	if(imposters2) {
-	    GLSL::set_program_uniform_by_name(
-		program_, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_imposter_2_BO", CELL_IMPOSTER_2_UNIT
 	    );
 	}
     }
@@ -1106,7 +1107,7 @@ namespace GEO {
 	if(mode == DRAW_MODE_MSS) {
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
-	    bind_tbos();
+	    bind_buffers();
 	    GLSL::set_program_uniform_by_name(
 		program_, "show_imposters", molecule_.show_imposters()
 	    );

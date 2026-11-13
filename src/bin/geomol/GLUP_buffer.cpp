@@ -92,34 +92,34 @@ namespace GLUP {
 	// TODO
     }
 
-    /**************** activate() ****************************/
+    /**************** active_unit() ****************************/
 
-    void BufferObject::activate(GLuint unit) {
+    void BufferObject::active_unit(GLuint unit) {
 	switch(default_type()) {
 	case UNINITIALIZED:
 	    geo_assert_not_reached;
 	    break;
 	case TEXTURE_2D:
-	    activate_TEXTURE_2D(unit);
+	    active_unit_TEXTURE_2D(unit);
 	    break;
 	case TBO:
-	    activate_TBO(unit);
+	    active_unit_TBO(unit);
 	    break;
 	case SSBO:
-	    activate_SSBO(unit);
+	    active_unit_SSBO(unit);
 	    break;
 	}
     }
 
-    void BufferObject::activate_TEXTURE_2D(GLuint unit) {
-	glActiveTexture(unit);
+    void BufferObject::active_unit_TEXTURE_2D(GLuint unit) {
+	glActiveTexture(GL_TEXTURE0 + unit);
     }
 
-    void BufferObject::activate_TBO(GLuint unit) {
-	glActiveTexture(unit);
+    void BufferObject::active_unit_TBO(GLuint unit) {
+	glActiveTexture(GL_TEXTURE0 + unit);
     }
 
-    void BufferObject::activate_SSBO(GLuint unit) {
+    void BufferObject::active_unit_SSBO(GLuint unit) {
 	geo_argused(unit);
 	geo_assert_not_reached;
     }
@@ -127,7 +127,9 @@ namespace GLUP {
     /**************** bind() ****************************/
 
     void BufferObject::bind(GLuint unit) {
-	activate(unit);
+	if(unit != 0) {
+	    active_unit(unit);
+	}
 	switch(type_) {
 	case UNINITIALIZED:
 	    geo_assert_not_reached;
@@ -249,6 +251,23 @@ namespace GLUP {
 	    return TBO;
 	}
 	return TEXTURE_2D;
+    }
+
+    void BufferObject::set_program_buffer_unit_by_name(
+	GLuint program, const char* name, GLuint unit
+    ) {
+	switch(default_type()) {
+	case UNINITIALIZED:
+	    geo_assert_not_reached;
+	    break;
+	case TEXTURE_2D:
+	case TBO:
+	    // Note: needs to be a GLint, doew not work with GLuint (why?)
+	    GLSL::set_program_uniform_by_name(program, name, GLint(unit));
+	    break;
+	case SSBO:
+	    break;
+	}
     }
 
     /***************************************************************************/

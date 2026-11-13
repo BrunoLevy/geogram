@@ -151,13 +151,18 @@ namespace GLUP {
 	/**
 	 * \brief Creates an uninitialized BufferObject or updates an initialized
 	 *  one with new data.
-	 * \details There should be an active unit when calling this function the
-	 *  first time
 	 * \param[in] nb number of items
 	 * \param[in] data a pointer to a contiguous array of \p nb items
-	 * \see activate()
+	 * \param[in] unit a unit this buffer will be bound to, or 0 if currently
+	 *  active unit should be used instead
+	 * \see active_unit()
 	 */
-	template <class T> void create_or_update(index_t nb, const T* data) {
+	template <class T> void create_or_update(
+	    index_t nb, const T* data, GLuint unit=0
+	) {
+	    if(unit != 0) {
+		active_unit(unit);
+	    }
 	    Type type = default_type();
 	    switch(type) {
 	    case UNINITIALIZED:
@@ -173,35 +178,70 @@ namespace GLUP {
 		create_or_update_SSBO(nb,data);
 		break;
 	    }
-	}
-
-	template <class T> void create_or_update(const std::vector<T>& v) {
-	    create_or_update(index_t(v.size()), v.data());
-	}
-
-	template <class T> void create_or_update(const GEO::vector<T>& v) {
-	    create_or_update(v.size(), v.data());
+	    if(unit != 0) {
+		active_unit(0);
+	    }
 	}
 
 	/**
-	 * \brief Activates a unit
+	 * \brief Creates an uninitialized BufferObject or updates an initialized
+	 *  one with new data.
+	 * \param[in] v a STL vector with the data
+	 * \param[in] unit a unit this buffer will be bound to, or 0 if currently
+	 *  active unit should be used instead
+	 * \see active_unit()
+	 */
+	template <class T> void create_or_update(
+	    const std::vector<T>& v, index_t unit=0
+	) {
+	    create_or_update(index_t(v.size()), v.data(), unit);
+	}
+
+	/**
+	 * \brief Creates an uninitialized BufferObject or updates an initialized
+	 *  one with new data.
+	 * \param[in] v a geogram vector with the data
+	 * \param[in] unit a unit this buffer will be bound to, or 0 if currently
+	 *  active unit should be used instead
+	 * \see active_unit()
+	 */
+	template <class T> void create_or_update(
+	    const GEO::vector<T>& v, index_t unit=0
+	) {
+	    create_or_update(v.size(), v.data(), unit);
+	}
+
+	/**
+	 * \brief Active_Units a unit
 	 * \param[in] unit a unit id (either a texture unit or a buffer unit,
 	 *  depending on default buffer type).
 	 */
-	static void activate(GLuint unit);
+	static void active_unit(GLuint unit);
 
 	/**
 	 * \brief Binds this buffer to a unit.
-	 * \details Calls activate(unit).
+	 * \details Calls active_unit(unit).
 	 * \param[in] unit a unit id (either a texture unit or a buffer unit,
-	 *  depending on default buffer type).
+	 *  depending on default buffer type). If 0, use currently active unit.
 	 */
-	void bind(GLuint unit);
+	void bind(GLuint unit=0);
+
+	/**
+	 * \brief Sets a program uniform buffer unit
+	 * \details \p unit is interpreted either as a texture unit or a SSBO
+	 *  binding point, depending on default_type().
+	 * \param[in] program the OpenGL program id
+	 * \param[in] name a string with the name of the uniform variable
+	 * \param[in] unit the unit
+	 */
+	static void set_program_buffer_unit_by_name(
+	    GLuint program, const char* name, GLuint unit
+	);
 
     protected:
-	static void activate_TEXTURE_2D(GLuint unit);
-	static void activate_TBO(GLuint unit);
-	static void activate_SSBO(GLuint unit);
+	static void active_unit_TEXTURE_2D(GLuint unit);
+	static void active_unit_TBO(GLuint unit);
+	static void active_unit_SSBO(GLuint unit);
 
 	void reset_TEXTURE_2D();
 	void reset_TBO();
