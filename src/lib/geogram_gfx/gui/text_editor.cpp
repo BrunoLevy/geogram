@@ -45,6 +45,7 @@
 
 namespace {
     using namespace GEO;
+#ifndef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
     void text_editor_callback(TextEditorAction action, void* client_data) {
 	GEO::TextEditor* target = static_cast<GEO::TextEditor*>(client_data);
 	geo_argused(target);
@@ -65,18 +66,27 @@ namespace {
 	    break;
 	}
     }
+#endif
 }
 
 namespace GEO {
 
     TextEditor::TextEditor(bool* visible) : visible_(visible) {
         impl_.SetText("");
-        impl_.SetCursorPosition(
-            ::TextEditor::CursorPosition(0,0)
-        );
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetCursor(::TextEditor::DocPos(0,0));
+#else
+        impl_.SetCursorPosition(::TextEditor::CursorPosition(0,0));
+#endif
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetLanguage(::TextEditor::LookupLanguage("Lua"));
+#else
         impl_.SetLanguage(::TextEditor::Language::Lua());
+#endif
         impl_.SetPalette(::TextEditor::GetDarkPalette());
-	impl_.set_callback(text_editor_callback, this);
+#ifndef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.set_callback(text_editor_callback, this);
+#endif
         fixed_layout_ = true;
     }
 
@@ -109,6 +119,21 @@ namespace GEO {
             }
         }
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        // Application shortcuts belong to Geogram, not to the editor core.
+        // Route them from the parent before drawing the editor child window.
+        if(
+            ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
+            ImGui::Shortcut(ImGuiKey_F5)
+        ) {
+            SimpleApplication* sapp = dynamic_cast<SimpleApplication*>(
+                Application::instance()
+            );
+            if(sapp != nullptr) {
+                sapp->run_key_func("F5");
+            }
+        }
+#endif
         impl_.Render("##source");
 
         ImGui::PopFont();
@@ -125,9 +150,11 @@ namespace GEO {
             text += "\n";
         }
         impl_.SetText(text);
-        impl_.SetCursorPosition(
-            ::TextEditor::CursorPosition(0,0)
-        );
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetCursor(::TextEditor::DocPos(0,0));
+#else
+        impl_.SetCursorPosition(::TextEditor::CursorPosition(0,0));
+#endif
     }
 
     void TextEditor::save(const std::string& filename) {
@@ -137,16 +164,20 @@ namespace GEO {
 
     void TextEditor::clear() {
         impl_.SetText("");
-        impl_.SetCursorPosition(
-            ::TextEditor::CursorPosition(0,0)
-        );
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetCursor(::TextEditor::DocPos(0,0));
+#else
+        impl_.SetCursorPosition(::TextEditor::CursorPosition(0,0));
+#endif
     }
 
     void TextEditor::load_data(const char* data) {
         impl_.SetText(data);
-        impl_.SetCursorPosition(
-            ::TextEditor::CursorPosition(0,0)
-        );
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+        impl_.SetCursor(::TextEditor::DocPos(0,0));
+#else
+        impl_.SetCursorPosition(::TextEditor::CursorPosition(0,0));
+#endif
     }
 
 }

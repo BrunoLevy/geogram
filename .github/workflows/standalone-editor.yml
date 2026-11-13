@@ -1,0 +1,71 @@
+name: Standalone editor integration
+
+on:
+  push:
+    branches: [ci/standalone-editor, feature/external-text-editor]
+    paths:
+      - .github/workflows/standalone-editor.yml
+      - ci/standalone-editor/**
+      - CMakeLists.txt
+      - cmake/**
+      - src/**
+      - tests/standalone-text-editor/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standalone-editor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout Geogram
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Checkout standalone editor
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: malbajun/ImGuiColorTextEdit
+          ref: merge/bruno-optional-features
+          path: .ci-editor
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build xorg-dev libgl1-mesa-dev libglu1-mesa-dev libglfw3-dev libtbb-dev
+      - name: Build and exercise installed integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/standalone-editor
+          bash ci/standalone-editor/run.sh 2>&1 | tee artifacts/standalone-editor/build.log
+      - name: Report failure diagnostics
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('artifacts/standalone-editor/build.log')
+          if path.exists():
+              lines = path.read_text(errors='replace').splitlines()
+              errors = [line for line in lines if re.search(
+                  r'error:|fatal error|undefined reference|CMake Error|FAILED:|Assertion failed|cannot open shared object',
+                  line, re.IGNORECASE)]
+              message = '\n'.join(errors)[:4000] + '\n' + '\n'.join(lines[-20:])[-2000:]
+              message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print(f'::error title=Geogram integration::{message}')
+          PY
+      - name: Save build and test records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: standalone-editor-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/standalone-editor/
+          if-no-files-found: warn
+          retention-days: 14

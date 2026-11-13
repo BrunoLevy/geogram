@@ -51,7 +51,11 @@
 #endif
 #endif
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <imgui_internal.h>
+#else
 #include <geogram_gfx/third_party/imgui/imgui_internal.h>
+#endif
 
 #if defined(GEO_COMPILER_GCC_FAMILY)
 #pragma GCC diagnostic pop
@@ -1114,6 +1118,7 @@ namespace ImGui {
 
     /****************************************************************/
 
+#if defined(IMGUI_DISABLE_OBSOLETE_FUNCTIONS) && IMGUI_VERSION_NUM >= 19200
     void PushFont(ImFont* font) {
 	for(int i=0; i<ImGui::GetIO().Fonts->Fonts.size(); ++i) {
 	    if(font == ImGui::GetIO().Fonts->Fonts[i]) {
@@ -1125,5 +1130,6 @@ namespace ImGui {
 	}
 	geo_assert_not_reached;
     }
+#endif
 
 }
