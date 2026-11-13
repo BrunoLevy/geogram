@@ -19,10 +19,9 @@ namespace {
     void frame(GEO::TextEditor& editor, bool focus_editor) {
         ImGui::NewFrame();
         ImGui::SetNextWindowSize(ImVec2(800, 600));
-        if(focus_editor) {
-            ImGui::SetNextWindowFocus();
-        }
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
         editor.draw();
+        ImGui::SetNextWindowPos(ImVec2(820, 0));
         ImGui::Begin("Other window");
         if(!focus_editor) {
             ImGui::SetWindowFocus();
@@ -53,6 +52,13 @@ int main() {
         TestApplication application;
         editor.set_fixed_layout(false);
         frame(editor, true);
+        ImGui::SetWindowFocus("Text Editor");
+        frame(editor, true);
+        // Click into the editable child, not just its parent window.
+        io.AddMousePosEvent(120, 120);
+        io.AddMouseButtonEvent(0, true);
+        frame(editor, true);
+        io.AddMouseButtonEvent(0, false);
         frame(editor, true);
         io.AddKeyEvent(ImGuiKey_F5, true);
         frame(editor, true);
