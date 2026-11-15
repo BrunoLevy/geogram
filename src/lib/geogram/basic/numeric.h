@@ -426,12 +426,15 @@ namespace GEO {
 // GCC does not have any pragma to deactivate FMA generation,
 // so instead we check that they are deactivated (by the command-line
 // option -ffp-contract=off) and fire an assertion fail if it was not
-// the case.
+// the case. If targeting (very old) x87, make sure that extended
+// precision is deactivated (if not the case it will be captured here
+// as well).
 struct GeoAssertNoFpContract {
     GeoAssertNoFpContract() {
 #ifdef GEOGRAM_PSM
 	if(fp_contraction_enabled()) {
-	    std::cerr << "Needs to be compiled with -ffp-contract-off"
+	    std::cerr << "Needs to be compiled with -ffp-contract-off "
+		      << "(or no x87 extended precision)"
 		      << std::endl;
 	    abort();
 	}

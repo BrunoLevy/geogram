@@ -283,7 +283,6 @@ namespace GLUP {
 	    GLuint block_index = glGetProgramResourceIndex(
 		program, GL_SHADER_STORAGE_BLOCK, name
 	    );
-	    std::cerr << name << ":" << block_index << std::endl;
 	    if(block_index == GLuint(-1)) {
 		Logger::err("GLUP") << name << ": no such SSBO block"
 				    << std::endl;

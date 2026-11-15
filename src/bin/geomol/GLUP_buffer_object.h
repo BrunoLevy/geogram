@@ -54,12 +54,14 @@
 // Note: for molecules with 2.5M atoms, it is FASTER
 // using standard texture than TBOs (with GEO_TBO_SUPPORTED *deactivated*
 // It seems that with TBOs it swaps between main memory and GPU
-// ... but for smaller molecules, TBOs seems worth it:
+// ... but for smaller molecules, TBOs seems worth it.
+// It seems to be the same thing with SSBOs (!)
+// Probably caused by the way I'm sending data to the buffer, to be revised...
+
 // 1HTQ (900K atoms)
 // textures: 15   fps
 // TBOS:     25.5 fps
-//
-// TODO: test with SSBOs
+// SSBOS:    25.5 fps
 
 #ifdef GEO_OS_EMSCRIPTEN
    #ifdef GEO_TBO_SUPPORTED
@@ -346,8 +348,8 @@ namespace GLUP {
 	) {
 #ifdef GEO_SSBO_SUPPORTED
 	    geo_debug_assert(type_ == TBO || type_ == UNINITIALIZED);
-	    type_ = TBO;
-	    geo_assert(GLint(nb) < max_TBO_size_);
+	    type_ = SSBO;
+	    // TODO: check SSBO size
 	    update_or_check_buffer_object(
 		BO_, GL_SHADER_STORAGE_BUFFER,
 		nb * sizeof(T), data,

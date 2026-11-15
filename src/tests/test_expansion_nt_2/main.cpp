@@ -21,6 +21,12 @@ inline bool is_zero(const GEO::exact_nt& x) {
 inline std::string as_string(const GEO::exact_nt& x) {
     return GEO::String::format("%f",x.estimate());
 }
+#else
+// Test expansion_nt only if geogramplus not there
+// (normally we could test both, but this creates
+//  a link error / does not find expansion static
+//  variables)
+#  define TEST_GEOGRAM_EXPANSION_NT
 #endif
 
 #include <cstdint>
@@ -127,7 +133,9 @@ int main() {
     GEO::expansion::initialize();
 
     bool OK = true;
+#ifdef TEST_GEOGRAM_EXPANSION_NT
     OK = OK && test_arithmetics<expansion_nt>("geogram expansion_nt");
+#endif
 #ifdef WITH_BOOST
     OK = OK && test_arithmetics<ExactDyadic>("ExactDyadic (boost bigint)");
 #endif

@@ -177,7 +177,8 @@ namespace GLUP {
         sources.push_back("precision highp sampler3D;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #else
-        sources.push_back("#version 150 core\n");
+	sources.push_back("#version 150 core\n");
+	//sources.push_back("#version 430\n"); // for SSBOs
 #endif
         sources.push_back("#define GLUP_VERTEX_SHADER\n");
         OES_extensions(sources);
@@ -204,7 +205,8 @@ namespace GLUP {
 	sources.push_back("precision highp sampler3D;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #else
-        sources.push_back("#version 150 core\n");
+	sources.push_back("#version 150 core\n");
+	// sources.push_back("#version 430\n"); // for SSBOs
 #endif
 
         sources.push_back(
