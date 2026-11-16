@@ -1838,10 +1838,213 @@ namespace GEO {
                                       << " components using ray tracing"
                                       << std::endl;
             }
+
+            // MP20 patch. component_vertex[] (the first corner of the
+            // component's first facet) can be a vertex shared with another
+            // component (components that touch at a vertex are not linked by
+            // any intersection, and mesh_colocate_vertices() gave both the
+            // same vertex). A ray started there is decided by the symbolic
+            // perturbation of the ray, not by the geometry. For such
+            // components, the ray is started from the exact centroid of a
+            // facet of the component instead (strictly inside the facet, so it
+            // is never a vertex of any component).
+            vector<index_t> component_interior_facet(nb_components, NO_INDEX);
+            vector<ExactPoint> copy_points; // stable addresses for the SOS
+            {
+                vector<index_t> vertex_owner(mesh_.vertices.nb(), NO_INDEX);
+                vector<char> vertex_shared(mesh_.vertices.nb(), 0);
+                for(index_t f: mesh_.facets) {
+                    index_t c = facet_component[f];
+                    for(index_t w: mesh_.facets.vertices(f)) {
+                        if(vertex_owner[w] == NO_INDEX) {
+                            vertex_owner[w] = c;
+                        } else if(vertex_owner[w] != c) {
+                            vertex_shared[w] = 1;
+                        }
+                    }
+                }
+                vector<index_t> first_facet(nb_components, NO_INDEX);
+                vector<index_t> free_facet(nb_components, NO_INDEX);
+                bool any = false;
+                for(index_t c=0; c<nb_components; ++c) {
+                    any = any || vertex_shared[component_vertex[c]];
+                }
+                if(any) {
+                    for(index_t f: mesh_.facets) {
+                        index_t c = facet_component[f];
+                        if(!vertex_shared[component_vertex[c]]) {
+                            continue;
+                        }
+                        if(first_facet[c] == NO_INDEX) {
+                            first_facet[c] = f;
+                        }
+                        if(free_facet[c] == NO_INDEX) {
+                            bool touches = false;
+                            for(index_t w: mesh_.facets.vertices(f)) {
+                                touches = touches || vertex_shared[w];
+                            }
+                            if(!touches) {
+                                free_facet[c] = f;
+                            }
+                        }
+                    }
+                    for(index_t c=0; c<nb_components; ++c) {
+                        component_interior_facet[c] = (
+                            free_facet[c] != NO_INDEX ?
+                            free_facet[c] : first_facet[c]
+                        );
+                    }
+                    copy_points.reserve(mesh_copy_.vertices.nb());
+                    for(index_t v: mesh_copy_.vertices) {
+                        copy_points.push_back(
+                            ExactPoint(mesh_copy_.vertices.point(v))
+                        );
+                    }
+                }
+            }
+
+            // Same ray casting as compute_component_inclusion_bits_exact(),
+            // starting from the exact centroid of facet f of mesh_.
+            auto inclusion_bits_from_interior = [&](
+                index_t component, index_t f
+            )->index_t {
+                Attribute<index_t> operand_bit_copy(
+                    mesh_copy_.facets.attributes(), "operand_bit"
+                );
+                Attribute<index_t> facet_component_copy(
+                    mesh_copy_.facets.attributes(), "component"
+                );
+                ExactPoint a = exact_vertex(mesh_.facets.vertex(f,0));
+                ExactPoint b = exact_vertex(mesh_.facets.vertex(f,1));
+                ExactPoint c = exact_vertex(mesh_.facets.vertex(f,2));
+                ExactPoint q1(
+                    a.x*b.w*c.w + b.x*a.w*c.w + c.x*a.w*b.w,
+                    a.y*b.w*c.w + b.y*a.w*c.w + c.y*a.w*b.w,
+                    a.z*b.w*c.w + b.z*a.w*c.w + c.z*a.w*b.w,
+                    exact::scalar(3.0)*a.w*b.w*c.w
+                );
+                ExactPoint q2 = q1;
+                q2.z += (q2.w * exact::scalar(1e6));
+                index_t bits = 0;
+                for(index_t g: mesh_copy_.facets) {
+                    if(
+                        facet_component_copy[g] == NO_INDEX ||
+                        facet_component_copy[g] == component
+                    ) {
+                        continue;
+                    }
+                    const ExactPoint& p1 =
+                        copy_points[mesh_copy_.facets.vertex(g,0)];
+                    const ExactPoint& p2 =
+                        copy_points[mesh_copy_.facets.vertex(g,1)];
+                    const ExactPoint& p3 =
+                        copy_points[mesh_copy_.facets.vertex(g,2)];
+                    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
+                        bits ^= operand_bit_copy[g];
+                    }
+                }
+                return bits;
+            };
+
+            // MP22 patch. compute_component_inclusion_bits() decides a ray
+            // that passes exactly through a vertex or an edge of another
+            // component (or lies in the plane of one of its facets) with
+            // orient_3d_SOS(), and classify() runs in SOS_ADDRESS mode, so
+            // that decision depends on the memory order of the points (vertex
+            // numbering after mesh_colocate_vertices and the stack addresses
+            // of the two ray end points): odd hit counts on a closed body are
+            // possible and differ between platforms. Here the ray is tested
+            // with the exact orient_3d() only. If some facet is hit
+            // degenerately (a raw predicate is 0 and the ray is not excluded
+            // by the others) the ray direction is tilted by a few fixed small
+            // offsets until no facet is degenerate. Rays with no degenerate
+            // facet give exactly the result of the original code (SOS is not
+            // consulted by it in that case). If every direction is
+            // degenerate the original code is used.
+            auto inclusion_bits_checked = [&](
+                index_t component, index_t v
+            )->index_t {
+                if(!is_original_vertex(v)) {
+                    return compute_component_inclusion_bits(component, v);
+                }
+                Attribute<index_t> operand_bit_copy(
+                    mesh_copy_.facets.attributes(), "operand_bit"
+                );
+                Attribute<index_t> facet_component_copy(
+                    mesh_copy_.facets.attributes(), "component"
+                );
+                static const double tilt[][2] = {
+                    {0.0, 0.0}, {1.0, 2.0}, {-3.0, 5.0}, {7.0, -11.0},
+                    {13.0, 17.0}, {-19.0, 23.0}, {29.0, -31.0}, {37.0, 41.0}
+                };
+                const vec3 q1 = mesh_.vertices.point(v);
+                for(const auto& t: tilt) {
+                    const vec3 q2(q1.x + t[0], q1.y + t[1], q1.z + 1e6);
+                    const double xmin = std::min(q1.x, q2.x);
+                    const double xmax = std::max(q1.x, q2.x);
+                    const double ymin = std::min(q1.y, q2.y);
+                    const double ymax = std::max(q1.y, q2.y);
+                    index_t bits = 0;
+                    bool degenerate = false;
+                    for(index_t f: mesh_copy_.facets) {
+                        if(
+                            facet_component_copy[f] == NO_INDEX ||
+                            facet_component_copy[f] == component
+                        ) {
+                            continue;
+                        }
+                        const vec3& p1 = mesh_copy_.facets.point(f,0);
+                        const vec3& p2 = mesh_copy_.facets.point(f,1);
+                        const vec3& p3 = mesh_copy_.facets.point(f,2);
+                        // Closed bounding boxes disjoint: no contact at all.
+                        if(
+                            std::max(std::max(p1.x,p2.x),p3.x) < xmin ||
+                            std::min(std::min(p1.x,p2.x),p3.x) > xmax ||
+                            std::max(std::max(p1.y,p2.y),p3.y) < ymin ||
+                            std::min(std::min(p1.y,p2.y),p3.y) > ymax ||
+                            std::max(std::max(p1.z,p2.z),p3.z) < q1.z ||
+                            std::min(std::min(p1.z,p2.z),p3.z) > q2.z
+                        ) {
+                            continue;
+                        }
+                        Sign o1 = PCK::orient_3d(q1,p1,p2,p3);
+                        Sign o2 = PCK::orient_3d(q2,p1,p2,p3);
+                        if(o1 == o2 && o1 != ZERO) {
+                            continue; // strictly the same side of the plane
+                        }
+                        Sign s1 = PCK::orient_3d(q1,q2,p1,p2);
+                        Sign s2 = PCK::orient_3d(q1,q2,p2,p3);
+                        Sign s3 = PCK::orient_3d(q1,q2,p3,p1);
+                        if(s1*s2 < 0 || s2*s3 < 0 || s3*s1 < 0) {
+                            continue; // misses the triangle, whatever the zeros
+                        }
+                        if(
+                            o1 == ZERO || o2 == ZERO ||
+                            s1 == ZERO || s2 == ZERO || s3 == ZERO
+                        ) {
+                            degenerate = true;
+                            break;
+                        }
+                        bits ^= operand_bit_copy[f];
+                    }
+                    if(!degenerate) {
+                        return bits;
+                    }
+                }
+                return compute_component_inclusion_bits(component, v);
+            };
+
             parallel_for(
                 0, nb_components, [&](index_t component) {
+                    if(component_interior_facet[component] != NO_INDEX) {
+                        component_inclusion_bits[component] =
+                            inclusion_bits_from_interior(
+                                component, component_interior_facet[component]
+                            );
+                        return;
+                    }
                     component_inclusion_bits[component] =
-			compute_component_inclusion_bits(
+			inclusion_bits_checked(
 			    component, component_vertex[component]
 			);
                 }
