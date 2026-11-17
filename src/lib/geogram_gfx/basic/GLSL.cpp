@@ -50,7 +50,7 @@
 #ifdef GEO_OS_EMSCRIPTEN
 #  define GEO_THROW_GLSL_ERROR
 #else
-#  define GEO_THROW_GLSL_ERROR throw GLSL::GLSLCompileError();
+#  define GEO_THROW_GLSL_ERROR throw GLSL::GLSLCompileError()
 #endif
 
 namespace {

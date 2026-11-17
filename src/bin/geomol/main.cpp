@@ -237,7 +237,7 @@ namespace {
 			);
 		    }
 		    break;
-		};
+		}
 		ImGui::TreePop();
 	    }
 	    if(animate()) {

@@ -150,13 +150,10 @@ namespace GEO {
 
 	// At this point we suppose it is a mesh file format,
 	// so we mesh the MSS and save the mesh.
-	{
-	    if(mesh_.vertices.nb() == 0) {
-		generate_mesh();
-	    }
-	    return mesh_save(mesh_, filename);
+	if(mesh_.vertices.nb() == 0) {
+	    generate_mesh();
 	}
-	return false;
+	return mesh_save(mesh_, filename);
     }
 
     bool Molecule::load_geogram(const std::string& filename) {
@@ -244,7 +241,7 @@ namespace GEO {
 					<< std::endl;
 	    }
 	}
-	if(false) {
+	/* {
 	    Stopwatch W("close",verbose_);
 	    while(close_cells()) {
 		if(verbose_) {
@@ -253,7 +250,7 @@ namespace GEO {
 			<< std::endl;
 		}
 	    }
-	}
+	} */
 	{
 	    Stopwatch W("skel",verbose_);
 	    diagram_->compute_skeleton(nb_atoms_);
@@ -553,7 +550,7 @@ namespace GEO {
 	    }
 
 	    return; // code below is wrong! H2 cells have missing parts
-
+	    /*
 	    double u = -(beta * r2_max + R2) / alpha;
 	    double uu1 = std::min(-u,u);
 	    double uu2 = std::max(-u,u);
@@ -565,6 +562,7 @@ namespace GEO {
 		u2 = uu2;
 		r2_2 = r2_max;
 	    }
+	    */
 	}
     }
 
