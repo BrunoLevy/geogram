@@ -230,6 +230,10 @@ namespace GLUP {
 	}
     }
 
+    const char* Context_GLSL140::GLSL_version_string() const {
+	return ""; // TODO
+    }
+
 #endif
 
     /******************************************************/
@@ -551,6 +555,10 @@ namespace GLUP {
         }
     }
 
+    const char* Context_GLSL150::GLSL_version_string() const {
+	return ""; // TODO
+    }
+
     /****** GLUP440 implementation *****************************************/
 
     Context_GLSL440::Context_GLSL440() {
@@ -753,5 +761,10 @@ namespace GLUP {
             geo_assert_not_reached;
         }
     }
+
+    const char* Context_GLSL440::GLSL_version_string() const {
+	return ""; // TODO
+    }
+
 #endif
 }

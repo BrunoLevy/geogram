@@ -1427,6 +1427,11 @@ namespace GLUP {
         Context::get_toggles_pseudo_file(sources);
         sources.push_back("#endif\n");
     }
+
+    const char* Context_ES2::GLSL_version_string() const {
+	return ""; // TODO
+    }
+
 }
 
 #endif

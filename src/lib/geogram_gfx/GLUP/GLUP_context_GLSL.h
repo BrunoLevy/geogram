@@ -86,6 +86,11 @@ namespace GLUP {
          */
 	bool primitive_supports_array_mode(GLUPprimitive prim) const override;
 
+	/**
+	 * \copydoc Context::GLSL_version_string()
+	 */
+	const char* GLSL_version_string() const override;
+
     protected:
         /**
          * \copydoc Context::setup_GLUP_POINTS()
@@ -171,6 +176,11 @@ namespace GLUP {
          * \copydoc Context::primitive_supports_array_mode()
          */
 	bool primitive_supports_array_mode(GLUPprimitive prim) const override;
+
+	/**
+	 * \copydoc Context::GLSL_version_string()
+	 */
+	const char* GLSL_version_string() const override;
 
     protected:
         /**
@@ -259,6 +269,11 @@ namespace GLUP {
          * \copydoc Context::profile_name()
          */
         const char* profile_name() const override;
+
+	/**
+	 * \copydoc Context::GLSL_version_string()
+	 */
+	const char* GLSL_version_string() const override;
 
     protected:
         /**
