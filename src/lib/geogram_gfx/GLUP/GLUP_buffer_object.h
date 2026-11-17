@@ -87,7 +87,7 @@ namespace GLUP {
      *  SSBO, depending on what is supported and on user-specified gfx:buffers
      *  command line argument.
      */
-    class BufferObject {
+    class GEOGRAM_GFX_API BufferObject {
     public:
 	enum Type {UNINITIALIZED, TEXTURE_2D, TBO, SSBO};
 

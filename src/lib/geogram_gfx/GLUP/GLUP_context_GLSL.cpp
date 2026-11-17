@@ -156,19 +156,37 @@ namespace GLUP {
 #endif
     }
 
+    const char* Context_GLSL140::GLSL_version_directive() const {
+#if defined(GEO_OS_ANDROID)
+        return "#version 320 es\n";
+#elif defined(GEO_OS_APPLE)
+	return "#version 150\n";
+#elif defined(GEO_OS_EMSCRIPTEN)
+	return "#version 300 es\n";
+#else
+	#ifdef GEO_GL_430
+	if(
+	    CmdLine::get_arg("gfx:buffers") == "default" ||
+	    CmdLine::get_arg("gfx:buffers") == "SSBO"
+	) {
+	    return "#version 430\n";
+	}
+	#endif
+	return "#version 150 core\n";
+#endif
+    }
+
+
     void Context_GLSL140::get_vertex_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
+	sources.push_back(GLSL_version_directive());
 #if defined(GEO_OS_ANDROID)
-        sources.push_back("#version 320 es\n");
         sources.push_back("precision lowp sampler3D;\n");
         sources.push_back("precision highp float;\n");
         sources.push_back("precision highp int;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
-#elif defined(GEO_OS_APPLE)
-        sources.push_back("#version 150\n");
 #elif defined(GEO_OS_EMSCRIPTEN)
-        sources.push_back("#version 300 es\n");
         sources.push_back("precision highp float;\n");
         sources.push_back("precision highp int;\n");
 	sources.push_back("precision highp sampler2D;\n");
@@ -176,9 +194,6 @@ namespace GLUP {
 	sources.push_back("precision highp usampler2D;\n");
         sources.push_back("precision highp sampler3D;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
-#else
-	sources.push_back("#version 150 core\n");
-	//sources.push_back("#version 430\n"); // for SSBOs
 #endif
         sources.push_back("#define GLUP_VERTEX_SHADER\n");
         OES_extensions(sources);
@@ -187,16 +202,13 @@ namespace GLUP {
     void Context_GLSL140::get_fragment_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
+	sources.push_back(GLSL_version_directive());
 #if defined(GEO_OS_ANDROID)
-        sources.push_back("#version 320 es\n");
         sources.push_back("precision lowp sampler3D;\n");
         sources.push_back("precision highp float;\n");
         sources.push_back("precision highp int;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
-#elif defined(GEO_OS_APPLE)
-        sources.push_back("#version 150\n");
 #elif defined(GEO_OS_EMSCRIPTEN)
-        sources.push_back("#version 300 es\n");
         sources.push_back("precision highp float;\n");
         sources.push_back("precision highp int;\n");
 	sources.push_back("precision highp sampler2D;\n");
@@ -204,9 +216,6 @@ namespace GLUP {
 	sources.push_back("precision highp usampler2D;\n");
 	sources.push_back("precision highp sampler3D;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
-#else
-	sources.push_back("#version 150 core\n");
-	// sources.push_back("#version 430\n"); // for SSBOs
 #endif
 
         sources.push_back(
@@ -228,10 +237,6 @@ namespace GLUP {
         if(primitive_source_ == GLUP_TRIANGLES) {
             sources.push_back("#define GLUP_NO_GEOMETRY_SHADER\n");
 	}
-    }
-
-    const char* Context_GLSL140::GLSL_version_string() const {
-	return ""; // TODO
     }
 
 #endif
@@ -518,19 +523,19 @@ namespace GLUP {
         }
     }
 
+    const char* Context_GLSL150::GLSL_version_directive() const {
+	return Context_GLSL140::GLSL_version_directive();
+    }
+
     void Context_GLSL150::get_geometry_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
+        sources.push_back(GLSL_version_directive());
 #if defined(GEO_OS_ANDROID)
-        sources.push_back("#version 320 es\n");
         sources.push_back("precision lowp sampler3D;\n");
         sources.push_back("precision highp float;\n");
         sources.push_back("precision highp int;\n");
         sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
-#elif defined(GEO_OS_APPLE)
-        sources.push_back("#version 150\n");
-#else
-        sources.push_back("#version 150 core\n");
 #endif
         sources.push_back("#define GLUP_GEOMETRY_SHADER\n");
         OES_extensions(sources);
@@ -553,10 +558,6 @@ namespace GLUP {
                 "const int glup_nb_vertices_per_GL_v=5;\n"
             );
         }
-    }
-
-    const char* Context_GLSL150::GLSL_version_string() const {
-	return ""; // TODO
     }
 
     /****** GLUP440 implementation *****************************************/
@@ -642,15 +643,19 @@ namespace GLUP {
 
     /***********************************************************************/
 
+    const char* Context_GLSL440::GLSL_version_directive() const {
+#ifdef GEO_OS_APPLE
+        return "#version 440\n";
+#else
+        return "#version 440 core\n";
+#endif
+    }
+
 
     void Context_GLSL440::get_vertex_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
-#ifdef GEO_OS_APPLE
-        sources.push_back("#version 440\n");
-#else
-        sources.push_back("#version 440 core\n");
-#endif
+	sources.push_back(GLSL_version_directive());
         sources.push_back("#define GLUP_VERTEX_SHADER\n");
         OES_extensions(sources);
     }
@@ -658,11 +663,7 @@ namespace GLUP {
     void Context_GLSL440::get_fragment_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
-#ifdef GEO_OS_APPLE
-        sources.push_back("#version 440\n");
-#else
-        sources.push_back("#version 440 core\n");
-#endif
+	sources.push_back(GLSL_version_directive());
         sources.push_back(
             "#define GLUP_FRAGMENT_SHADER\n"
             "#extension GL_ARB_conservative_depth : enable\n"
@@ -673,11 +674,7 @@ namespace GLUP {
     void Context_GLSL440::get_geometry_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
-#ifdef GEO_OS_APPLE
-        sources.push_back("#version 440\n");
-#else
-        sources.push_back("#version 440 core\n");
-#endif
+	sources.push_back(GLSL_version_directive());
         sources.push_back("#define GLUP_GEOMETRY_SHADER\n");
         OES_extensions(sources);
         get_geometry_shader_layout(sources);
@@ -686,11 +683,7 @@ namespace GLUP {
     void Context_GLSL440::get_tess_evaluation_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
-#ifdef GEO_OS_APPLE
-        sources.push_back("#version 440\n");
-#else
-        sources.push_back("#version 440 core\n");
-#endif
+	sources.push_back(GLSL_version_directive());
         sources.push_back("#define GLUP_TESS_EVALUATION_SHADER\n");
         OES_extensions(sources);
     }
@@ -760,10 +753,6 @@ namespace GLUP {
         case GLUP_NB_PRIMITIVES:
             geo_assert_not_reached;
         }
-    }
-
-    const char* Context_GLSL440::GLSL_version_string() const {
-	return ""; // TODO
     }
 
 #endif

@@ -1,5 +1,5 @@
 
-#include "GLUP_buffer_object.h"
+#include <geogram_gfx/GLUP/GLUP_buffer_object.h>
 #include <geogram_gfx/basic/GLSL.h>
 
 
@@ -7,7 +7,6 @@ namespace {
 
     void register_geomol_shader_utilities() {
 	GLUP::BufferObject::register_GLSL_sources();
-
 	if(GLUP::BufferObject::default_type() == GLUP::BufferObject::SSBO) {
 	    GEO::GLSL::register_GLSL_include_file("geomol/buffers.h",
             R"(

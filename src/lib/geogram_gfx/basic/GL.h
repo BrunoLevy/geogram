@@ -81,8 +81,13 @@
 #  define GEO_GL_TEXTURE_3D
 #  define GEO_GL_140
 #  define GEO_GL_150
-#  define GEO_GL_440
 #  define GEO_GL_ES2
+
+#  ifndef GEO_OS_APPLE
+#    define GEO_GL_430
+#    define GEO_GL_440
+#  endif
+
 #endif
 
 #include <geogram_gfx/GLUP/GLUP.h>

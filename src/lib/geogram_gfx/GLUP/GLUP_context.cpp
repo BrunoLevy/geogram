@@ -39,6 +39,7 @@
 
 #include <geogram_gfx/GLUP/GLUP_context.h>
 #include <geogram_gfx/GLUP/GLUP_private.h>
+#include <geogram_gfx/GLUP/GLUP_buffer_object.h>
 #include <geogram_gfx/GLUP/shaders/embedded_shaders.h>
 #include <geogram_gfx/basic/GLSL.h>
 
@@ -2132,6 +2133,8 @@ namespace GLUP {
         if(initialized) {
             return;
         }
+
+	//GLUP::BufferObject::register_GLSL_sources();
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/vertex_shader_preamble.h",

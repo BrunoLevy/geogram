@@ -37,7 +37,7 @@
  *
  */
 
-#include "GLUP_buffer_object.h"
+#include <geogram_gfx/GLUP/GLUP_buffer_object.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/command_line.h>
 

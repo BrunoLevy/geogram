@@ -133,9 +133,9 @@ namespace GLUP {
         ) override;
 
 	/**
-	 * \copydoc Context::GLSL_version_string()
+	 * \copydoc Context::GLSL_version_directive()
 	 */
-	const char* GLSL_version_string() const override;
+	const char* GLSL_version_directive() const override;
 
     protected:
 
