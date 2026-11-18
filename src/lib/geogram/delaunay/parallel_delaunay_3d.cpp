@@ -289,7 +289,7 @@ namespace GEO {
          * \details The point sequence was previously defined
          *  by set_work().
          */
-        void run() override GEO_LOCKS_EXCLUDED(mutex_) {
+        void run() override {
 
             finished_ = false;
 

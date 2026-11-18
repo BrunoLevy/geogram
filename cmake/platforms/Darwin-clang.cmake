@@ -22,6 +22,8 @@ set(FULL_WARNINGS
     # and mesh code are built on raw arrays by design, so this opt-in
     # hardening model does not apply.
     -Wno-unsafe-buffer-usage
+    -Wno-thread-safety-negative # seems that std::mutex lacks needed annotations
+    -Wno-allocator-wrappers     # annotations cannot use class member function
 )
 
 # Compile with full warnings by default

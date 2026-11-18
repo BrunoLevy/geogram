@@ -308,6 +308,8 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::square(vec2 size, bool center) {
 
+	std::shared_ptr<Mesh> M = empty_mesh_;
+
         double x1 = 0.0;
         double y1 = 0.0;
         double x2 = size.x;
@@ -327,10 +329,10 @@ namespace GEO {
 		    << "square with negative size (returning empty shape)"
 		    << std::endl;
 	    }
-            return empty_mesh_;
+            return M;
         }
 
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+	M = std::make_shared<Mesh>();
         M->vertices.set_dimension(2);
 
         M->vertices.create_vertex(vec2(x1,y1));
@@ -353,6 +355,8 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::circle(double r, index_t nu) {
 
+	std::shared_ptr<Mesh> M = empty_mesh_;
+
 	if(nu == 0) {
 	    nu = index_t(GEOCSG::get_fragments_from_r(r, fn_, fs_, fa_));
 	}
@@ -364,10 +368,10 @@ namespace GEO {
 		    << "circle with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-            return empty_mesh_;
+            return M;
         }
 
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+	M = std::make_shared<Mesh>();
         M->vertices.set_dimension(2);
 
         for(index_t u=0; u<nu; ++u) {
@@ -407,6 +411,7 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::cube(vec3 size, bool center) {
+	std::shared_ptr<Mesh> M = empty_mesh_;
 
         double x1 = 0.0;
         double y1 = 0.0;
@@ -430,10 +435,10 @@ namespace GEO {
 		    << "cube with negative size (returning empty shape)"
 		    << std::endl;
 	    }
-            return empty_mesh_;
+            return M;
         }
 
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+	M = std::make_shared<Mesh>();
 
         M->vertices.create_vertex(vec3(x1,y1,z1));
         M->vertices.create_vertex(vec3(x2,y1,z1));
@@ -474,16 +479,18 @@ namespace GEO {
 	nu = std::max(nu, index_t(3));
 	nv = std::max(nv, index_t(2));
 
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
         if(r <= 0.0) {
 	    if(warnings_) {
 		Logger::warn("CSG")
 		    << "sphere with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-            return empty_mesh_;
+            return result;
         }
 
-	std::shared_ptr<Mesh> result = circle(1.0, nu);
+	result = circle(1.0, nu);
 
 	GEOCSG::sweep(
 	    result, nv,
@@ -521,13 +528,15 @@ namespace GEO {
 	    center ?  h/2.0 : h
 	};
 
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
         if(r1 < 0.0 || r2 < 0.0) {
 	    if(warnings_) {
 		Logger::warn("CSG")
 		    << "cylinder with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-	    return empty_mesh_;
+	    return result;
         }
 
 	// If first side's capping is a pole, then flip sides
@@ -537,7 +546,7 @@ namespace GEO {
             std::swap(z[0],z[1]);
         }
 
-	std::shared_ptr<Mesh> result = circle(1.0, nu);
+	result = circle(1.0, nu);
 	GEOCSG::sweep(
 	    result, 2,
 	    [&](index_t u, index_t v)->vec3 {
@@ -560,12 +569,11 @@ namespace GEO {
         const std::filesystem::path& filename, const std::string& layer,
         index_t timestamp, vec2 origin, vec2 scale
     ) {
-	std::shared_ptr<Mesh> result;
+	std::shared_ptr<Mesh> result = empty_mesh_;
         std::filesystem::path full_filename = filename;
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-	    result = empty_mesh_;
             return result;
         }
 
@@ -681,12 +689,12 @@ namespace GEO {
     std::shared_ptr<Mesh> CSGBuilder::surface_with_OpenSCAD(
         const std::filesystem::path& filename, bool center, bool invert
     ) {
-	std::shared_ptr<Mesh> result;
+	std::shared_ptr<Mesh> result = empty_mesh_;
         std::filesystem::path full_filename = filename;
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-            return empty_mesh_;
+            return result;
         }
 	GEOCSG::ArgList args;
 	args.add_arg("file", full_filename);
@@ -730,8 +738,10 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::union_instr(const CSGScope& scope) {
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
 	if(scope.size() == 0) {
-	    return empty_mesh_;
+	    return result;
 	}
 
 	if(scope.size() == 1) {
@@ -762,7 +772,7 @@ namespace GEO {
             return union_instr(scope3);
 	}
 
-	std::shared_ptr<Mesh> result = append(scope);
+	result = append(scope);
 	if(may_have_intersections(scope)) {
 	    do_CSG(result, "union");
 	}
@@ -771,8 +781,10 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::intersection(const CSGScope& scope) {
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
 	if(scope.size() == 0) {
-	    return empty_mesh_;
+	    return result;
 	}
 
         if(scope.size() == 1) {
@@ -800,15 +812,17 @@ namespace GEO {
             return intersection(scope3);
         }
 
-	std::shared_ptr<Mesh> result = append(scope);
+	result = append(scope);
 	do_CSG(result, "intersection");
 	finalize_mesh(result);
         return result;
     }
 
     std::shared_ptr<Mesh> CSGBuilder::difference(const CSGScope& scope) {
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
 	if(scope.size() == 0) {
-	    return empty_mesh_;
+	    return result;
 	}
 
         if(scope.size() == 1) {
@@ -841,7 +855,7 @@ namespace GEO {
             return difference(scope3);
         }
 
-	std::shared_ptr<Mesh> result = append(scope);
+	result = append(scope);
         // construct the expression x0-x1-x2...-xn
         std::string expr = "x0";
         for(index_t i=1; i<scope.size(); ++i) {
@@ -1096,8 +1110,10 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::minkowski(const CSGScope& scope) {
+	std::shared_ptr<Mesh> result = empty_mesh_;
+
 	if(scope.size() == 0) {
-	    return empty_mesh_;
+	    return result;
 	}
 
         if(scope.size() == 1) {
@@ -1112,7 +1128,7 @@ namespace GEO {
 	    scope[0]->vertices.dimension() == 2 &&
 	    scope[1]->vertices.dimension() == 2
 	) {
-	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
+	    result = std::make_shared<Mesh>();
 	    compute_minkowski_sum_2d(*result, *scope[0], *scope[1]);
 	    triangulate(result);
 	    return result;
@@ -1122,7 +1138,7 @@ namespace GEO {
 	    scope[0]->vertices.dimension() == 3 &&
 	    scope[1]->vertices.dimension() == 3
 	) {
-	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
+	    result = std::make_shared<Mesh>();
 	    compute_minkowski_sum_3d(*result, *scope[0], *scope[1]);
 	    // TODO: simplify coplanar facets
 	    return result;
