@@ -90,6 +90,7 @@ namespace GLUP {
     }
 
     void BufferObject::reset_TBO() {
+#ifdef GEO_TBO_SUPPORTED
 	if(texture_ != 0) {
 	    glDeleteTextures(1, &texture_);
 	    texture_ = 0;
@@ -98,6 +99,9 @@ namespace GLUP {
 	    glDeleteBuffers(1,&BO_);
 	    BO_ = 0;
 	}
+#else
+	geo_assert_not_reached;
+#endif
     }
 
     void BufferObject::reset_SSBO() {
@@ -136,7 +140,11 @@ namespace GLUP {
     }
 
     void BufferObject::active_unit_TBO(GLuint unit) {
+#ifdef GEO_TBO_SUPPORTED
 	glActiveTexture(GL_TEXTURE0 + unit);
+#else
+	geo_assert_not_reached;
+#endif
     }
 
     void BufferObject::active_unit_SSBO(GLuint unit) {
