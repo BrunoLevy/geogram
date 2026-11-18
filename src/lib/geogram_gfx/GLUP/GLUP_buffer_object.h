@@ -78,6 +78,19 @@
    #endif
 #endif
 
+
+#ifdef GEO_TBO_SUPPORTED
+#define GEO_TBO_FUNC
+#else
+#define GEO_TBO_FUNC [[noreturn]]
+#endif
+
+#ifdef GEO_SSBO_SUPPORTED
+#define GEO_SSBO_FUNC
+#else
+#define GEO_SSBO_FUNC [[noreturn]]
+#endif
+
 namespace GLUP {
     using namespace GEO;
 
@@ -246,12 +259,12 @@ namespace GLUP {
 	static void active_unit_SSBO(GLuint unit);
 
 	void reset_TEXTURE_2D();
-	void reset_TBO();
-	void reset_SSBO();
+	GEO_TBO_FUNC  void reset_TBO();
+	GEO_SSBO_FUNC void reset_SSBO();
 
 	void bind_TEXTURE_2D(GLuint unit);
-	void bind_TBO(GLuint unit);
-	void bind_SSBO(GLuint unit);
+	GEO_TBO_FUNC void bind_TBO(GLuint unit);
+	GEO_SSBO_FUNC void bind_SSBO(GLuint unit);
 
 	template <class T> void create_or_update_TEXTURE_2D(
 	    index_t nb, const T* data
@@ -319,7 +332,7 @@ namespace GLUP {
 	    }
 	}
 
-	template <class T> void create_or_update_TBO(
+	GEO_TBO_FUNC template <class T> void create_or_update_TBO(
 	    index_t nb, const T* data
 	) {
 #ifdef GEO_TBO_SUPPORTED
@@ -343,7 +356,7 @@ namespace GLUP {
 #endif
 	}
 
-	template <class T> void create_or_update_SSBO(
+	GEO_SSBO_FUNC template <class T> void create_or_update_SSBO(
 	    index_t nb, const T* data
 	) {
 #ifdef GEO_SSBO_SUPPORTED

@@ -121,16 +121,20 @@ namespace {
 	vec3 Q(const vec3& v) const {
 	    return sphere ? v : v - a * ((1.0 + B) * dot(a, v));
 	}
+	/*
 	double f(const vec3& p) const {
 	    vec3 q = p - c;
 	    return dot(q, Q(q)) - A;
 	}
+	*/
 	vec3 grad(const vec3& p) const {
 	    return Q(p - c) * 2.0;
 	}
+	/*
 	bool two_sheet() const {
 	    return !sphere && A < 0;
 	}
+	*/
     };
 
     /********************** Conics ****************************************/
@@ -150,9 +154,10 @@ namespace {
 		return C + X * (a * std::cos(t)) + Y * (b * std::sin(t));
             case Hyperbola:
 		return C + X * (a * std::cosh(t)) + Y * (b * std::sinh(t));
-            default:
+            case Parabola:
 		return C + X * (a * t * t) + Y * (2 * a * t);
 	    }
+	    geo_assert_not_reached;
 	}
 
 	vec3 tangent(double t) const {
@@ -162,9 +167,10 @@ namespace {
 		return X * (-a * std::sin(t)) + Y * (b * std::cos(t));
             case Hyperbola:
 		return X * (a * std::sinh(t)) + Y * (b * std::cosh(t));
-            default:
+            case Parabola:
 		return X * (2 * a * t) + Y * (2 * a);
 	    }
+	    geo_assert_not_reached;
 	}
 
 	double param(const vec3& p) const {
@@ -177,9 +183,10 @@ namespace {
             }
             case Hyperbola:
 		return std::asinh(dot(d, Y) / b);
-            default:
+            case Parabola:
 		return dot(d, Y) / (2 * a);
 	    }
+	    geo_assert_not_reached;
 	}
 
 	int to_step(StepWriter& w) const {
@@ -197,9 +204,10 @@ namespace {
 		    "HYPERBOLA(''," + w.ref(pl) + "," + w.real(a) +
 		    "," + w.real(b) + ")"
 		);
-            default:
+            case Parabola:
 		return w.add("PARABOLA(''," + w.ref(pl) + "," + w.real(a) + ")");
 	    }
+	    geo_assert_not_reached;
 	}
     };
 

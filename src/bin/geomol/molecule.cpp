@@ -648,8 +648,8 @@ namespace GEO {
 		}
 
 		double imposter_r2 = 0.0;
-		for(index_t lv=0; lv<3; ++lv) {
-		    double r2 = length2((p[lv]-c));
+		for(index_t lv2=0; lv2<3; ++lv2) {
+		    double r2 = length2((p[lv2]-c));
 		    imposter_r2 = std::max(imposter_r2,r2);
 		}
 		const double t1 = -1.0/(1.0-shrink_factor_);

@@ -52,6 +52,13 @@
 #include <algorithm>
 #include <cmath>
 
+// Ignore warnings about 64 bits constants
+#ifdef GEO_COMPILER_CLANG
+#  if __has_warning("-Wunknown-warning-option")
+#    pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#  endif
+#endif
+
 /*
  * Notations (see the paper):
  *
@@ -292,7 +299,7 @@ namespace GEO {
             double A = form(g);
             double C = eval(x);
             double B = form((x - c) + g) - form(x - c) - A; // 2 bilinear
-            double lambda;
+            double lambda = 0.0;
             bool ok = false;
             if(std::fabs(A) < 1e-14*std::fabs(B)) {
                 if(B != 0.0) {
