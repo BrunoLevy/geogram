@@ -51,6 +51,14 @@
 #define GEO_CONNECTION_MACHINE
 #endif
 
+// Indicate that when entering a function we are sure that the
+// specified lock is not acquired already (supported by Clang only)
+#ifdef GEO_COMPILER_CLANG
+#define GEO_LOCKS_EXCLUDED(...)  __attribute__((locks_excluded(__VA_ARGS__)))
+#else
+#define GEO_LOCKS_EXCLUDED(...)
+#endif
+
 /**
  * \file geogram/delaunay/delaunay_sync.h
  * \brief Synchronization primitives for parallel Delaunay
