@@ -429,8 +429,24 @@ namespace GEO {
 // the case. If targeting (very old) x87, make sure that extended
 // precision is deactivated (if not the case it will be captured here
 // as well).
+// Define GEOGRAM_X87_DOUBLE_PRECISION to select 53-bit precision in the
+// initializing thread. This intentionally changes its floating-point
+// environment. All threads using Geogram must retain that precision;
+// existing workers need the same setup before calling Geogram.
+namespace {
 struct GeoAssertNoFpContract {
     GeoAssertNoFpContract() {
+#if defined(GEOGRAM_X87_DOUBLE_PRECISION) && \
+    (defined(__i386__) || defined(__x86_64__)) && !defined(__SSE2_MATH__)
+        // Error-free transformations require a 53-bit significand on x87.
+        // Preserve the rounding mode and exception masks when changing it.
+        unsigned short control_word;
+        __asm__ __volatile__("fnstcw %0" : "=m"(control_word));
+        control_word = static_cast<unsigned short>(
+            (control_word & ~0x0300U) | 0x0200U
+        );
+        __asm__ __volatile__("fldcw %0" : : "m"(control_word) : "memory");
+#endif
 #ifdef GEOGRAM_PSM
 	if(fp_contraction_enabled()) {
 	    std::cerr << "Needs to be compiled with -ffp-contract-off "
@@ -449,6 +465,7 @@ struct GeoAssertNoFpContract {
 	return a * a + b;
     }
 };
+}
 #  define GEO_FP_CONTRACT_OFF \
     static GeoAssertNoFpContract CPP_CONCAT(assert_no_fp_contract_,__LINE__);
 #else
