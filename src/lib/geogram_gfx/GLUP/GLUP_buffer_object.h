@@ -255,8 +255,8 @@ namespace GLUP {
 
     protected:
 	static void active_unit_TEXTURE_2D(GLuint unit);
-	static void active_unit_TBO(GLuint unit);
-	static void active_unit_SSBO(GLuint unit);
+	static GEO_TBO_FUNC  void active_unit_TBO(GLuint unit);
+	static GEO_SSBO_FUNC void active_unit_SSBO(GLuint unit);
 
 	void reset_TEXTURE_2D();
 	GEO_TBO_FUNC  void reset_TBO();
