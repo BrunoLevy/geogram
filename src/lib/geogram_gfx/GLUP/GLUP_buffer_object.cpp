@@ -41,6 +41,16 @@
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/command_line.h>
 
+// We got switch case with calls to function that have
+// [[noreturn]] attribute or not depending on supported
+// OpenGL buffer types. This generates warnings for
+// unreachable break statements.
+#ifdef GEO_COMPILER_CLANG
+#  if __has_warning("-Wunreachable-code-break")
+#  pragma clang diagnostic ignored "-Wunreachable-code-break"
+#  endif
+#endif
+
 namespace GLUP {
 
     bool  BufferObject::class_initialized_ = false;
@@ -133,6 +143,9 @@ namespace GLUP {
 	geo_argused(unit);
 	// Does nothing, unit is memorized as active_unit_,
 	// then bind() does the job.
+#ifndef GEO_SSBO_SUPPORTED
+	geo_assert_not_reached;
+#endif
     }
 
     /**************** bind() ****************************/

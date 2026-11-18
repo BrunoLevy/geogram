@@ -417,7 +417,7 @@ namespace {
 	    }
             break;
         }
-        default: {  // parabola: quadratic in t
+        case Conic::Parabola: {  // parabola: quadratic in t
             double A2 = c.a * dot(n, c.X);
 	    double B2 = 2 * c.a * dot(n, c.Y);
 	    double C2 = dot(n, c.C) - d;

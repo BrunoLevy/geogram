@@ -133,7 +133,6 @@ namespace {
 		    cells, c, true, shrink_factor, w
 		);
 		break;
-            default: ok = false;
 	    }
 	    done += ok ? 1 : 0;
 	}
