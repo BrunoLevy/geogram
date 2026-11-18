@@ -255,16 +255,16 @@ namespace GLUP {
 
     protected:
 	static void active_unit_TEXTURE_2D(GLuint unit);
-	static GEO_TBO_FUNC  void active_unit_TBO(GLuint unit);
-	static GEO_SSBO_FUNC void active_unit_SSBO(GLuint unit);
+	static void active_unit_TBO(GLuint unit) GEO_TBO_FUNC;
+	static void active_unit_SSBO(GLuint unit) GEO_SSBO_FUNC;
 
 	void reset_TEXTURE_2D();
-	GEO_TBO_FUNC  void reset_TBO();
-	GEO_SSBO_FUNC void reset_SSBO();
+	void reset_TBO() GEO_TBO_FUNC;
+	void reset_SSBO() GEO_SSBO_FUNC;
 
 	void bind_TEXTURE_2D(GLuint unit);
-	GEO_TBO_FUNC void bind_TBO(GLuint unit);
-	GEO_SSBO_FUNC void bind_SSBO(GLuint unit);
+	void bind_TBO(GLuint unit) GEO_TBO_FUNC;
+	void bind_SSBO(GLuint unit) GEO_SSBO_FUNC ;
 
 	template <class T> void create_or_update_TEXTURE_2D(
 	    index_t nb, const T* data
@@ -332,9 +332,9 @@ namespace GLUP {
 	    }
 	}
 
-	GEO_TBO_FUNC template <class T> void create_or_update_TBO(
+	template <class T> void create_or_update_TBO(
 	    index_t nb, const T* data
-	) {
+	) GEO_TBO_FUNC {
 #ifdef GEO_TBO_SUPPORTED
 	    geo_debug_assert(type_ == TBO || type_ == UNINITIALIZED);
 	    type_ = TBO;
@@ -356,9 +356,9 @@ namespace GLUP {
 #endif
 	}
 
-	GEO_SSBO_FUNC template <class T> void create_or_update_SSBO(
+	template <class T> void create_or_update_SSBO(
 	    index_t nb, const T* data
-	) {
+	) GEO_SSBO_FUNC {
 #ifdef GEO_SSBO_SUPPORTED
 	    geo_debug_assert(type_ == TBO || type_ == UNINITIALIZED);
 	    type_ = SSBO;
