@@ -44,6 +44,7 @@
 namespace GLUP {
 
     bool  BufferObject::class_initialized_ = false;
+    bool  BufferObject::GLSL_sources_registered_ = false;
     GLint BufferObject::max_TBO_size_ = 0;
     GLint BufferObject::max_texture_size_ = 0;
     BufferObject::Type BufferObject::default_type_ = UNINITIALIZED;
@@ -299,6 +300,10 @@ namespace GLUP {
     /***************************************************************************/
 
     void BufferObject::register_GLSL_sources() {
+	if(GLSL_sources_registered_) {
+	    return;
+	}
+	GLSL_sources_registered_ = true;
 	if(default_type() == TEXTURE_2D) {
 	    GEO::GLSL::register_GLSL_include_file("GLUP/buffers.h",
             R"(

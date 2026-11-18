@@ -403,6 +403,7 @@ namespace GLUP {
 	GLsizei height_ = 0;
 
 	static bool class_initialized_;
+	static bool GLSL_sources_registered_;
 	static GLint max_TBO_size_;     // in texels.
 	static GLint max_texture_size_; // in texels.
 	static Type default_type_;

@@ -2134,7 +2134,8 @@ namespace GLUP {
             return;
         }
 
-	//GLUP::BufferObject::register_GLSL_sources();
+	GLUP::BufferObject::initialize_class();
+	GLUP::BufferObject::register_GLSL_sources();
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/vertex_shader_preamble.h",
