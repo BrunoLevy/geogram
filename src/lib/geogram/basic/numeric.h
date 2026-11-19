@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/assert.h>
+#include <geogram/basic/i387.h>
 #include <cmath>
 #include <float.h>
 #include <limits.h>
@@ -423,14 +424,18 @@ namespace GEO {
 #  define GEO_FP_CONTRACT_OFF _Pragma("fp_contract(off)")
 #elif defined(__GNUC__)
 
+namespace {
+
 // GCC does not have any pragma to deactivate FMA generation,
 // so instead we check that they are deactivated (by the command-line
 // option -ffp-contract=off) and fire an assertion fail if it was not
-// the case. If targeting (very old) x87, make sure that extended
-// precision is deactivated (if not the case it will be captured here
-// as well).
-struct GeoAssertNoFpContract {
-    GeoAssertNoFpContract() {
+// the case. If targeting (very old) x87, deactivates the old extended
+// precision mode .
+  struct GeoAssertStrictIEEE754 {
+    GeoAssertStrictIEEE754() {
+#ifdef GEO_387 // disable (very old) 387 extended precision
+    geo_disable_387_extended_precision();
+#endif
 #ifdef GEOGRAM_PSM
 	if(fp_contraction_enabled()) {
 	    std::cerr << "Needs to be compiled with -ffp-contract-off "
@@ -448,9 +453,11 @@ struct GeoAssertNoFpContract {
     __attribute__((noipa)) static double a2plusb(double a, double b) {
 	return a * a + b;
     }
-};
+  };
+}
+
 #  define GEO_FP_CONTRACT_OFF \
-    static GeoAssertNoFpContract CPP_CONCAT(assert_no_fp_contract_,__LINE__);
+    static GeoAssertStrictIEEE754 CPP_CONCAT(assert_strict_ieee_754_,__LINE__);
 #else
 #  define GEO_FP_CONTRACT_OFF _Pragma("STDC FP_CONTRACT OFF")
 #endif
