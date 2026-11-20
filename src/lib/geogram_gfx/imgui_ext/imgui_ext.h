@@ -53,7 +53,11 @@
 #endif
 #endif
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <imgui.h>
+#else
 #include <geogram_gfx/third_party/imgui/imgui.h>
+#endif
 #include <geogram_gfx/third_party/imgui/misc/cpp/imgui_stdlib.h>
 
 #if defined(GEO_COMPILER_GCC_FAMILY)
@@ -213,7 +217,9 @@ namespace ImGui {
     /**
      * \Brief Emulate pre-v1.92 ImGUI API
      */
+#if defined(IMGUI_DISABLE_OBSOLETE_FUNCTIONS) && IMGUI_VERSION_NUM >= 19200
     void GEOGRAM_GFX_API PushFont(ImFont* font);
+#endif
 
 
 #ifndef GOMGEN

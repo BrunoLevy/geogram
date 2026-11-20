@@ -66,7 +66,11 @@ namespace ImOGuizmo {
 #include <geogram/basic/logger.h>
 #include <map>
 
+#ifdef GEOGRAM_USE_SYSTEM_TEXT_EDITOR
+#include <geogram_gfx/lua/luawrap_runtime.h>
+#else
 #include <geogram_gfx/third_party/imgui_lua_bindings_gomgen/luawrap_runtime.h>
+#endif
 
 extern void LoadImGuiBindings(lua_State* L);
 extern void LoadImDrawListBindings(lua_State* L);
