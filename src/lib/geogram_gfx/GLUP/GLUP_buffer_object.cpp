@@ -143,6 +143,7 @@ namespace GLUP {
 #ifdef GEO_TBO_SUPPORTED
 	glActiveTexture(GL_TEXTURE0 + unit);
 #else
+	geo_argused(unit);
 	geo_assert_not_reached;
 #endif
     }
