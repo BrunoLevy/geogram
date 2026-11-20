@@ -500,7 +500,13 @@ typedef uLong FAR uLongf;
 #  endif
 #endif
 #ifndef Z_HAVE_UNISTD_H
-#  if defined(_LARGEFILE64_SOURCE) && !defined(_WIN32)
+/*
+ * [Bruno] deactives 64-bit off_t for emscripten, we had an inconsistency:
+ * Under emscripten, _LARGEFILE64_SOURCE is not defined when compiling zlib
+ * but it is defined when compiling the rest of geogram.             |
+ *                                                                   V
+ */
+# if defined(_LARGEFILE64_SOURCE) && !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 #    define Z_HAVE_UNISTD_H
 #  endif
 #endif

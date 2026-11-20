@@ -4,6 +4,7 @@
 HEADERS="../api/defs.h \
 ../basic/common.h \
 ../basic/argused.h \
+../basic/i387.h \
 ../basic/numeric.h \
 ../basic/psm.h \
 ../basic/thread_sync.h \

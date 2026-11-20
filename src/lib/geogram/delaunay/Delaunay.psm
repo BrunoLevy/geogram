@@ -5,6 +5,7 @@ HEADERS="../api/defs.h \
 ../basic/common.h \
 ../basic/assert.h \
 ../basic/argused.h \
+../basic/i387.h \
 ../basic/numeric.h \
 ../basic/memory.h \
 ../basic/counted.h \
