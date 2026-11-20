@@ -497,8 +497,14 @@ GLUPcontext glupCreateContext() {
 #ifdef GEO_GL_140
     if(GLUP_profile == "GLUP140") {
         try {
+	    GEO::Logger::out("GLUP") << "Creating GLUP140 context"
+				     << std::endl;
             result = new GLUP::Context_GLSL140;
+	    GEO::Logger::out("GLUP") << "Setting up GLUP140 context"
+				     << std::endl;
             result->setup();
+	    GEO::Logger::out("GLUP") << "GLUP140 context ready"
+				     << std::endl;
         } catch(...) {
             GEO::Logger::warn("GLUP")
                 << "Caught an exception in GLUP140, downgrading to GLUPES2"
@@ -1989,9 +1995,6 @@ namespace GLUP {
 
 }
 
-// TODO1: ArraysOES()/Arrays() switch based on OpenGL profile
-// (runtime) rather than GEO_OS_EMSCRIPTEN macro (compile-time)
-
 void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
     if(GLUP::vertex_array_emulate) {
         for(GLUPsizei i=0; i<n; ++i) {
@@ -2000,7 +2003,7 @@ void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
 
     } else {
 #ifdef GEO_OS_EMSCRIPTEN
-        glGenVertexArraysOES(n, arrays);
+        glGenVertexArrays(n, arrays);
 #else
         if(!glGenVertexArrays) {
             GLUP::vertex_array_emulate = true;
@@ -2019,7 +2022,7 @@ void glupDeleteVertexArrays(GLUPsizei n, const GLUPuint *arrays) {
         }
     } else {
 #if defined(GEO_OS_EMSCRIPTEN)
-        glDeleteVertexArraysOES(n, arrays);
+        glDeleteVertexArrays(n, arrays);
 #else
         if(!glDeleteVertexArrays) {
             GLUP::vertex_array_emulate = true;
@@ -2048,7 +2051,7 @@ void glupBindVertexArray(GLUPuint array) {
         }
     } else {
 #if defined(GEO_OS_EMSCRIPTEN)
-        glBindVertexArrayOES(array);
+        glBindVertexArray(array);
 #else
         if(!glBindVertexArray) {
             GLUP::vertex_array_emulate = true;

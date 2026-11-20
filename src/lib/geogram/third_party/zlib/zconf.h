@@ -8,11 +8,19 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
+
+/* [Bruno] */
+#if defined(__clang__)
+#pragma clang diagnostic push
+#  if __has_warning("-Wreserved-macro-identifier")
+#  pragma clang diagnostic ignored "-Wreserved-macro-identifier"
+#  endif
+#endif
+
 /*
  * [Bruno] enable 64 bits IO (needed on MacOS and Windows that do not
  * set these defines by default
  */
-
 #if defined(_WIN32) || defined(_WIN64) || defined(__APPLE__)
 #define _LARGEFILE64_SOURCE 1
 #define _LFS64_LARGEFILE 1
@@ -492,7 +500,13 @@ typedef uLong FAR uLongf;
 #  endif
 #endif
 #ifndef Z_HAVE_UNISTD_H
-#  if defined(_LARGEFILE64_SOURCE) && !defined(_WIN32)
+/*
+ * [Bruno] deactives 64-bit off_t for emscripten, we had an inconsistency:
+ * Under emscripten, _LARGEFILE64_SOURCE is not defined when compiling zlib
+ * but it is defined when compiling the rest of geogram.             |
+ *                                                                   V
+ */
+# if defined(_LARGEFILE64_SOURCE) && !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 #    define Z_HAVE_UNISTD_H
 #  endif
 #endif
@@ -555,6 +569,11 @@ typedef uLong FAR uLongf;
   #pragma map(inflate_table,"INTABL")
   #pragma map(inflate_fast,"INFA")
   #pragma map(inflate_copyright,"INCOPY")
+#endif
+
+/* [Bruno] */
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif
 
 #endif /* ZCONF_H */

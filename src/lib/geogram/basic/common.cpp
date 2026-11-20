@@ -63,6 +63,7 @@
 
 #ifdef GEO_OS_EMSCRIPTEN
 #include <emscripten.h>
+#pragma GCC diagnostic ignored "-Wc++20-extensions" // for EM_ASM()
 #endif
 
 namespace GEO {

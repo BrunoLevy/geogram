@@ -42,6 +42,8 @@
 
 #include <geogram/delaunay/periodic_delaunay_3d.h>
 #include <geogram/basic/range.h>
+#include <geogram/basic/thread_sync.h>
+
 
 namespace GEO {
 
@@ -77,6 +79,8 @@ namespace GEO {
 	PowerDiagram() : PeriodicDelaunay3d(false) {
 	    set_keeps_infinite(true);
 	}
+
+	~PowerDiagram() override;
 
 	/**
 	 * \brief gets the number of tetrahedra
@@ -567,6 +571,8 @@ namespace GEO {
 	// this vertex, stored in compressed row storage.
 	vector<index_t> skel_ptr_;
 	vector<index_t> skel_h_;
+
+	Process::BasicSpinLockArray locks_;
     };
 
 }

@@ -40,15 +40,26 @@
 #include "molecule.h"
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/mesh_remesh.h>
+#include <geogram/mesh/mesh_geometry.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/debug_stream.h>
+#include <geogram/basic/geometry_nd.h>
+#include <geogram/basic/file_system.h>
+#include <geogram/basic/line_stream.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include "molecule_shaders.h"
+#include "molecule_step.h"
+#include "skin_surface_mesh.h"
 
-// Try to obtain tigher cells / tigher imposters
-// using the equation, especially for H2 and H1 cells,
-// but also S3 cells (S0 cells are OK!)
+// TODO:
+//  - S0: OK
+//  - H1: OK (try to use two imposters for 2-sheeted patches)
+//  - H2: tighter imposters
+//  - S3: tighter imposters if possible: (shrunk tets, we can probably restrain)
 //
+//   Note: in my notation, I use R2 = |pi-c|^2-wi (used to that in power diag)
+//         rather than the opposite used in the articles
 //   wi = Ri^2/s
 //   t1 = -1/(1-s)   t2 = 1/s
 //
@@ -57,7 +68,7 @@
 // 	 c  = radical_point(i,j)
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
-//   t1*X^2 + t2*(Y^2+Z^2) = R2
+//   t1*X^2 + t2*(Y^2+Z^2) + R2 = 0
 //
 //   H2 cells equation:
 //   ------------------
@@ -65,7 +76,7 @@
 //       R2 = |pi - c|^2 - wi
 //          = |pj - c|^2 - wj
 //          = |pk - c|^2 - wi
-//   t2*X^2 + t1*(Y^2+Z^2) = R2
+//   t2*X^2 + t1*(Y^2+Z^2) + R2 = 0
 //
 //   S3 cells equation:
 //   ------------------
@@ -84,6 +95,29 @@ namespace GEO {
 	cells_[CELL_TYPE_H1].set_color({1.0, 1.0, 0.0});
 	cells_[CELL_TYPE_H2].set_color({1.0, 0.0, 1.0});
 	cells_[CELL_TYPE_S3].set_color({1.0, 0.0, 0.0});
+
+	// Create an interesting shape to have something to see
+	// when no command line argument is specified.
+	atom_pos_.push_back({ 0.0,  0.0,  0.0});
+	atom_pos_.push_back({ 1.0,  0.0,  0.0});
+	atom_pos_.push_back({ 0.0,  1.0,  0.0});
+	atom_pos_.push_back({ 0.0,  0.0,  1.0});
+	atom_pos_.push_back({ 0.0,  1.0,  1.0});
+	atom_pos_.push_back({ 1.0,  0.0,  1.0});
+	atom_pos_.push_back({ 1.0,  1.0,  0.0});
+	atom_pos_.push_back({ 1.0,  1.0,  1.0});
+	atom_pos_.push_back({-0.5,  0.5,  0.5});
+	atom_pos_.push_back({ 0.5, -0.5,  0.5});
+	atom_pos_.push_back({ 0.5,  0.5, -0.5});
+	atom_pos_.push_back({ 1.5,  0.5,  0.5});
+	atom_pos_.push_back({ 0.5,  1.5,  0.5});
+	atom_pos_.push_back({ 0.5,  0.5,  1.5});
+
+	nb_atoms_ = atom_pos_.size();
+	atom_type_.assign(nb_atoms_,'H');
+	atom_chain_.assign(nb_atoms_,0);
+
+	update(true);
     }
 
     Molecule::~Molecule() {
@@ -93,18 +127,36 @@ namespace GEO {
 	if(H_program_ != 0) {
 	    glDeleteProgram(H_program_);
 	}
-	if(S_imposters_program_ != 0) {
-	    glDeleteProgram(S_imposters_program_);
-	}
-	if(H_imposters_program_ != 0) {
-	    glDeleteProgram(H_imposters_program_);
-	}
 	if(empty_VAO_ != 0) {
 	    glDeleteVertexArrays(1,&empty_VAO_);
 	}
     }
 
     bool Molecule::load(const std::string& filename) {
+	if(FileSystem::extension(filename) == "cif") {
+	    return load_CIF(filename);
+	}
+	return load_geogram(filename);
+    }
+
+    bool Molecule::save(const std::string& filename) {
+	if(
+	    FileSystem::extension(filename) == "stp" ||
+	    FileSystem::extension(filename) == "step"
+	) {
+	    double threshold = 1e-5;
+	    return MSS_Claude::save_molecule_STEP(*this, filename, threshold);
+	}
+
+	// At this point we suppose it is a mesh file format,
+	// so we mesh the MSS and save the mesh.
+	if(mesh_.vertices.nb() == 0) {
+	    generate_mesh();
+	}
+	return mesh_save(mesh_, filename);
+    }
+
+    bool Molecule::load_geogram(const std::string& filename) {
 	Mesh M;
 	if(!mesh_load(filename, M)) {
 	    return false;
@@ -113,18 +165,45 @@ namespace GEO {
 	atom_pos_.resize(nb_atoms_);
 	atom_type_.resize(nb_atoms_);
 	atom_chain_.resize(nb_atoms_);
-	Attribute<char> atom_type_attr(
-	    M.vertices.attributes(), "atom_type"
-	);
-	Attribute<char> atom_chain_attr (
-	    M.vertices.attributes(), "chain_id"
-	);
+	Attribute<char> atom_type_attr;
+	atom_type_attr.bind_if_is_defined(M.vertices.attributes(), "atom_type") ;
+	Attribute<char> atom_chain_attr;
+	atom_chain_attr.bind_if_is_defined(M.vertices.attributes(), "chain_id") ;
 	for(index_t v: M.vertices) {
 	    atom_pos_[v] = M.vertices.point(v);
-	    atom_type_[v]= atom_type_attr[v];
-	    atom_chain_[v] = index_t(atom_chain_attr[v]);
+	    atom_type_[v] = atom_type_attr.is_bound() ? atom_type_attr[v] : 'C' ;
+	    atom_chain_[v] =
+		atom_chain_attr.is_bound() ? index_t(atom_chain_attr[v]) : 0 ;
 	}
-	update();
+	update(true);
+	return true;
+    }
+
+    bool Molecule::load_CIF(const std::string& filename) {
+	LineInput in(filename);
+	if(!in.OK()) {
+	    Logger::err("CIF") << "Could not open " << filename << std::endl;
+	    return false;
+	}
+	atom_pos_.resize(0);
+	atom_type_.resize(0);
+	atom_chain_.resize(0);
+	Logger::out("CIF") << "Loading " << filename << std::endl;
+	while(in.get_line()) {
+	    in.get_fields();
+	    if(!strcmp(in.field(0),"ATOM")) {
+		char type = in.field(2)[0];
+		unsigned int chain = in.field_as_uint(7);
+		double x = in.field_as_double(10);
+		double y = in.field_as_double(11);
+		double z = in.field_as_double(12);
+		atom_pos_.emplace_back(x,y,z);
+		atom_type_.push_back(type);
+		atom_chain_.push_back(chain);
+	    }
+	}
+	nb_atoms_ = atom_pos_.size();
+	update(true);
 	return true;
     }
 
@@ -137,7 +216,7 @@ namespace GEO {
 	return B;
     }
 
-    void Molecule::update() {
+    void Molecule::update(bool full) {
 	atom_weight_.resize(nb_atoms());
 	atom_pos_.resize(nb_atoms());
 	r_min_ =  Numeric::max_float64();
@@ -150,8 +229,10 @@ namespace GEO {
 	}
 	{
 	    Stopwatch W("delaunay",verbose_);
-	    diagram_ = new PowerDiagram();
-	    diagram_->set_vertices(nb_atoms(), atom_pos_[0].data());
+	    if(full) {
+		diagram_ = new PowerDiagram();
+		diagram_->set_vertices(nb_atoms(), atom_pos_[0].data());
+	    }
 	    diagram_->set_weights(atom_weight_.data());
 	    diagram_->compute();
 	    if(verbose_) {
@@ -160,7 +241,7 @@ namespace GEO {
 					<< std::endl;
 	    }
 	}
-	{
+	/* {
 	    Stopwatch W("close",verbose_);
 	    while(close_cells()) {
 		if(verbose_) {
@@ -169,7 +250,7 @@ namespace GEO {
 			<< std::endl;
 		}
 	    }
-	}
+	} */
 	{
 	    Stopwatch W("skel",verbose_);
 	    diagram_->compute_skeleton(nb_atoms_);
@@ -193,7 +274,17 @@ namespace GEO {
 	    Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 				    << std::endl;
 	}
-	update_cells();
+	{
+	    Stopwatch W("cells",verbose_);
+	    update_cells();
+	}
+	mesh_.clear();
+#ifndef GEO_OS_EMSCRIPTEN
+	mesh_gfx_.set_mesh(&mesh_);
+#endif
+	if(draw_mode_ == DRAW_MESH) {
+	    draw_mode_ = DRAW_MSS;
+	}
     }
 
     bool Molecule::close_cells() {
@@ -262,10 +353,25 @@ namespace GEO {
     }
 
     void Molecule::update_cells() {
-	update_S0_cells();
-	update_H1_cells();
-	update_H2_cells();
-	update_S3_cells();
+        // Clear cell buffers sequentially, because it deallocates OpenGL
+	// buffers, which cannot be done in parallel!
+	for(index_t c=0; c<4; ++c) {
+	    cells_[c].clear();
+	}
+
+	// For big molecules it may be worth it doing all cell types in parallel
+	// It gains several seconds for 1M atoms
+	// TODO: finer parallelism, for H1 and H2 cells that have costly mesh
+	// traversals.
+	{
+	    parallel(
+		[this]{update_S0_cells();},
+		[this]{update_H1_cells();},
+		[this]{update_H2_cells();},
+		[this]{update_S3_cells();}
+	    );
+	}
+
     }
 
     void Molecule::update_S0_cells() {
@@ -274,7 +380,6 @@ namespace GEO {
 	//   for each edge incident to the atom in the diagram
 	//      add the polygonal facet obtained by turning around the edge
 	MixedComplexCells& cells = cells_[CELL_TYPE_S0];
-	cells.clear();
 	for(index_t v: atoms()) {
 	    auto incident_edges = diagram_->incident_edges(v);
 	    // skip empty power cell
@@ -291,6 +396,29 @@ namespace GEO {
 	}
     }
 
+
+    // Given the quadric equation (zero at center and U along axis):
+    //    alpha U^2 + beta (V^2+W^2) + R2 = 0
+    // This function computes the min and max radius r^2(U) along the U axis
+    //   defined by: V^2+W^2 = r^2(U)
+    // r^2(U) is given by (when it exists, that is, r^2(U) > 0):
+    //    r^2(U) = - (alpha U^2 + R2) / beta
+    inline std::pair<double,double> Hcell_radius(
+	double alpha, double beta, double R2,
+	double u1, double u2
+    ) {
+	double r2_1 = -(alpha*u1*u1+R2)/beta;
+	double r2_2 = -(alpha*u2*u2+R2)/beta;
+	double r2_min = std::min(r2_1,r2_2);
+	double r2_max = std::max(r2_1,r2_2);
+	if(u1*u2 < 0) {
+	    double r2_0 = -R2/beta;
+	    r2_min = std::min(r2_min,r2_0);
+	    r2_max = std::max(r2_max,r2_0);
+	}
+	return {r2_min, r2_max};
+    }
+
     void Molecule::update_H1_cells() {
 	// H1 cells are polygonal prisms aligned with the edges of the
 	// triangulation. They are obtained as follows:
@@ -300,8 +428,17 @@ namespace GEO {
 	//       for each halfedge around edge (v1,v2)
 	//           generate a quad facet
 	//    generate the two polygonal caps
+	//
+	//   H1 cells equation
+	//   -----------------
+        //   reminder: wi = Ri^2/s  t1 = -1/(1-s)   t2 = 1/s
+	//
+        // 	 c  = radical_point(i,j)
+        //       R2 = |pi - c|^2 - wi
+        //          = |pj - c|^2 - wj
+        //   t1*X^2 + t2*(Y^2+Z^2) + R2 = 0
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_H1];
-	cells.clear();
 	for(index_t v1: atoms()) {
 	    for(index_t h0: diagram_->incident_edges(v1)) {
 		if(h0 == NO_INDEX) {
@@ -311,155 +448,254 @@ namespace GEO {
 		if(!is_atom(v2) || v1 > v2) {
 		    continue;
 		}
-		index_t t  = diagram_->halfedge_t(h0);
-
-		vec3 p1 = mixed_vertex({v1,t});
-		vec3 p2 = mixed_vertex({v2,t});
 
 		vec3 c = diagram_->radical_point(v1,v2);
+		vec3 p1 = atom_pos_[v1];
+		vec3 p2 = atom_pos_[v2];
 		vec3 axis = normalize(p2 - p1);
+		p1 = mix(p1,c,shrink_factor_);
+		p2 = mix(p2,c,shrink_factor_);
 
 		double R2 = distance2(c, diagram_->vertex(v1)) -
 		    diagram_->weight(v1);
 
-		cells.begin_H_cell(
-		    c,axis,R2,
-		    atom_pos_[v1], atom_radius(v1),
-		    atom_pos_[v2], atom_radius(v2)
-		);
+		const double t1 = -1.0/(1.0-shrink_factor_);
+		const double t2 =  1.0/shrink_factor_;
+		double u1 = dot(p1-c,axis);
+		double u2 = dot(p2-c,axis);
+		auto [rmin2, rmax2] = Hcell_radius(t1,t2,R2,u1,u2);
 
-		// generate the quad facets
-		index_t h = h0;
-		do {
-		    cells.add_quad_facet(h);
-		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
-		} while(h != h0);
+		if(discard_empty_cells_ && rmin2 < 0.0 && rmax2 < 0.0) {
+		    continue;
+		}
+
+		double imposter_r = ::sqrt(rmax2);
+
+		cells.begin_H_cell(c, axis, R2, p1, imposter_r, p2, imposter_r);
 
 		// generate the two polygonal caps
+		index_t h = h0;
 		cells.add_shrunk_power_facet(h, FLIPPED);
 		h = diagram_->halfedge_flip(h);
 		cells.add_shrunk_power_facet(h, FLIPPED);
+
+		// generate the quad facets
+		h = h0;
+		do {
+		    index_t tt1 = diagram_->halfedge_t(h);
+		    index_t lf = diagram_->halfedge_lf(h);
+		    index_t tt2 = diagram_->tet_adjacent(tt1,lf);
+		    if(
+			diagram_->tet_is_finite(tt1) ||
+			diagram_->tet_is_finite(tt2)
+		    ) {
+			cells.add_quad_facet(h);
+		    }
+		    h = diagram_->next_halfedge_around_edge(h,v1,v2);
+		} while(h != h0);
 
 		cells.end_cell();
 	    }
 	}
     }
 
+    // Given the quadric equation (zero at center and U along axis):
+    //    alpha U^2 + beta (V^2+W^2) + R2 = 0
+    // this function restricts an interval [u1,u2] along the U direction
+    // If the quadric is a dual-sheeted hyperboloid, the interval is replaced
+    // with:
+    // - [u,u2] if u1 is in the empty space (r2(u1)<0)
+    // - [u1,u] if u2 is in the empty space (r2(u2)<0)
+    // where u is defined by r2(u)=0
+    // r2max: radius of the imposter (needs to be centered on the quadric's axis)
+
+    inline void Hcell_restrict(
+	double alpha, double beta, double R2, double r2_max,
+	double& u1, double& u2
+    ) {
+	double r2_1 = -(alpha*u1*u1+R2)/beta;
+	double r2_2 = -(alpha*u2*u2+R2)/beta;
+
+	geo_assert(u2 >= u1);
+	// cell should bnot be completely empty
+	geo_assert(r2_1 >= 0.0 || r2_2 >= 0.0);
+
+	double u = -R2/alpha;
+
+	// if u > 0, it is a 2-sheeted hyperboloid, and we try
+	// nibbling the empty space (between the two sheets) if
+	// [u1,u2] straddles it
+	if(u > 0) {
+	    u = ::sqrt(u);
+	    if(u < u1 || u > u2) {
+		u = -u;
+	    }
+	    if(u >= u1 && u <= u2) {
+		if(r2_1 < 0 && r2_2 >= 0) {
+		    u1 = u;
+		    r2_1 = 0.0;
+		} else if(r2_1 >= 0 && r2_2 < 0) {
+		    u2 = u;
+		    r2_2 = 0.0;
+		}
+	    }
+	}
+
+	if(r2_1 > r2_max || r2_2 > r2_max) {
+	    // cell completely inside quadric
+	    if(r2_1 > r2_max && r2_2 > r2_max && u1*u2 > 0) {
+		u1 = 0.0;
+		u2 = 0.0;
+		return;
+	    }
+
+	    return; // code below is wrong! H2 cells have missing parts
+	    /*
+	    double u = -(beta * r2_max + R2) / alpha;
+	    double uu1 = std::min(-u,u);
+	    double uu2 = std::max(-u,u);
+	    if(r2_1 > r2_max && uu1 >= u1 && uu1 <= u2) {
+		u1 = uu1;
+		r2_1 = r2_max;
+	    }
+	    if(r2_2 > r2_max && uu2 >= u1 && uu2 <= u2) {
+		u2 = uu2;
+		r2_2 = r2_max;
+	    }
+	    */
+	}
+    }
+
+
     void Molecule::update_H2_cells() {
 	// H2 cells are triangular prisms extruded from tetrahedra facets.
 	// Their two triangular and three quadrangular facets are explicitly
 	// constructed.
+	//
+        //   H2 cells equation:
+        //   ------------------
+        // 	 c = radical_point(i,j,k)
+        //       R2 = |pi - c|^2 - wi
+        //          = |pj - c|^2 - wj
+        //          = |pk - c|^2 - wi
+        //   t2*X^2 + t1*(Y^2+Z^2) + R2 = 0
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_H2];
-	cells.clear();
-	for(index_t t1: diagram_->tets()) {
-	    if(!diagram_->tet_is_finite(t1)) {
-		continue;
-	    }
-	    for(index_t lf=0; lf<4; ++lf) {
-		index_t t2 = diagram_->tet_adjacent(t1, lf);
-		if(t2 < t1) {
+	for(index_t tet1: diagram_->tets()) {
+	    for(index_t lf1=0; lf1<4; ++lf1) {
+		index_t tet2 = diagram_->tet_adjacent(tet1, lf1);
+		if(tet2 < tet1) {
+		    continue;
+		}
+		index_t lf2 = diagram_->find_tet_adjacent(tet2,tet1);
+		bool tet1_is_real = is_atom(diagram_->tet_vertex(tet1,lf1));
+		bool tet2_is_real = is_atom(diagram_->tet_vertex(tet2,lf2));
+		if(!tet1_is_real && !tet2_is_real) {
 		    continue;
 		}
 
 		index_t lv[3] = {
-		    PowerDiagram::tet_facet_lv(lf,0),
-		    PowerDiagram::tet_facet_lv(lf,1),
-		    PowerDiagram::tet_facet_lv(lf,2)
+		    PowerDiagram::tet_facet_lv(lf1,0),
+		    PowerDiagram::tet_facet_lv(lf1,1),
+		    PowerDiagram::tet_facet_lv(lf1,2)
 		};
 
 		index_t v[3] = {
-		    diagram_->tet_vertex(t1,lv[0]),
-		    diagram_->tet_vertex(t1,lv[1]),
-		    diagram_->tet_vertex(t1,lv[2])
+		    diagram_->tet_vertex(tet1,lv[0]),
+		    diagram_->tet_vertex(tet1,lv[1]),
+		    diagram_->tet_vertex(tet1,lv[2])
 		};
 
 		if(!is_atom(v[0]) || !is_atom(v[1]) || !is_atom(v[2])) {
 		    continue;
 		}
 
-		vec3 p[3][2];
+		vec3 p[3];
+		double atom_rmax=0.0;
 		for(index_t tlv=0; tlv<3; ++tlv) {
-		    p[tlv][0] = mixed_vertex({v[tlv],t1});
-		    p[tlv][1] = mixed_vertex({v[tlv],t2});
+		    p[tlv] = atom_pos_[v[tlv]];
+		    atom_rmax = std::max(atom_rmax, atom_radius(v[tlv]));
 		}
 
-		vec3 g1 = (1.0/3.0)*(p[0][0]+p[1][0]+p[2][0]);
-		double r1 = std::max(
-		    std::max(distance2(p[0][0],g1),distance2(p[1][0],g1)),
-		    distance2(p[2][0],g1)
-		);
-
-		vec3 g2 = (1.0/3.0)*(p[0][1]+p[1][1]+p[2][1]);
-		double r2 = r1; // it is a prism!
-
-		vec3 axis = normalize(tet_dual_[t1] - tet_dual_[t2]);
+		vec3 axis = normalize(cross(p[1]-p[0],p[2]-p[0]));
 		vec3 c = diagram_->radical_point(v[0],v[1],v[2]);
 		double R2 =
 		    distance2(c,diagram_->vertex(v[0])) - diagram_->weight(v[0]);
-		cells.begin_H_cell(
-		    c, axis, R2,
-		    g1, ::sqrt(r1), g2, ::sqrt(r2)
-		);
 
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[0][0]));
-		cells.add_vertex_by_point(vec3f(p[1][0]));
-		cells.add_vertex_by_point(vec3f(p[1][1]));
-		cells.add_vertex_by_point(vec3f(p[0][1]));
-		cells.end_facet();
+		p[0] = mix(p[0], c, shrink_factor_);
+		p[1] = mix(p[1], c, shrink_factor_);
+		p[2] = mix(p[2], c, shrink_factor_);
 
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[1][0]));
-		cells.add_vertex_by_point(vec3f(p[2][0]));
-		cells.add_vertex_by_point(vec3f(p[2][1]));
-		cells.add_vertex_by_point(vec3f(p[1][1]));
-		cells.end_facet();
+		double u1 = -atom_rmax;
+		double u2 = atom_rmax;
 
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[2][0]));
-		cells.add_vertex_by_point(vec3f(p[0][0]));
-		cells.add_vertex_by_point(vec3f(p[0][1]));
-		cells.add_vertex_by_point(vec3f(p[2][1]));
-		cells.end_facet();
-
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[2][0]));
-		cells.add_vertex_by_point(vec3f(p[1][0]));
-		cells.add_vertex_by_point(vec3f(p[0][0]));
-		cells.end_facet();
-
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[0][1]));
-		cells.add_vertex_by_point(vec3f(p[1][1]));
-		cells.add_vertex_by_point(vec3f(p[2][1]));
-		cells.end_facet();
-
-		cells.end_cell();
-
-		if(false) {
-		    index_t cc = cells.nb_cells()-1;
-		    cells_[CELL_TYPE_H2].save_cell(
-			cc, String::format("H2_cell_%05u.obj", cc)
-		    );
-
-		    DebugStream dbg("H2_debug",cc);
-		    vec3 atom[3] = {
-			atom_pos_[v[0]], atom_pos_[v[1]], atom_pos_[v[2]]
-		    };
-		    double rad[3] = {
-			atom_radius(v[0]),atom_radius(v[1]), atom_radius(v[2])
-		    };
-
-		    vec3 g = 0.5*(g1+g2);
-		    double hmin =  std::numeric_limits<double>::max();
-		    double hmax = -std::numeric_limits<double>::max();
-		    for(index_t i=0; i<3; ++i) {
-			double h = dot(atom[i]-g,axis);
-			hmin = std::min(hmin, h-rad[i]);
-			hmax = std::max(hmax, h+rad[i]);
+		// "nibble" [u1,u2] if there is matter in the direction of tet1
+		// (negative direction along axis)
+		if(tet1_is_real) {
+		    double u = dot(mixed_vertex({v[0],tet1})-c,axis);
+		    if(u < 0) {
+			u1 = std::max(u1,u);
 		    }
-		    dbg.add_segment(g+hmin*axis, g+hmax*axis);
 		}
+
+		// "nibble" [u1,u2] if there is matter in the direction of tet2
+		// (positive direction along axis)
+		if(tet2_is_real) {
+		    double u = dot(mixed_vertex({v[0],tet2})-c,axis);
+		    if(u > 0) {
+			u2 = std::min(u2,u);
+		    }
+		}
+
+		double imposter_r2 = 0.0;
+		for(index_t lv2=0; lv2<3; ++lv2) {
+		    double r2 = length2((p[lv2]-c));
+		    imposter_r2 = std::max(imposter_r2,r2);
+		}
+		const double t1 = -1.0/(1.0-shrink_factor_);
+		const double t2 =  1.0/shrink_factor_;
+		auto [rmin2, rmax2] = Hcell_radius(t2,t1,R2,u1,u2);
+		if(discard_empty_cells_ && rmin2 < 0.0 && rmax2 < 0.0) {
+		    continue;
+		}
+		if(discard_empty_cells_ && rmin2 > imposter_r2) {
+		    continue;
+		}
+
+		// If we have a 2-sheeted hyperboloid, and if one of u1,u2 is
+		// in the gap, we can nibble the [u1,u2] interval (remove the
+		// gap)
+		if(discard_empty_cells_) {
+		    Hcell_restrict(t2,t1,R2,imposter_r2,u1,u2);
+		    if(u1 == 0.0 && u2 == 0.0) {
+			continue;
+		    }
+		}
+
+
+		vec3 g1 = c + u1*axis;
+		vec3 g2 = c + u2*axis;
+		double imposter_r = ::sqrt(imposter_r2);
+		cells.begin_H_cell(c, axis, R2, g1, imposter_r, g2, imposter_r);
+
+		index_t h1 =
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[0], lv[1]);
+		index_t h2 =
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[1], lv[2]);
+		index_t h3 =
+		    diagram_->make_halfedge_from_t_lv_lv(tet1, lv[2], lv[0]);
+
+		cells.add_quad_facet(h1,FLIPPED);
+		cells.add_quad_facet(h2,FLIPPED);
+		cells.add_quad_facet(h3,FLIPPED);
+
+		if(tet1_is_real) {
+		    cells.add_shrunk_tet_facet(tet1,lf1,FLIPPED);
+		}
+		if(tet2_is_real) {
+		    cells.add_shrunk_tet_facet(tet2,lf2,FLIPPED);
+		}
+		cells.end_cell();
 	    }
 	}
     }
@@ -467,8 +703,14 @@ namespace GEO {
     void Molecule::update_S3_cells() {
 	// S3 cells are shrunk tetrahedra.
 	// Their four triangular facets are explicitly constructed.
+        //   S3 cells equation:
+        //   ------------------
+        //      c  = radical_point(i,j,k,l)
+        //      R2 = (|pi - c|^2 - wi)*(1-s)
+        //         = ...
+        //         = (|pl - c|^2 - wl)*(1-s)
+
 	MixedComplexCells& cells = cells_[CELL_TYPE_S3];
-	cells.clear();
 	for(index_t t: diagram_->tets()) {
 
 	    index_t v[4] = {
@@ -509,25 +751,47 @@ namespace GEO {
 		carries_surface = carries_surface || (distance2(c,p[i]) > R2);
 	    }
 
-	    if(!carries_surface) {
+	    if(discard_empty_cells_ && !carries_surface) {
+		continue;
+	    }
+
+	    // Center of imposter
+	    vec3 imp_c = 0.25*(p[0]+p[1]+p[2]+p[3]);
+
+	    // If tet is completely outside sphere then tet is solid
+	    carries_surface = false;
+	    for(index_t lf=0; lf<4; ++lf) {
+		vec3 p1 = p[diagram_->tet_facet_lv(lf,0)];
+		vec3 p2 = p[diagram_->tet_facet_lv(lf,1)];
+		vec3 p3 = p[diagram_->tet_facet_lv(lf,2)];
+		double d2 = Geom::point_triangle_squared_distance(
+		    imp_c, p1, p2, p3
+		);
+		if(d2 < R2) {
+		    carries_surface = true;
+		    break;
+		}
+	    }
+
+	    if(discard_empty_cells_ && !carries_surface) {
 		continue;
 	    }
 
 	    double R = ::sqrt(R2);
-	    cells.begin_S_cell(c,R);
 
-	    // we could instead do cells.add_shrunk_tet_facet(t,0..3) but
-	    // it is slower because it recomputes the shrunk vertices
-	    for(index_t lf=0; lf<4; ++lf) {
-		index_t lv1 = PowerDiagram::tet_facet_lv(lf,0);
-		index_t lv2 = PowerDiagram::tet_facet_lv(lf,1);
-		index_t lv3 = PowerDiagram::tet_facet_lv(lf,2);
-		cells.begin_facet();
-		cells.add_vertex_by_point(vec3f(p[lv1]));
-		cells.add_vertex_by_point(vec3f(p[lv2]));
-		cells.add_vertex_by_point(vec3f(p[lv3]));
-		cells.end_facet();
+	    // radius of imposter
+	    double imp_R2 = 0.0;
+	    for(index_t i=0; i<4; ++i) {
+		imp_R2 = std::max(imp_R2, length2(p[i]-imp_c));
 	    }
+	    double imp_R = ::sqrt(imp_R2);
+
+	    cells.begin_S_cell(c,R,imp_c,imp_R);
+
+	    cells.add_shrunk_tet_facet(t,0);
+	    cells.add_shrunk_tet_facet(t,1);
+	    cells.add_shrunk_tet_facet(t,2);
+	    cells.add_shrunk_tet_facet(t,3);
 
 	    cells.end_cell();
 	}
@@ -536,60 +800,147 @@ namespace GEO {
     /************************************************************************/
 
     void Molecule::draw() {
-	create_shaders_if_needed();
-
-	if(!draw_mss_) {
-	    draw_atoms();
+	if(nb_atoms() == 0) {
 	    return;
 	}
 
+	// GLUP140 profile not supported yet in Emscripten
+	#ifndef GEO_OS_EMSCRIPTEN
+	if(draw_mode_ == DRAW_MESH) {
+	    mesh_gfx_.draw_surface();
+	    return;
+	}
+	#endif
+
+	create_shaders_if_needed();
+
 	// All the rest of this function is for drawing
 	// the molecular skin surface
-	nb_triangles_ = 0;
+	nb_quadrics_ = 0;
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
+	if(draw_mesh_) {
+	    glupEnable(GLUP_DRAW_MESH);
+	    glupSetMeshWidth(mesh_width_);
+	    glupSetColor4fv(GLUP_MESH_COLOR, mesh_color_.data());
+	}
 
-	MixedComplexCells::DrawMode mode =
-	    raytrace_ ? MixedComplexCells::DRAW_MODE_MSS
-        	      : MixedComplexCells::DRAW_MODE_CELLS;
+	MixedComplexCells::DrawMode mode = MixedComplexCells::DRAW_MODE_MSS;
 
 	float t1 = float(-1.0/(1.0 - shrink_factor_));
 	float t2 = float(1.0 / shrink_factor_);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S0]);
-	} else {
-	    cells_[CELL_TYPE_S0].draw(mode);
-	}
+	GLSL::set_program_uniform_by_name(
+	    S_program_, "full_imposters", full_imposters_
+	);
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
+	GLSL::set_program_uniform_by_name(
+	    H_program_, "full_imposters", full_imposters_
+	);
+
+	bool clip=glupIsEnabled(GLUP_CLIPPING) || glupIsEnabled(GLUP_DRAW_MESH);
+	clip = clip && (draw_mode_ == DRAW_MSS);
+
+	GLSL::set_program_uniform_by_name(S_program_, "replace_imposter", false);
+	GLSL::set_program_uniform_by_name(
+	    S_program_, "max_clip_planes", clip ? 1024 : 0
+	);
+	cells_[CELL_TYPE_S0].draw(mode);
+
+	if(draw_mode_ == DRAW_MSS) {
 	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t1, t2
+		H_program_, "max_clip_planes", clip ? 1024 : 2
 	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H1]);
-	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t1, t2);
+	    GLSL::set_program_uniform_by_name(H_program_,"cAxisPerp", t1, t2);
 	    cells_[CELL_TYPE_H1].draw(mode);
-	}
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    GLSL::set_program_uniform_by_name(
-		H_imposters_program_, "cAxisPerp", t2, t1
-	    );
-	    draw_hyperboloids_imposters(cells_[CELL_TYPE_H2]);
-	} else {
-	    GLSL::set_program_uniform_by_name(H_program_, "cAxisPerp", t2, t1);
+	    GLSL::set_program_uniform_by_name(H_program_,"max_clip_planes",1024);
+	    GLSL::set_program_uniform_by_name(H_program_,"cAxisPerp", t2, t1);
 	    cells_[CELL_TYPE_H2].draw(mode);
-	}
 
-	if(use_imposters_ && mode == MixedComplexCells::DRAW_MODE_MSS) {
-	    draw_spheres_imposters(cells_[CELL_TYPE_S3]);
-	} else {
+	    GLSL::set_program_uniform_by_name(
+		S_program_, "replace_imposter", true
+	    );
+	    GLSL::set_program_uniform_by_name(S_program_,"max_clip_planes",1024);
+	    GLSL::set_program_uniform_by_name(S_program_,"clip_cells", true);
 	    cells_[CELL_TYPE_S3].draw(mode);
 	}
 
 	glDisable(GL_CULL_FACE);
+	glupDisable(GLUP_DRAW_MESH);
+    }
+
+    /************************************************************************/
+
+    void Molecule::generate_mesh() {
+	Stopwatch W("Meshing");
+	SkinSurfaceMesher mesher(
+	    *diagram_,
+	    atom_pos_[0].data(),
+	    atom_weight_.data(),
+	    nb_atoms(),
+	    shrink_factor_
+	);
+	Mesh coarse;
+	Mesh fine;
+	Mesh quality;
+	mesher.compute(coarse);
+
+	const MeshingParameters& params = meshing_parameters_;
+
+	if(params.subdivide_steps == 1) {
+	    fine.copy(coarse);
+	} else {
+	    index_t subdivide_steps = params.subdivide_steps;
+	    if(subdivide_steps == 0) {
+		if(nb_atoms() > 100000) {
+		    subdivide_steps = 1;
+		} else if(nb_atoms() > 10000) {
+		    subdivide_steps = 2;
+		} else {
+		    subdivide_steps = 3;
+		}
+	    }
+	    // there is room for improvement in this Claude-generated
+	    // function that is slow
+	    // (uses a std::ordered_map to keep track of per-edge
+	    // subdivided vertices)
+	    mesher.subdivide(fine,subdivide_steps);
+	}
+
+	switch(params.post_processing) {
+	case Molecule::MeshingParameters::NONE: {
+	    mesh_.copy(fine);
+	} break;
+	case Molecule::MeshingParameters::REFINE: {
+	    // alternative Delaunay-refinement based method as in article
+	    mesher.refine(quality);
+	    index_t bad = mesher.check_isotopy();
+	    Logger::out("Mesher") << bad << " bad elements" << std::endl;
+	    mesh_.copy(quality);
+	} break;
+	case Molecule::MeshingParameters::REMESH: {
+	    // here we could use normals to actual surface
+	    compute_normals(fine);
+	    if(params.remesh.normals_steps != 0) {
+		simple_Laplacian_smooth(
+		    fine,params.remesh.normals_steps,true
+		);
+	    }
+	    set_anisotropy(fine, params.remesh.anisotropy);
+	    index_t nb_vertices = params.remesh.nb_vertices;
+	    if(nb_vertices == 0) {
+		nb_vertices = fine.vertices.nb()/10;
+	    }
+	    remesh_smooth(fine, quality, nb_vertices);
+	    mesh_.copy(quality);
+	} break;
+	}
+	Logger::out("Mesher") << "done." << std::endl;
+#ifndef GEO_OS_EMSCRIPTEN
+	mesh_gfx_.set_mesh(&mesh_);
+#endif
     }
 
     /************************************************************************/
@@ -601,129 +952,21 @@ namespace GEO {
 	    first_time=false;
 	}
 	if(S_program_ == 0) {
+	    Logger::out("geomol") << "Compiling S program" << std::endl;
 	    S_program_ = glupCompileProgram(spheres_source);
 	    cells_[CELL_TYPE_S0].set_program(S_program_);
 	    cells_[CELL_TYPE_S3].set_program(S_program_);
 	}
 	if(H_program_ == 0) {
+	    Logger::out("geomol") << "Compiling H program" << std::endl;
 	    H_program_ = glupCompileProgram(hyperboloids_source);
 	    cells_[CELL_TYPE_H1].set_program(H_program_);
 	    cells_[CELL_TYPE_H2].set_program(H_program_);
 	}
-	if(S_imposters_program_ == 0) {
-	    S_imposters_program_ = glupCompileProgram(spheres_imposters_source);
-	}
-	if(H_imposters_program_ == 0) {
-	    H_imposters_program_ = glupCompileProgram(
-		hyperboloids_imposters_source
-	    );
-	}
 	if(empty_VAO_ == 0) {
+	    Logger::out("geomol") << "Creating empty VAO" << std::endl;
 	    glGenVertexArrays(1, &empty_VAO_);
 	}
-    }
-
-    void Molecule::draw_atoms() const {
-	/*
-	bool slicing_mode =
-	    glupIsEnabled(GLUP_CLIPPING) &&
-	    glupGetClipMode() == GLUP_CLIP_SLICE_CELLS;
-
-	if(atom_coloring_ == ATOM_COLORING_CONSTANT) {
-	    glupSetColor3fv(
-		GLUP_FRONT_AND_BACK_COLOR, constant_color_.data()
-	    );
-	} else {
-	    glupEnable(GLUP_VERTEX_COLORS);
-	}
-	glupBegin(GLUP_SPHERES);
-	for(index_t v: atoms()) {
-	    double R = atom_radius(v);
-	    vec3 color = atom_color(v);
-	    if(atom_coloring_ == ATOM_COLORING_ATOM) {
-		glupColor3dv(color.data());
-	    } else if(atom_coloring_ == ATOM_COLORING_CHAIN) {
-		index_t i = atom_chain_[v] % nb_colormap_entries;
-		double gray = 1.0;
-		if(!slicing_mode) {
-		    gray = 0.299*color.x + 0.587*color.y + 0.114*color.z;
-		    gray = 0.8 + 0.2*gray;
-		}
-		glupColor3d(
-		    gray*colormap[i][0],
-		    gray*colormap[i][1],
-		    gray*colormap[i][2]
-		);
-	    }
-	    vec3 xyz = atom_pos_[v];
-	    glupVertex4d(xyz[0], xyz[1], xyz[2], R*atom_size_);
-	}
-	glupEnd();
-	glupDisable(GLUP_VERTEX_COLORS);
-	*/
-
-	const MixedComplexCells& cells = cells_[CELL_TYPE_S0];
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_, true, false, false);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "facet_ptr_TBO", 0
-	);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "facet_plane_TBO", 0
-	);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "show_imposters", false
-	);
-	glupUpdateUniformState();
-	glUseProgram(S_imposters_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
-    }
-
-
-    void Molecule::draw_spheres_imposters(const MixedComplexCells& cells) const {
-	if(!cells.visible()) {
-	    return;
-	}
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(S_imposters_program_,true,false);
-	GLSL::set_program_uniform_by_name(
-	    S_imposters_program_, "show_imposters", show_imposters_
-	);
-	glupUpdateUniformState();
-	glUseProgram(S_imposters_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
-    }
-
-
-    void Molecule::draw_hyperboloids_imposters(
-	const MixedComplexCells& cells
-    ) const {
-	if(!cells.visible()) {
-	    return;
-	}
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, cells.color().data());
-	cells.bind_tbos(H_imposters_program_,true,true,true);
-	GLSL::set_program_uniform_by_name(
-	    H_imposters_program_, "show_imposters", show_imposters_
-	);
-	glupUpdateUniformState();
-	glUseProgram(H_imposters_program_);
-	glBindVertexArray(empty_VAO_);
-	glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(cells.nb_cells()));
-	glBindVertexArray(0);
-	glUseProgram(0);
-	nb_triangles_ += 2*cells.nb_cells();
     }
 
     /************************************************************************/
@@ -793,82 +1036,101 @@ namespace GEO {
 	cell_eqn_2_.resize(0);
 	cell_imposter_1_.resize(0);
 	cell_imposter_2_.resize(0);
-	cell_facet_ptr_tbo_.reset();
-	cell_facet_plane_tbo_.reset();
-	cell_eqn_1_tbo_.reset();
-	cell_eqn_2_tbo_.reset();
-	cell_imposter_1_tbo_.reset();
-	cell_imposter_2_tbo_.reset();
+	cell_facet_ptr_bo_.reset();
+	cell_facet_plane_bo_.reset();
+	cell_eqn_1_bo_.reset();
+	cell_eqn_2_bo_.reset();
+	cell_imposter_1_bo_.reset();
+	cell_imposter_2_bo_.reset();
     }
 
-    void Molecule::MixedComplexCells::bind_tbos(
-	GLuint program, bool eqn1, bool eqn2, bool imposters
-    ) const {
-	bind_tbo(cell_facet_ptr_tbo_, cell_facet_ptr_, FACET_PTR_TEX_UNIT);
-	bind_tbo(cell_facet_plane_tbo_, cell_facet_plane_, FACET_PLANE_TEX_UNIT);
+    void Molecule::MixedComplexCells::bind_buffers() const {
+	bool eqn1 = (cell_eqn_1_.size() != 0);
+	bool eqn2 = (cell_eqn_2_.size() != 0);
+	bool imposters1 = (cell_imposter_1_.size() != 0);
+	bool imposters2 = (cell_imposter_2_.size() != 0);
+
+	bind_buffer(cell_facet_ptr_bo_, cell_facet_ptr_, FACET_PTR_UNIT);
+	bind_buffer(cell_facet_plane_bo_, cell_facet_plane_, FACET_PLANE_UNIT);
+
 	if(eqn1) {
-	    bind_tbo(cell_eqn_1_tbo_, cell_eqn_1_, CELL_EQN_1_TEX_UNIT);
+	    bind_buffer(cell_eqn_1_bo_, cell_eqn_1_, CELL_EQN_1_UNIT);
 	}
 	if(eqn2) {
-	    bind_tbo(cell_eqn_2_tbo_, cell_eqn_2_, CELL_EQN_2_TEX_UNIT);
+	    bind_buffer(cell_eqn_2_bo_, cell_eqn_2_, CELL_EQN_2_UNIT);
 	}
-	if(imposters) {
-	    bind_tbo(
-		cell_imposter_1_tbo_, cell_imposter_1_, CELL_IMPOSTER_1_TEX_UNIT
-	    );
-	    bind_tbo(
-		cell_imposter_2_tbo_, cell_imposter_2_, CELL_IMPOSTER_2_TEX_UNIT
+	if(imposters1) {
+	    bind_buffer(
+		cell_imposter_1_bo_, cell_imposter_1_, CELL_IMPOSTER_1_UNIT
 	    );
 	}
-	GLSL::set_program_uniform_by_name(
-	    program, "facet_ptr_TBO", FACET_PTR_TEX_UNIT
+	if(imposters2) {
+	    bind_buffer(
+		cell_imposter_2_bo_, cell_imposter_2_, CELL_IMPOSTER_2_UNIT
+	    );
+	}
+	GLUP::BufferObject::set_program_buffer_unit_by_name(
+	    program_, "facet_ptr_BO", FACET_PTR_UNIT
 	);
-	GLSL::set_program_uniform_by_name(
-	    program, "facet_plane_TBO", FACET_PLANE_TEX_UNIT
+	GLUP::BufferObject::set_program_buffer_unit_by_name(
+	    program_, "facet_plane_BO", FACET_PLANE_UNIT
 	);
 	if(eqn1) {
-	    GLSL::set_program_uniform_by_name(
-		program, "cell_eqn_1_TBO", CELL_EQN_1_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_eqn_1_BO", CELL_EQN_1_UNIT
 	    );
 	}
 	if(eqn2) {
-	    GLSL::set_program_uniform_by_name(
-		program, "cell_eqn_2_TBO", CELL_EQN_2_TEX_UNIT
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_eqn_2_BO", CELL_EQN_2_UNIT
 	    );
 	}
-	if(imposters) {
-	    GLSL::set_program_uniform_by_name(
-		program, "cell_imposter_1_TBO", CELL_IMPOSTER_1_TEX_UNIT
+	if(imposters1) {
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_imposter_1_BO", CELL_IMPOSTER_1_UNIT
 	    );
-	    GLSL::set_program_uniform_by_name(
-		program, "cell_imposter_2_TBO", CELL_IMPOSTER_2_TEX_UNIT
+	}
+	if(imposters2) {
+	    GLUP::BufferObject::set_program_buffer_unit_by_name(
+		program_, "cell_imposter_2_BO", CELL_IMPOSTER_2_UNIT
 	    );
 	}
     }
 
     void Molecule::MixedComplexCells::draw(DrawMode mode) const {
-	if(!visible_) {
+	if(!visible_ || nb_cells() == 0) {
 	    return;
 	}
-	glupDisable(GLUP_VERTEX_COLORS);
-	glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+
 	if(mode == DRAW_MODE_MSS) {
-	    // cell equation is sent through vertex tex coord
-	    // and vertex normal, so we need to activate these
-	    // vertex attributes.
-	    glupEnable(GLUP_TEXTURING);
-	    glupEnable(GLUP_VERTEX_NORMALS);
-	    glupUseProgram(program_);
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+	    bind_buffers();
+	    GLSL::set_program_uniform_by_name(
+		program_, "show_imposters", molecule_.show_imposters()
+	    );
+	    glupUpdateUniformState();
+	    glUseProgram(program_);
+	    glBindVertexArray(molecule_.empty_VAO_);
+	    glDrawArrays(GL_TRIANGLES, 0, 6*GLsizei(nb_cells()));
+	    glBindVertexArray(0);
+	    glUseProgram(0);
+	    molecule_.nb_quadrics_ += nb_cells();
+	    return;
 	}
-	bind_tbos(program_); // texture buffer object with clipping planes
-	glupBegin(GLUP_TRIANGLES);
-	for(index_t c: *this) {
-	    draw_cell(c);
+
+	/* // need to re-wire cells storage and close()
+	if(mode == DRAW_MODE_CELLS) {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3dv(GLUP_FRONT_AND_BACK_COLOR, color().data());
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t c: *this) {
+		draw_cell(c);
+	    }
+	    glupEnd();
+	    return;
 	}
-	glupEnd();
-	glupUseProgram(0);
-	glupDisable(GLUP_TEXTURING);
-	glupDisable(GLUP_VERTEX_NORMALS);
+	*/
     }
 
     void Molecule::MixedComplexCells::draw_cell(index_t c) const {
@@ -892,16 +1154,39 @@ namespace GEO {
 		    glupVertex3fv(v1.data());
 		    glupVertex3fv(v2.data());
 		    glupVertex3fv(v.data());
-		    ++molecule_.nb_triangles_;
 		    v2 = v;
 		}
 	    }
 	}
     }
 
+    inline vec4 triangle_plane(vec3 p1, vec3 p2, vec3 p3) {
+	vec3 N = normalize(cross(p2-p1, p3-p1));
+	return vec4(N, -dot(N,p1));
+    }
+
     void Molecule::MixedComplexCells::add_shrunk_power_facet(
 	index_t h0, bool flipped
     ) {
+	if(!store_mesh_) {
+	    index_t v1 = diagram().halfedge_v(h0,0);
+	    index_t v2 = diagram().halfedge_v(h0,1);
+	    index_t t = NO_INDEX;
+	    index_t h = h0;
+	    do {
+		index_t ht = diagram().halfedge_t(h);
+		if(!diagram().tet_is_infinite(ht)) {
+		    t = ht;
+		    break;
+		}
+		h = diagram().next_halfedge_around_edge(h, v1, v2);
+	    } while(h != h0);
+	    geo_debug_assert(t != NO_INDEX);
+	    vec3 p = molecule_.mixed_vertex({v1,t});
+	    vec3 N = normalize(diagram().vertex(v2) - diagram().vertex(v1));
+	    add_facet_plane(vec4(N,-dot(N,p)), flipped);
+	    return;
+	}
 	if(flipped) {
 	    h0 = diagram().halfedge_flip(h0);
 	}
@@ -918,10 +1203,34 @@ namespace GEO {
     }
 
     void Molecule::MixedComplexCells::add_quad_facet(index_t h, bool flipped) {
+	index_t lf1 = diagram().halfedge_lf(h);
 	index_t v1 = diagram().halfedge_v(h,0);
 	index_t v2 = diagram().halfedge_v(h,1);
 	index_t t1 = diagram().halfedge_t(h);
-	index_t t2 = diagram().tet_adjacent(t1,diagram().halfedge_lf(h));
+	index_t t2 = diagram().tet_adjacent(t1,lf1);
+	if(!store_mesh_) {
+	    index_t w1 = diagram().tet_facet_vertex(t1,lf1,0);
+	    index_t w2 = diagram().tet_facet_vertex(t1,lf1,1);
+	    index_t w3 = diagram().tet_facet_vertex(t1,lf1,2);
+	    vec3 Nt1 = cross(
+		diagram().vertex(w2)-diagram().vertex(w1),
+		diagram().vertex(w3)-diagram().vertex(w1)
+	    );
+	    vec3 N = cross(
+		Nt1, diagram().vertex(v2)-diagram().vertex(v1)
+	    );
+	    N = normalize(N);
+	    geo_debug_assert(
+		diagram().tet_is_finite(t1) ||
+		diagram().tet_is_finite(t2)
+	    );
+	    vec3 p =
+		diagram().tet_is_finite(t1)     ?
+		molecule_.mixed_vertex({v1,t1}) :
+		molecule_.mixed_vertex({v1,t2}) ;
+	    add_facet_plane(vec4(N,-dot(N,p)), flipped);
+	    return;
+	}
 	begin_facet();
 	if(flipped) {
 	    add_vertex({v2,t1});
@@ -943,6 +1252,15 @@ namespace GEO {
 	index_t v1 = diagram().tet_facet_vertex(t, lf, 0);
 	index_t v2 = diagram().tet_facet_vertex(t, lf, 1);
 	index_t v3 = diagram().tet_facet_vertex(t, lf, 2);
+	if(!store_mesh_) {
+	    vec4 P = triangle_plane(
+		molecule_.mixed_vertex({v1,t}),
+		molecule_.mixed_vertex({v2,t}),
+		molecule_.mixed_vertex({v3,t})
+	    );
+	    add_facet_plane(P, flipped);
+	    return;
+	}
 	begin_facet();
 	if(flipped) {
 	    add_vertex({v3,t});
@@ -976,6 +1294,4 @@ namespace GEO {
 	    out << std::endl;
 	}
     }
-
-
 }

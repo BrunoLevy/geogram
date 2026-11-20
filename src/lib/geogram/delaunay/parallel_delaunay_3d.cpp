@@ -56,7 +56,7 @@
 // no out-of-line virtual functions. It is not a
 // problem since they are only visible from this translation
 // unit, but clang will complain.
-#ifdef __clang__
+#ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif
 
@@ -282,6 +282,7 @@ namespace GEO {
         Delaunay3dThread* thread(index_t t) {
             return static_cast<Delaunay3dThread*>(master_->threads_[t].get());
         }
+
 
         /**
          * \brief Inserts the point sequence allocated to

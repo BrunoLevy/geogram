@@ -47,18 +47,14 @@
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/api/defs.h>
 
-
 #if defined(GEO_OS_EMSCRIPTEN)
 #  define GLFW_INCLUDE_ES2
 #  include <GLFW/glfw3.h>
 #  define GL_GLEXT_PROTOTYPES
-#  include <GLES2/gl2ext.h>
-#  define GL_INVALID_INDEX GLuint(-1)
-typedef double GLdouble;
-#  define glGenVertexArrays glGenVertexArraysOES
-#  define glBindVertexArray glBindVertexArrayOES
-#  define glDeleteVertexArrays glDeleteVertexArraysOES
+#  include <GLES3/gl3.h>
+   typedef double GLdouble;
 #  define GEO_GL_ES2
+#  define GEO_GL_140
 #  define GEO_GL_NO_DOUBLES
 #elif defined(GEO_OS_ANDROID)
 #  include <GLES3/gl3.h>
@@ -70,12 +66,28 @@ typedef double GLdouble;
 #  define GEO_GL_150
 #  define GEO_GL_NO_DOUBLES
 #else
+
+#  ifdef GEO_COMPILER_CLANG
+#     pragma GCC diagnostic push
+#     pragma GCC diagnostic ignored "-Wreserved-identifier"
+#  endif
+
 #  include <geogram_gfx/third_party/glad/glad.h>
+
+#  ifdef GEO_COMPILER_CLANG
+#     pragma GCC diagnostic pop
+#  endif
+
 #  define GEO_GL_TEXTURE_3D
 #  define GEO_GL_140
 #  define GEO_GL_150
-#  define GEO_GL_440
 #  define GEO_GL_ES2
+
+#  ifndef GEO_OS_APPLE
+#    define GEO_GL_430
+#    define GEO_GL_440
+#  endif
+
 #endif
 
 #include <geogram_gfx/GLUP/GLUP.h>

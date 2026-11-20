@@ -199,6 +199,36 @@ namespace GEO {
             step_mul_ = std::max(x,1.0);
         }
 
+	/**
+	 * \brief Gets the downscale factor
+	 * \return The ratio between framebuffer resolution and
+	 *  effect resolution.
+	 * \details On very high dpi devices, such as mac retinas, it is
+	 *  necessary to keep rendering time reasonable.
+	 */
+	index_t get_downscale_factor() const {
+	    return downscale_factor_;
+	}
+
+	/**
+	 * \brief Sets the downscale factor
+	 * \param[in] x the ratio between framebuffer resolution and
+	 *  effect resolution.
+	 * \details On very high dpi devices, such as mac retinas, it is
+	 *  necessary to keep rendering time reasonable. On Emscripten,
+	 *  it is not supported yet (simply ignored)
+	 */
+	void set_downscale_factor(index_t x) {
+#ifdef GEO_OS_EMSCRIPTEN
+	    geo_argused(x);
+#else
+	    if(x > 0 && x != downscale_factor_) {
+		downscale_factor_ = x;
+		resize(width(),height());
+	    }
+#endif
+	}
+
     protected:
         /**
          * \copydoc FullScreenEffectImpl::initialize()
@@ -261,6 +291,12 @@ namespace GEO {
 
         GLuint random_tex_;
         GLuint SSAO_program_;
+
+	// Downscale
+	GLuint downscale_program_;
+	index_t downscale_factor_;
+	FrameBufferObject downscale_Z_;
+	FrameBufferObject downscale_AO_;
 
         // Blur
         FrameBufferObject blur_1_;

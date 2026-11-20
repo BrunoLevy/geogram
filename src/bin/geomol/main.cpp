@@ -39,7 +39,9 @@
 
 #include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
+#include <geogram/mesh/mesh_io.h>
 #include <geogram/basic/command_line.h>
+#include <geogram/basic/stopwatch.h>
 #include "molecule.h"
 
 namespace {
@@ -50,7 +52,7 @@ namespace {
     class GeoMolApplication : public SimpleApplication {
     public:
         GeoMolApplication() : SimpleApplication("GeoMol") {
-            set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
+            set_region_of_interest(-1.0, -1.0, -1.0, 2.0, 2.0, 2.0);
 	    lighting_ = false;
 	    effect_ = 1;
 	    full_screen_effect_ = new AmbientOcclusionImpl();
@@ -80,6 +82,11 @@ namespace {
         }
 
     protected:
+
+	void GL_initialize() override {
+	    SimpleApplication::GL_initialize();
+	    GLUP::BufferObject::initialize_class();
+	}
 
 	/**
 	 * \brief Turns the object around one of the three screen axes.
@@ -113,7 +120,39 @@ namespace {
 
         void draw_object_properties() override {
             SimpleApplication::draw_object_properties();
-	    ImGui::Text("atoms: %d",molecule_.nb_atoms());
+	    ImGui::Text("atoms: %u",molecule_.nb_atoms());
+
+	    if(ImGui::TreeNode("Debug")) {
+		ImGui::Checkbox("show imps", &molecule_.show_imposters());
+		ImGui::SetItemTooltip(
+		    "For debugging shaders: "
+		    "show imposters instead of geometry"
+		);
+		if(
+		    ImGui::Checkbox(
+			"skip empty cells", &molecule_.discard_empty_cells()
+		    )
+		) {
+		    molecule_.update();
+		}
+		ImGui::SetItemTooltip(
+		    "For debugging an optimization: "
+		    "early discard empty cells (on by default)"
+		);
+		ImGui::Checkbox(
+		    "mesher", &molecule_.meshing_parameters().debug
+		);
+		if(ImGui::TreeNode("Danger zone!!!")) {
+		    ImGui::Checkbox("full imps", &molecule_.full_imposters());
+		    ImGui::SetItemTooltip(
+			"For debugging shaders: "
+			"use fullscreen imposters "
+			"(!! super slow, use at own risk !!)"
+		    );
+		    ImGui::TreePop();
+		}
+		ImGui::TreePop();
+	    }
 
 	    float size = float(molecule_.atom_size());
 	    if(ImGui::SliderFloat("size", &size, 0.01f, 1.99f)) {
@@ -122,24 +161,21 @@ namespace {
 	    }
 	    ImGui::Combo(
 		"color", (int*)&molecule_.atom_coloring(),
-		"constant\0atom\0chain\0\0"
+		"constant\0atom\0chain\0patch\0\0"
 	    );
 	    if(molecule_.atom_coloring() == Molecule::ATOM_COLORING_CONSTANT) {
 		ImGui::ColorEdit3WithPalette(
 		    "constant color", molecule_.constant_color().data()
 		);
 	    }
-	    ImGui::Checkbox("skin surface", &molecule_.draw_mss());
-	    if(molecule_.draw_mss()) {
+	    ImGui::Combo(
+		"mode", (int*)&molecule_.draw_mode(), "atoms\0MSS\0mesh\0\0"
+	    );
+	    if(molecule_.draw_mode() == Molecule::DRAW_MSS) {
 		float sf = float(molecule_.shrink_factor());
 		if(ImGui::SliderFloat("shrink", &sf, 0.05f, 0.95f, "%.2f")) {
 		    molecule_.shrink_factor() = double(sf);
 		    molecule_.update();
-		}
-		ImGui::Checkbox("raytrace", &molecule_.raytrace());
-		if(molecule_.raytrace()) {
-		    ImGui::Checkbox("imposters", &molecule_.use_imposters());
-		    ImGui::Checkbox("show imps", &molecule_.show_imposters());
 		}
 		ImGui::Checkbox("0-patches", &molecule_.visible(0));
 		ImGui::Checkbox("1-patches", &molecule_.visible(1));
@@ -147,7 +183,66 @@ namespace {
 		ImGui::Checkbox("3-patches", &molecule_.visible(3));
 		ImGui::Checkbox("verbose", &molecule_.verbose());
 
-		ImGui::Text("triangles: %d",molecule_.nb_drawn_triangles());
+		ImGui::Checkbox("patches",&molecule_.draw_mesh());
+		if(molecule_.draw_mesh()) {
+		    ImGui::ColorEdit3WithPalette(
+			"##mesh_color", molecule_.mesh_color().data()
+		    );
+		    ImGui::SameLine();
+		    ImGui::SliderInt(
+			"##mesh_width", &molecule_.mesh_width(), 1, 10
+		    );
+		}
+		ImGui::Text("quadrics: %u",molecule_.nb_drawn_quadrics());
+	    }
+	    if(ImGui::TreeNode("Meshing")) {
+		if(ImGui::Button("Generate mesh")) {
+		    molecule_.generate_mesh();
+		    molecule_.draw_mode() = Molecule::DRAW_MESH;
+		}
+		auto& params = molecule_.meshing_parameters();
+		ImGui::Text("Subdivisions");
+		    ImGui::SetItemTooltip(
+			"Number of subdivisions, 0 for auto."
+		    );
+		ImGui::SliderInt(
+		    "##sbd", (int*)&params.subdivide_steps, 0, 5
+		);
+		ImGui::Text("Post-processing");
+		ImGui::Combo(
+		    "##post", (int*)&params.post_processing,
+		    "none\0refine\0remesh\0\0"
+		);
+		switch(params.post_processing) {
+		case Molecule::MeshingParameters::NONE:
+		    break;
+		case Molecule::MeshingParameters::REFINE:
+		    break;
+		case Molecule::MeshingParameters::REMESH:
+		    ImGui::Text("nb vertices");
+		    ImGui::SetItemTooltip(
+			"Desired number of vertices, 0 for auto."
+		    );
+		    ImGui::InputInt(
+			"##Nv",(int*)&params.remesh.nb_vertices
+		    );
+		    if(molecule_.meshing_parameters().debug) {
+			ImGui::Text("normals smoothing");
+			ImGui::SliderInt(
+			    "##Sm", (int*)&params.remesh.normals_steps, 0, 4
+			);
+			ImGui::Text("anisotropy");
+			ImGui::InputDouble(
+			    "##ani",&params.remesh.anisotropy
+			);
+		    }
+		    break;
+		}
+		ImGui::TreePop();
+	    }
+	    if(animate()) {
+		double fps = double(frame_) / (Stopwatch::now() - start_time_);
+		ImGui::Text("FPS: %f",fps);
 	    }
         }
 
@@ -161,6 +256,15 @@ namespace {
 		molecule_.draw();
 		glupClipMode(GLUP_CLIP_SLICE_CELLS);
 	    }
+	    if(animate()) {
+		if(frame_ == 0) {
+		    start_time_ = Stopwatch::now();
+		}
+		++frame_;
+		if(frame_ == 200) {
+		    frame_ = 0;
+		}
+	    }
         }
 
         void draw_about() override {
@@ -171,8 +275,9 @@ namespace {
                 );
                 ImGui::Separator();
                 ImGui::Text(
-                    "  Molecular Skin Surface by Matthieu Chavent\n"
-                    "\n"
+                    "Molecular Skin Surface\n"
+		    "Initial version by Matthieu Chavent\n"
+                    "Optimizations by Bruno Levy\n"
                 );
                 ImGui::Separator();
                 ImGui::Text("\n");
@@ -194,11 +299,15 @@ namespace {
         }
 
         std::string supported_read_file_extensions() override {
-            return "pdb";
+            return "pdb;xyz";
         }
 
         std::string supported_write_file_extensions() override {
-            return "";
+	    std::vector<std::string> extensions;
+	    GEO::MeshIOHandlerFactory::list_creators(extensions);
+	    extensions.push_back("step");
+	    extensions.push_back("stp");
+	    return String::join_strings(extensions, ';');
         }
 
         bool load(const std::string& filename) override {
@@ -213,8 +322,14 @@ namespace {
 	    return result;
         }
 
+        bool save(const std::string& filename) override {
+	    return molecule_.save(filename);
+	}
+
     private:
 	Molecule molecule_;
+	double start_time_ = 0.0;
+	index_t frame_ = 0;
     };
 }
 

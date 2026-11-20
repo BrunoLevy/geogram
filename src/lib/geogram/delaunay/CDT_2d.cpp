@@ -1994,18 +1994,20 @@ namespace GEO {
 	const expansion_nt& x, const expansion_nt& y, const expansion_nt& w
     ) {
 	double result = 0.0;
-#if defined(__SIZEOF_FLOAT128__) || defined(__FLOAT128__)
+// Android's 32-bit x86 runtime has no quad-precision builtins for __float128.
+#if (defined(__SIZEOF_FLOAT128__) || defined(__FLOAT128__)) && \
+    !(defined(__ANDROID__) && defined(__i386__))
 	{
 	    expansion_nt Num = geo_sqr(x) + geo_sqr(y);
 	    expansion_nt Denom = geo_sqr(w);
 
-	    __float128 num = 0.0;
+	    __float128 num = __float128(0.0);
 	    for(index_t i=0; i<Num.rep().length(); ++i) {
-		num += Num.rep()[i];
+		num += __float128(Num.rep()[i]);
 	    }
-	    __float128 denom = 0.0;
+	    __float128 denom = __float128(0.0);
 	    for(index_t i=0; i<Denom.rep().length(); ++i) {
-		denom += Denom.rep()[i];
+		denom += __float128(Denom.rep()[i]);
 	    }
 	    result = double(num/denom);
 	}

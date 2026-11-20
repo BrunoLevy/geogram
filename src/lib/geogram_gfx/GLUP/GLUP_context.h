@@ -1119,6 +1119,11 @@ namespace GLUP {
         virtual const char* profile_name() const = 0;
 
         /**
+         * \brief Gets the GLSL version directive (with #version and newline)
+         */
+        virtual const char* GLSL_version_directive() const = 0;
+
+        /**
          * \brief Tests whether a given GLUP primitive supports array mode.
          * \details If array mode is supported, then one can use glupDrawArray()
          *  and glupDrawElements() with the specified primitive.

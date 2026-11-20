@@ -160,6 +160,10 @@ namespace GEO {
     }
 
     FrameBufferObject::~FrameBufferObject() {
+	destroy();
+    }
+
+    void FrameBufferObject::destroy() {
         if(offscreen_id != 0) {
             glDeleteTextures(1, &offscreen_id);
             offscreen_id = 0;
@@ -171,7 +175,10 @@ namespace GEO {
         if(frame_buffer_id != 0) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDeleteFramebuffers(1, &frame_buffer_id);
+	    frame_buffer_id = 0;
         }
+	width = 0;
+	height = 0;
     }
 
     void FrameBufferObject::resize(index_t new_width, index_t new_height) {

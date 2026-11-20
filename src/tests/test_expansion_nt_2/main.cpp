@@ -1,7 +1,24 @@
+#include <geogram/basic/string.h>
+
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#include <geogram/geogramplus/numerics/exact_nt.h>
+inline bool is_zero(const GEO::exact_nt& x) {
+    return (x.sign() == GEO::ZERO);
+}
+inline std::string as_string(const GEO::exact_nt& x) {
+    return GEO::String::format("%f",x.estimate());
+}
+#else
+// Test expansion_nt only if geogramplus not there
+// (normally we could test both, but this creates
+//  a link error / does not find expansion static
+//  variables)
 #include <geogram/numerics/expansion_nt.h>
+#define TEST_GEOGRAM_EXPANSION_NT
+#endif
+
 #include <geogram/numerics/exact_geometry.h>
 #include <geogram/basic/geometry.h>
-#include <geogram/basic/string.h>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wpre-c++17-compat-pedantic"
@@ -13,15 +30,6 @@
 #include "exact_dyadic.h"
 #endif
 
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS
-#include <geogram/geogramplus/numerics/exact_nt.h>
-inline bool is_zero(const GEO::exact_nt& x) {
-    return (x.sign() == GEO::ZERO);
-}
-inline std::string as_string(const GEO::exact_nt& x) {
-    return GEO::String::format("%f",x.estimate());
-}
-#endif
 
 #include <cstdint>
 #include <cstring>
@@ -122,12 +130,13 @@ template <class NT> inline bool test_arithmetics(const std::string& tag) {
 }
 
 int main() {
-    //   This function needs to be called before
-    // using expansion_nt.
-    GEO::expansion::initialize();
 
     bool OK = true;
+#ifdef TEST_GEOGRAM_EXPANSION_NT
+    // This function needs to be called before using expansion_nt.
+    GEO::expansion::initialize();
     OK = OK && test_arithmetics<expansion_nt>("geogram expansion_nt");
+#endif
 #ifdef WITH_BOOST
     OK = OK && test_arithmetics<ExactDyadic>("ExactDyadic (boost bigint)");
 #endif

@@ -44,8 +44,10 @@
 #include <geogram/basic/range.h>
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/GLUP/GLUP.h>
+#include <geogram_gfx/mesh/mesh_gfx.h>
+#include <geogram_gfx/GLUP/GLUP_buffer_object.h>
 #include "power_diagram.h"
-#include "TBO.h"
+
 
 namespace GEO {
 
@@ -56,13 +58,31 @@ namespace GEO {
     class Molecule {
     public:
 
+	enum DrawMode {
+	    DRAW_ATOMS, DRAW_MSS, DRAW_MESH
+	};
+
 	enum AtomColoring {
-	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
+	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM,
+	    ATOM_COLORING_CHAIN, ATOM_COLORING_PATCH
 	};
 
 	enum MixedCellType {
-	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3,
-	    CELL_TYPE_NB=4
+	    CELL_TYPE_S0=0, CELL_TYPE_H1=1, CELL_TYPE_H2=2, CELL_TYPE_S3=3
+	};
+	static constexpr index_t CELL_TYPE_NB = 4;
+
+	struct MeshingParameters {
+	    bool debug = false; // set to true to save all steps
+	    index_t subdivide_steps=0;
+	    enum PostProcessing {
+		NONE, REFINE, REMESH
+	    } post_processing = REMESH;
+	    struct {
+		index_t nb_vertices=0;
+		index_t normals_steps=0;
+		double anisotropy = 0.01;
+	    } remesh;
 	};
 
 	Molecule();
@@ -73,6 +93,10 @@ namespace GEO {
 	 * \param[in] filename the name of a PDB file
 	 */
 	bool load(const std::string& filename);
+
+	bool save(const std::string& filename);
+
+	void initialize_demo();
 
 	/**
 	 * \brief Gets the number of atoms in this molecule
@@ -94,8 +118,10 @@ namespace GEO {
 	/**
 	 * \brief Needs to be called each time the molecule, atom size or
 	 *  shrink factor is changed
+	 * \param[in] full needs to be set if atom positions or atom number
+	 *  changed.
 	 */
-	void update();
+	void update(bool full = false);
 
 	/** \brief one of ATOM_COLORING_CONSTANT, ..._ATOM, ..._CHAIN */
 	AtomColoring& atom_coloring()  { return atom_coloring_; }
@@ -109,18 +135,19 @@ namespace GEO {
 	/** \brief the color for ATOM_COLORING_CONSTANT */
 	vec3f&        constant_color() { return constant_color_; }
 
-	/** \brief draw the molecular skin surface */
-	bool&         draw_mss()       { return draw_mss_; }
+	bool&         draw_mesh()  { return draw_mesh_; }
+	vec3f&        mesh_color() { return mesh_color_; }
+	int&          mesh_width() { return mesh_width_; }
 
-	/** \brief molecular skin surface or draw complex if not set */
-	bool&         raytrace()       { return raytrace_; }
+	/** \brief draw the molecular skin surface */
+	DrawMode&     draw_mode()  { return draw_mode_; }
 
 	/** \brief displays some statistics when updaring */
 	bool&         verbose()        { return verbose_; }
 
-
-	bool& use_imposters() { return use_imposters_; }
 	bool& show_imposters() { return show_imposters_; }
+	bool& full_imposters() { return full_imposters_; }
+	bool& discard_empty_cells() { return discard_empty_cells_; }
 
 	/**
 	 * \brief toggle display mixed complex cells by type
@@ -131,11 +158,27 @@ namespace GEO {
 	    return cells_[type].visible();
 	}
 
-	index_t nb_drawn_triangles() const { return nb_triangles_; }
+	index_t nb_drawn_quadrics() const { return nb_quadrics_; }
+
+	/**
+	 * \brief Converts the Molecular Skin Surface into a Mesh
+	 * \details Uses the parameters in meshing_parameters()
+	 */
+	void generate_mesh();
+
+	/**************************************************************/
+
+	MeshingParameters& meshing_parameters() {
+	    return meshing_parameters_;
+	}
 
 	/**************************************************************/
 
     protected:
+
+	bool load_geogram(const std::string& filename);
+
+	bool load_CIF(const std::string& filename);
 
 	index_range atoms() const {
 	    return index_range(0, nb_atoms());
@@ -181,45 +224,14 @@ namespace GEO {
 	typedef std::pair<index_t, index_t> mixed_vertex_id;
 
 	vec3 mixed_vertex(mixed_vertex_id V) const {
+	    geo_debug_assert(V.first != NO_INDEX);
+	    geo_debug_assert(diagram_->tet_is_finite(V.second));
 	    return mix(atom_pos_[V.first], tet_dual_[V.second], shrink_factor_);
 	}
 
 	/***********************************************************************/
 
-    protected:
-
-	/** \brief symbolic constant for MixedCells::add_XXX() */
-	static constexpr bool FLIPPED = true;
-
-	/**
-	 * \brief When called the first time, creates the shaders used to
-	 *  render S0, H1, H2 and S3 patches.
-	 * \details Shaders sources are in molecule_shaders.h
-	 */
-	void create_shaders_if_needed();
-
-	/***********************************************************************/
-
-	/**
-	 * \brief Draws the atoms as spheres.
-	 */
-	void draw_atoms() const;
-
-	/***********************************************************************/
-
-	double atom_radius(index_t v) const {
-	    return atom_size_*atom_radius_from_type(atom_type_[v]);
-	}
-
-	vec3 atom_color(index_t v) const {
-	    return atom_color_from_type(atom_type_[v]);
-	}
-
-	static double atom_radius_from_type(char c);
-	static vec3 atom_color_from_type(char c);
-
-	/***********************************************************************/
-
+    public:
 	/**
 	 * \brief A familly of cells of the mixed complex.
 	 * \details Stores all the polygons in compressed row storage.
@@ -275,25 +287,50 @@ namespace GEO {
 
 	    /*************************************************/
 
+	    /**
+	     * \brief Starts creating a sphere cell
+	     * \param[in] center , radius center and radius of the sphere
+	     * \details The imposters is generated from the center and
+	     *  radius of the sphere. Another version of this function,
+	     *  uses the center and radius of the imposter.
+	     */
 	    void begin_S_cell(vec3 center, double radius) {
-		index_t cell_id = nb_cells();
 		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
-		cell_eqn_2_.emplace_back(0.0f, 0.0f, 0.0f, float(cell_id));
 	    }
 
-	    void begin_H_cell(vec3 center, vec3 axis, double R2) {
-		index_t cell_id = nb_cells();
-		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
-		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
+	    /**
+	     * \brief Starts creating a sphere cell
+	     * \param[in] center , radius center and radius of the sphere
+	     * \param[in] imp_center , imp_radius center and radius of the
+	     *   imposter.
+	     * \details This version of begin_S_cell() takes a different
+	     *   center and radius for the imposter. It is interesting to do
+	     *   so for S3 cells (shrunk tetrahedra), and use a sphere that
+	     *   covers the tetrahedron instead of the actual sphere that
+	     *   can be quite large.
+	     */
+	    void begin_S_cell(
+		vec3 center, double radius,
+		vec3 imp_center, double imp_radius
+	    ) {
+		cell_eqn_1_.emplace_back(vec3f(center),float(radius));
+		cell_imposter_1_.emplace_back(
+		    vec3f(imp_center),float(imp_radius)
+		);
 	    }
 
+	    /**
+	     * \brief Starts creating a hyperboloid sphere
+	     * \param[in] center , axis , R2 parameters of the hyperboloid
+	     * \param[in] impos1 , Rimpos1 , impos2 , Rimpos2 a cone imposter
+	     *  that covers the cell
+	     */
 	    void begin_H_cell(
 		vec3 center, vec3 axis, double R2,
 		vec3 impos1, double Rimpos1, vec3 impos2, double Rimpos2
 	    ) {
-		index_t cell_id = nb_cells();
 		cell_eqn_1_.emplace_back(vec3f(center), float(R2));
-		cell_eqn_2_.emplace_back(vec3f(axis), float(cell_id));
+		cell_eqn_2_.emplace_back(vec3f(axis), 0.0f);
 		cell_imposter_1_.emplace_back(vec3f(impos1),float(Rimpos1));
 		cell_imposter_2_.emplace_back(vec3f(impos2),float(Rimpos2));
 	    }
@@ -308,7 +345,10 @@ namespace GEO {
 
 	    void begin_facet() {  } // yes, does nothing, but it's nicer with it.
 
+	    // version to be called when store_mesh_ is set, computes
+	    // clipping planes from mesh facet vertices
 	    void end_facet() {
+		geo_debug_assert(store_mesh_);
 		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
 		auto it = cell_facet_vertex_.rbegin();
 		vec3f p[3] = {*(it+2), *(it+1), *it};
@@ -322,6 +362,18 @@ namespace GEO {
 
 	    void add_vertex(mixed_vertex_id V) {
 		add_vertex_by_point(vec3f(molecule_.mixed_vertex(V)));
+	    }
+
+	    // version to be called when store_mesh_ is not set, takes
+	    // clipping planes as argument
+	    void add_facet_plane(vec4 P, bool flipped = false) {
+		begin_facet(); // does nothing but in case we change our mind...
+		geo_debug_assert(!store_mesh_);
+		if(flipped) {
+		    P = -P;
+		}
+		cell_facet_vertex_ptr_.push_back(cell_facet_vertex_.size());
+		cell_facet_plane_.push_back(vec4f(P));
 	    }
 
 	    /*************************************************/
@@ -362,7 +414,11 @@ namespace GEO {
 
 	    std::pair<vec4f, vec4f> cell_eqn(index_t c) const {
 		geo_debug_assert(c < nb_cells());
-		return {cell_eqn_1_[c], cell_eqn_2_[c]};
+		if(cell_eqn_2_.size() != 0) {
+		    return {cell_eqn_1_[c], cell_eqn_2_[c]};
+		} else {
+		    return {cell_eqn_1_[c], vec4f(0.0f, 0.0f, 0.0f, 0.0f)};
+		}
 	    }
 
 	    /*************************************************/
@@ -370,18 +426,14 @@ namespace GEO {
 	    // Note: a GLint, not a GLuint (because glUniform1ui(location, val)
 	    // does not seem to work to set a texture unit, that seems to be
 	    // expected to be a *signed* integer (no idea why).
-	    static constexpr GLint FACET_PTR_TEX_UNIT       = 4;
-	    static constexpr GLint FACET_PLANE_TEX_UNIT     = 5;
-	    static constexpr GLint CELL_EQN_1_TEX_UNIT      = 6;
-	    static constexpr GLint CELL_EQN_2_TEX_UNIT      = 7;
-	    static constexpr GLint CELL_IMPOSTER_1_TEX_UNIT = 8;
-	    static constexpr GLint CELL_IMPOSTER_2_TEX_UNIT = 9;
+	    static constexpr GLint FACET_PTR_UNIT       = 4;
+	    static constexpr GLint FACET_PLANE_UNIT     = 5;
+	    static constexpr GLint CELL_EQN_1_UNIT      = 6;
+	    static constexpr GLint CELL_EQN_2_UNIT      = 7;
+	    static constexpr GLint CELL_IMPOSTER_1_UNIT = 8;
+	    static constexpr GLint CELL_IMPOSTER_2_UNIT = 9;
 
-	    // TODOC!
-	    void bind_tbos(
-		GLuint program,
-		bool eqn1=false, bool eqn2=false, bool imposters=false
-	    ) const;
+	    void bind_buffers() const;
 
 	    vec3 color() const {
 		if(molecule_.atom_coloring() == ATOM_COLORING_CONSTANT) {
@@ -435,7 +487,6 @@ namespace GEO {
 
 	    /*************************************************/
 
-
 	protected:
 	    /**
 	     * \brief Used internally by draw()
@@ -444,27 +495,26 @@ namespace GEO {
 	    const PowerDiagram& diagram() const { return *(molecule_.diagram_); }
 
 	    /**
-	     * \brief Binds a texture buffer object to the specified texture unit
-	     * \details If the texture buffer object \p tbo is uninitialized,
-	     *  create it with the specified vector \p V. Note that if \p tbo is
-	     *  initialized then \p V is ignored. One needs to call tbo.reset()
+	     * \brief Binds a buffer object to the specified texture unit
+	     * \details If the buffer object \p bo is uninitialized,
+	     *  create it with the specified vector \p V. Note that if \p bo is
+	     *  initialized then \p V is ignored. One needs to call bo.reset()
 	     *  before in order to load new values of \p V.
-	     *  \param[in] tbo the TextureBufferObject to be bound
-	     *  \param[in] V the vector of values to initialize \p tbo the first
-	     *   time it is called or each time \p tbo is uninitialized
-	     *  \param texture_unit one of 0,1,2,...N. Note: it is different
+	     *  \param[in] bo the GLUP::BufferObject to be bound
+	     *  \param[in] V the vector of values to initialize \p bo the first
+	     *   time it is called or each time \p bo is uninitialized
+	     *  \param unit one of 0,1,2,...N. Note: it is different
 	     *   from GL_TEXTURE0, GL_TEXTURE1, ... GL_TEXTUREN.
 	     */
-	    template <class T> static void bind_tbo(
-		TextureBufferObject& tbo, const vector<T>& V, GLint texture_unit
+	    template <class T> static void bind_buffer(
+		GLUP::BufferObject& bo, const vector<T>& V, GLuint unit
 	    ) {
-		GLenum unit = GLenum(GL_TEXTURE0 + texture_unit);
-		glActiveTexture(unit);
-		if(tbo.TBO() == 0) {
-		    tbo.create_or_update(V);
+		GLUP::BufferObject::active_unit(unit);
+		if(!bo.initialized()) {
+		    bo.create_or_update(V);
 		}
-		tbo.bind(unit);
-		glActiveTexture(GL_TEXTURE0);
+		bo.bind();
+		GLUP::BufferObject::active_unit(0);
 	    }
 
 	private:
@@ -498,25 +548,47 @@ namespace GEO {
 	    /**
 	     * \brief For each cell, clipping planes in compressed row storage
 	     */
-	    mutable TextureBufferObject cell_facet_ptr_tbo_;
-	    mutable TextureBufferObject cell_facet_plane_tbo_;
+	    mutable GLUP::BufferObject cell_facet_ptr_bo_;
+	    mutable GLUP::BufferObject cell_facet_plane_bo_;
 
-	    mutable TextureBufferObject cell_eqn_1_tbo_;
-	    mutable TextureBufferObject cell_eqn_2_tbo_;
+	    mutable GLUP::BufferObject cell_eqn_1_bo_;
+	    mutable GLUP::BufferObject cell_eqn_2_bo_;
 
-	    mutable TextureBufferObject cell_imposter_1_tbo_;
-	    mutable TextureBufferObject cell_imposter_2_tbo_;
+	    mutable GLUP::BufferObject cell_imposter_1_bo_;
+	    mutable GLUP::BufferObject cell_imposter_2_bo_;
 
 	    vec3 color_ = {1.0, 1.0, 1.0};
 	    GLuint program_ = 0;
 	    bool visible_ = true;
+
+	    bool store_mesh_ = false;
 	};
 
-	/***********************************************************************/
+	const MixedComplexCells& cells(index_t type) const {
+	    return cells_[type];
+	}
 
-	void draw_spheres_imposters(const MixedComplexCells& cells) const;
-	void draw_hyperboloids_imposters(const MixedComplexCells& cells) const;
+    protected:
+	/** \brief symbolic constant for MixedCells::add_XXX() */
+	static constexpr bool FLIPPED = true;
 
+	/**
+	 * \brief When called the first time, creates the shaders used to
+	 *  render S0, H1, H2 and S3 patches.
+	 * \details Shaders sources are in molecule_shaders.h
+	 */
+	void create_shaders_if_needed();
+
+	double atom_radius(index_t v) const {
+	    return atom_size_*atom_radius_from_type(atom_type_[v]);
+	}
+
+	vec3 atom_color(index_t v) const {
+	    return atom_color_from_type(atom_type_[v]);
+	}
+
+	static double atom_radius_from_type(char c);
+	static vec3 atom_color_from_type(char c);
 
     private:
 	index_t nb_atoms_;
@@ -530,23 +602,29 @@ namespace GEO {
 	vector<double> atom_weight_;
 	vector<vec3> tet_dual_; // the radical point dual to each tet
 	SmartPointer<PowerDiagram> diagram_;
-	mutable index_t nb_triangles_; // number of drawn triangles
+	mutable index_t nb_quadrics_; // number of drawn quadrics
+
+	Mesh mesh_;
+	MeshGfx mesh_gfx_;
+	MeshingParameters meshing_parameters_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	double atom_size_ = 1.0;
-	mutable bool wireframe_ = 0.0;
 
-	bool draw_mss_ = false;
-	bool raytrace_ = true;
+	vec3f mesh_color_ = {0.0f, 0.0f, 0.0f};
+	int  mesh_width_ = 1;
+	bool draw_mesh_ = false;
+
+	DrawMode draw_mode_ = DRAW_ATOMS;
 	bool verbose_ = false;
-	GLuint S_program_ = 0; // GPU program for spheres
-	GLuint H_program_ = 0; // GPU program for hyperboloids
 
-	bool use_imposters_ = true;
 	bool show_imposters_ = false;
-	GLuint S_imposters_program_ = 0;
-	GLuint H_imposters_program_ = 0;
+	bool full_imposters_ = false; // generate fullscreen quad for each impo
+	bool discard_empty_cells_ = true;
+
+	GLuint S_program_ = 0;
+	GLuint H_program_ = 0;
 	GLuint empty_VAO_ = 0;
 
 	MixedComplexCells cells_[4]; // S0,H1,H2 and S3 cells

@@ -72,6 +72,7 @@
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
+#pragma GCC diagnostic ignored "-Wextra-semi-stmt"
 #pragma GCC diagnostic ignored "-Wcast-align"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -80,6 +81,7 @@
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wreserved-identifier"
 #endif
 #endif
 

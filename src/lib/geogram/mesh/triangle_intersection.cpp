@@ -930,7 +930,7 @@ namespace GEO {
         } break;
         default:
             geo_assert_not_reached;
-        };
+        }
     }
 
     TriangleRegion GEOGRAM_API regions_convex_hull(

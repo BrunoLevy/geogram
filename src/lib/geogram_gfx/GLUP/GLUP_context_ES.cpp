@@ -1313,47 +1313,38 @@ namespace GLUP {
         }
     }
 
+
+    const char* Context_ES2::GLSL_version_directive() const {
+        if(use_ES_profile_) {
+            if(GLSL_version_ >= 3.0) {
+                return "#version 300 es\n";
+            } else {
+                return "#version 100\n";
+            }
+        } else {
+#ifdef GEO_OS_APPLE
+	    return "#version 150 core \n";
+#else
+	    return "#version 130 \n";
+#endif
+        }
+    }
+
     void Context_ES2::get_vertex_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
-        if(use_ES_profile_) {
-            if(GLSL_version_ >= 3.0) {
-                sources.push_back(
-                    "#version 300 es\n"
-                    "#define GLUP_VERTEX_SHADER \n"
-                );
-            } else {
-                sources.push_back(
-                    "#version 100\n"
-                    "#define GLUP_VERTEX_SHADER \n"
-                );
-            }
-        } else {
-            sources.push_back(
-#ifdef GEO_OS_APPLE
-                "#version 150 core          \n"
-#else
-                "#version 130               \n"
-#endif
-                "#define GLUP_VERTEX_SHADER \n"
-            );
-        }
+	sources.push_back(GLSL_version_directive());
+	sources.push_back("#define GLUP_VERTEX_SHADER \n");
     }
 
 
     void Context_ES2::get_fragment_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
+	sources.push_back(GLSL_version_directive());
+	sources.push_back("#define GLUP_FRAGMENT_SHADER \n");
         if(use_ES_profile_) {
-#if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
-            if(GLSL_version_ >= 3.0) {
-                sources.push_back("#version 300 es\n");
-            } else {
-                sources.push_back("#version 100\n");
-            }
-#endif
             sources.push_back(
-                "#define GLUP_FRAGMENT_SHADER                    \n"
                 "#extension GL_OES_standard_derivatives : enable \n"
                 "#extension GL_EXT_frag_depth : enable           \n"
                 "#extension GL_OES_texture3D : enable            \n"
@@ -1364,15 +1355,6 @@ namespace GLUP {
                 "#ifdef GL_FRAGMENT_PRECISION_HIGH               \n"
                 "   precision highp int;                         \n"
                 "#endif                                          \n"
-            );
-        } else {
-            sources.push_back(
-#ifdef GEO_OS_APPLE
-                "#version 150 core                               \n"
-#else
-                "#version 130                                    \n"
-#endif
-                "#define GLUP_FRAGMENT_SHADER                    \n"
             );
         }
     }
@@ -1427,6 +1409,7 @@ namespace GLUP {
         Context::get_toggles_pseudo_file(sources);
         sources.push_back("#endif\n");
     }
+
 }
 
 #endif

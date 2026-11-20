@@ -69,8 +69,7 @@ int main(int argc, char** argv) {
             << std::endl;
 
         return(-1);
-#endif
-
+#else
         Stopwatch Wtot("Total time");
 
         std::vector<std::string> filenames;
@@ -147,4 +146,5 @@ int main(int argc, char** argv) {
 
     Logger::out("") << "Everything OK, Returning status 0" << std::endl;
     return 0;
+#endif
 }

@@ -48,6 +48,7 @@
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma GCC diagnostic ignored "-Wms-bitfield-padding"
 #endif
 #endif
 

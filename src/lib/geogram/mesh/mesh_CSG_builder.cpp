@@ -565,7 +565,8 @@ namespace GEO {
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-            return empty_mesh_;
+	    result = empty_mesh_;
+            return result;
         }
 
         if(
@@ -685,7 +686,8 @@ namespace GEO {
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-            return empty_mesh_;
+	    result = empty_mesh_;
+            return result;
         }
 	GEOCSG::ArgList args;
 	args.add_arg("file", full_filename);
