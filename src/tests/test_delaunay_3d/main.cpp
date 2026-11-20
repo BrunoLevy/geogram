@@ -19,7 +19,7 @@ int main() {
             points[3 * v + coord] =
                 static_cast<double>(rng() >> 11) * (1.0 / 9007199254740992.0);
         }
-        rng();
+        (void)rng();
     }
 
     // Query PDEL directly: Delaunay::create() can fall back to NN.
