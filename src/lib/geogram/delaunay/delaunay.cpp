@@ -202,6 +202,11 @@ namespace GEO {
         keep_infinite_ = false;
         nb_finite_cells_ = 0;
         keep_regions_ = false;
+#ifdef GEO_DETERMINISTIC
+        // Reset the global RNG so the randomized spatial sort used when
+        // reordering vertices is reproducible across operations.
+        Numeric::random_reset();
+#endif
     }
 
     Delaunay::~Delaunay() {

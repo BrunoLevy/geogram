@@ -69,6 +69,10 @@ target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
 target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
+if(GEOGRAM_WITH_DETERMINISTIC_CVT)
+target_compile_definitions(geogram PRIVATE -DGEO_DETERMINISTIC)
+endif()
+
 # For now here (quick and dirty fix, for using parallel STL)
 if(LINUX AND NOT GEOGRAM_WITH_EMSCRIPTEN) 
 target_link_libraries(geogram tbb)

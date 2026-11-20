@@ -130,13 +130,15 @@ namespace GEO {
         points_.resize(dimension_ * nb_points);
     }
 
-    void CentroidalVoronoiTesselation::Lloyd_iterations(index_t nb_iter) {
+    void CentroidalVoronoiTesselation::Lloyd_iterations(
+        index_t nb_iter, bool safe_mode
+    ) {
         index_t nb_points = index_t(points_.size() / dimension_);
 
         vector<double> mg;
         vector<double> m;
 
-        RVD_->set_check_SR(false);
+        RVD_->set_check_SR(safe_mode);
 
         if(progress_ != nullptr) {
             progress_->reset(nb_iter);

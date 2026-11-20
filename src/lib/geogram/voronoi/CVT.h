@@ -153,8 +153,15 @@ namespace GEO {
      *  a call to compute_initial_sampling() to regularize
      *  the point set before calling Newton_iterations().
      * \param[in] nb_iter number of iterations
+     * \param[in] safe_mode if set, enables the "radius of security"
+     *  check during Lloyd relaxation. This avoids potential errors of the
+     *  algorithm when a point has many neighbors. When unset, the potential
+     *  errors are typically minor (and thus still produce a suitable input
+     *  for Newton_iterations()), but they depend on the number of threads
+     *  used (and thus may pose issues for reproducibility across different
+     *  machines); they may also be more significant in extreme cases.
      */
-    virtual void Lloyd_iterations(index_t nb_iter);
+    virtual void Lloyd_iterations(index_t nb_iter, bool safe_mode = false);
 
     /**
      * \brief Relaxes the points with Newton-Lloyd's algorithm.
