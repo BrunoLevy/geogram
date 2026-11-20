@@ -5,8 +5,9 @@
 #
 # This module defines the following variables:
 #
-#   Geogram_FOUND       - True if geogram has been found.
-#   Geogram::geogram    - Imported target for the main Geogram library.
+#   Geogram_FOUND        - True if geogram has been found.
+#   Geogram::geogram     - Imported target for the main Geogram library.
+#   Geogram::geogram_gfx - Imported target for Geogram graphics library.
 #
 # This module reads hints about the Geogram location from the following
 # environment variables:
@@ -39,22 +40,22 @@ find_path (GEOGRAM_INCLUDE_DIR
 find_library (GEOGRAM_LIBRARY
                 NAMES geogram
                 PATHS ${GEOGRAM_SEARCH_PATHS}
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib lib64
 )
 
 find_library (GEOGRAM_GFX_LIBRARY
                 NAMES geogram_gfx
                 PATHS ${GEOGRAM_SEARCH_PATHS}
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib lib64
 )
 
 # This one we search in both Geogram search path and
 # system search path since it may be already installed
 # in the system
 find_library (GEOGRAM_GLFW3_LIBRARY
-                NAMES glfw3 glfw geogram_glfw3
+                NAMES glfw3 glfw geogram_glfw3 glfw3dll glfwdll
                 PATHS ${GEOGRAM_SEARCH_PATHS} ${GEOGRAM_SEARCH_PATHS_SYSTEM}
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib lib64
 )
 
 include (FindPackageHandleStandardArgs)
@@ -63,9 +64,9 @@ find_package_handle_standard_args(
 )
 
 # Create an imported target for Geogram 
-If (Geogram_FOUND)
+If (GEOGRAM_FOUND)
   
-        set(GEOGRAM_INSTALL_PREFIX ${GEOGRAM_INCLUDE_DIR}/..)
+        set(GEOGRAM_INSTALL_PREFIX ${GEOGRAM_INCLUDE_DIR}/../..)
   
         if (NOT TARGET Geogram::geogram)
                 add_library (Geogram::geogram UNKNOWN IMPORTED)
