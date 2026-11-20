@@ -122,6 +122,9 @@ namespace GEO {
 
         /**
          * \copydoc Delaunay::set_vertices
+         * \details If a worker exhausts its local tetrahedron pool,
+         *  pending insertions are completed sequentially before advancing
+         *  to the next BRIO level.
          */
         void set_vertices(index_t nb_vertices, const double* vertices) override;
 
