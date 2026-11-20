@@ -17,10 +17,23 @@ set(FULL_WARNINGS
     -Wno-format-nonliteral # Todo: use Laurent Alonso's trick
     -Wno-poison-system-directories
     -Wno-switch-default
+    # Clang's C++ Safe Buffers model (-Wunsafe-buffer-usage, clang 16+): flags
+    # every raw pointer subscript / arithmetic. Geogram's numerics, predicates
+    # and mesh code are built on raw arrays by design, so this opt-in
+    # hardening model does not apply.
+    -Wno-unsafe-buffer-usage
+    -Wno-thread-safety-negative # seems that std::mutex lacks needed annotations
+    -Wno-allocator-wrappers     # annotations cannot use class member function
 )
 
 # Compile with full warnings by default
 add_definitions(${FULL_WARNINGS})
+
+# Since C++23 libc++ is in the process of splitting larger headers
+# into smaller modular headers.  Force this behavior for the older
+# dialects to keep the C++23 build green.  See
+# https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
+add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
 
 # Run the static analyzer
 if(VORPALINE_WITH_CLANGSA)
@@ -31,11 +44,10 @@ endif()
 add_flags(CMAKE_CXX_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 
-# Enable setting FPU rounding mode (needed by FPG) and
-# disable automatic generation of FMAs (would break exact
+# Disable automatic generation of FMAs (would break exact
 # predicates)
-add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
-add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -stdlib=libc++ -Wno-c++98-compat)

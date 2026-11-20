@@ -52,6 +52,9 @@
 #ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
+#  if __has_warning("-Wallocator-wrappers")
+#  pragma clang diagnostic ignored "-Wallocator-wrappers"
+#  endif
 #endif
 
 namespace GEO {

@@ -479,7 +479,7 @@ namespace {
         double X_cutoff = axis_coord[axis_coord.size()/2];
 
         for(index_t f: M.facets) {
-            chart[f] = (X_coord[f] > X_cutoff);;
+            chart[f] = (X_coord[f] > X_cutoff);
         }
 
         // Test whether chart boundary touches mesh border

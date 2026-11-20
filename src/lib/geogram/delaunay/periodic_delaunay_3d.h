@@ -155,11 +155,20 @@ namespace GEO {
          */
         void compute();
 
+	/**
+	 * \brief Tests whether this PeriodicDelaunay3d is in periodic mode
+	 * \retval true if in periodic mode, that is, uses periodic boundary
+	 *  conditions
+	 * \retval false otherwise
+	 */
+	bool periodic() const {
+	    return periodic_;
+	}
+
         /**
          * \brief Use exact predicates in convex cell computations.
-         * \details Convex cell computations are used in periodic
-         *  mode for determining the cells that straddle the domain
-         *  boundary.
+         * \details Convex cell computations are used when checking volume
+	 *  and when saving the cells
          * \param[in] x true if exact predicates should be used
          *  (default), false otherwise.
          */
@@ -253,6 +262,16 @@ namespace GEO {
             IncidentTetrahedra W;
             copy_Laguerre_cell_from_Delaunay(i,C,W);
         }
+
+	/**
+	 * \brief Sets whether computation should be stopped when an
+	 *  empty cell is encountered
+	 * \param[in] x if set, computation is aborted as soon as an
+	 *  empty cell is encountered. Default behavior is off.
+	 */
+	void abort_if_empty_cell(bool x) {
+	    abort_on_empty_cell_ = x;
+	}
 
         /**
          * \brief Tests whether the Laguerre diagram has empty cells.
@@ -459,6 +478,12 @@ namespace GEO {
         bool update_periodic_v_to_cell_;
         vector<index_t> periodic_v_to_cell_rowptr_;
         vector<index_t> periodic_v_to_cell_data_;
+
+	/**
+	 * \brief If set, abort as soon as an empty cell
+	 *   is encountered.
+	 */
+	bool abort_on_empty_cell_;
 
         /**
          * \brief Early detection of empty cells.

@@ -38,13 +38,12 @@
  */
 
 #include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
 
 // This makes sure the compiler will not optimize y = a*x+b
 // with fused multiply-add, this would break the exact
 // predicates.
-#ifdef GEO_COMPILER_MSVC
-#pragma fp_contract(off)
-#endif
+GEO_FP_CONTRACT_OFF
 
 #include <geogram/numerics/multi_precision.h>
 #include <geogram/numerics/PCK.h>
@@ -77,8 +76,8 @@ namespace {
     }
 
     /**
-     * \brief Computes the sum of a length 2 expansion and a double
-     *  into a length 3 expansion.
+     * \brief Computes the sum of two length 2 expansions
+     *  into a length 4 expansion.
      * \param[in] a1 high-magnitude component of first argument
      * \param[in] a0 low-magnitude component of first argument
      * \param[in] b1 high-magnitude component of second argument
@@ -546,6 +545,7 @@ namespace GEO {
 
     double expansion_splitter_;
     double expansion_epsilon_;
+    bool expansion_initialized_ = false;
 
     void expansion::initialize() {
         // Taken from Jonathan Shewchuk's exactinit.
@@ -572,6 +572,7 @@ namespace GEO {
             check = 1.0 + expansion_epsilon_;
         } while((check != 1.0) && (check != lastcheck));
         expansion_splitter_ += 1.0;
+	expansion_initialized_ = true;
     }
 
     // ====== Initialization from expansion and double ===============

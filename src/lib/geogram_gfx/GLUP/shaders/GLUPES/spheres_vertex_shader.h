@@ -57,7 +57,14 @@ void main(void) {
     gl_Position =
         GLUP_VS.modelviewprojection_matrix*vec4(vertex_in.xyz,1.0);
 
-    // TODO: optimize, directly compute r1,r2,r4
+    // TODO: maybe optimize: directly compute r1,r2,r4 (but optimizing
+    // is probably not usefull since GLSL compiler probably propagates
+    // constants...)
+
+    // Important note: GLSL matrix constructor takes coefficients
+    // in *column major* order (if you ask me, this is insane!),
+    // this is why the coefficients of T appear here as transposed
+    // as compared to the formula in the original article.
     mat4 T = mat4(
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
@@ -65,6 +72,8 @@ void main(void) {
         vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
     );
 
+    // Important note: PMT[i] would give you the i-th *column* (still because
+    // of GLSL in *column major* order...)
     mat4 PMT = GLUP_VS.modelviewprojection_matrix * T;
     vec4 r1 = row0(PMT);
     vec4 r2 = row1(PMT);

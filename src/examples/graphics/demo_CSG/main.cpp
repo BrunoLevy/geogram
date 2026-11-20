@@ -41,6 +41,12 @@
 #include <geogram/mesh/mesh_CSG.h>
 #include <geogram/basic/file_system.h>
 
+extern void register_embedded_csg_files(GEO::FileSystem::MemoryNode* n);
+
+namespace {
+#include "gui_state.h"
+}
+
 namespace {
     using namespace GEO;
 
@@ -50,13 +56,32 @@ namespace {
             use_text_editor_ = true;
             add_key_func("F5", [this](void) { run(); }, "Compile CSG tree");
             builtin_files_ = new FileSystem::MemoryNode();
+	    register_embedded_csg_files(builtin_files_);
+	    hide_console();
+	    show_text_editor();
+	    viewer_properties_visible_ = false;
+	    object_properties_visible_ = false;
+	    load("example001.csg");
         }
 
         /**
          * \copydoc SimpleApplication::load()
          */
         bool load(const std::string& filename) override {
-            geo_argused(filename);
+            if(FileSystem::is_file(filename)) {
+                text_editor_.load(filename);
+                current_file_ = filename;
+                text_editor_visible_ = true;
+		run();
+                return true;
+            } else if(builtin_files_->is_file(filename)) {
+                const char* data = builtin_files_->get_file_contents(filename);
+                text_editor_.load_data(data);
+                current_file_ = "";
+                text_editor_visible_ = true;
+		run();
+                return true;
+            }
             return false;
         }
 
@@ -64,8 +89,23 @@ namespace {
          * \copydoc SimpleApplication::save()
          */
         bool save(const std::string& filename) override {
-            geo_argused(filename);
-            return false;
+            text_editor_.save(filename);
+            current_file_ = filename;
+            return true;
+        }
+
+        /**
+         * \copydoc Application::supported_read_file_extensions()
+         */
+        std::string supported_read_file_extensions() override {
+            return "csg";
+        }
+
+        /**
+         * \copydoc Application::supported_write_file_extensions()
+         */
+        std::string supported_write_file_extensions() override {
+            return "csg";
         }
 
         /**
@@ -100,6 +140,11 @@ namespace {
         }
 
     protected:
+
+	const char* default_layout() const override {
+	    return (const char*)gui_state;
+	}
+
         void run() {
             mesh_.clear();
 
@@ -110,13 +155,17 @@ namespace {
                 mesh_.copy(*result);
             }
 
-            double xyzmin[3];
-            double xyzmax[3];
-            get_bbox(mesh_, xyzmin, xyzmax, false);
-            set_region_of_interest(
-                xyzmin[0], xyzmin[1], xyzmin[2],
-                xyzmax[0], xyzmax[1], xyzmax[2]
-            );
+	    if(mesh_.vertices.nb() == 0) {
+		set_region_of_interest(0,0,0,1,1,1);
+	    } else {
+		double xyzmin[3];
+		double xyzmax[3];
+		get_bbox(mesh_, xyzmin, xyzmax, false);
+		set_region_of_interest(
+		    xyzmin[0], xyzmin[1], xyzmin[2],
+		    xyzmax[0], xyzmax[1], xyzmax[2]
+		);
+	    }
             mesh_gfx_.set_mesh(&mesh_);
         }
 

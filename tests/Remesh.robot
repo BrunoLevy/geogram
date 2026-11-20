@@ -38,8 +38,8 @@ joint.off (profile=cad)
     Run Test    joint.off    profile=cad
 
 mask.off (gradation=1)
-    [Tags]    weekly_valgrind
-    Run Test    mask.off    gradation=1   sys:multithread=false
+    [Tags]    daily_valgrind
+    Run Test    mask.off    gradation=1   
 
 test_isect.obj (profile=convert, isect=true)
     [Tags]    daily_valgrind

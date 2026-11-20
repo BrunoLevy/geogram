@@ -830,8 +830,18 @@ namespace GEO {
 #ifdef GEO_NO_INTERVALS
     typedef intervalDummy interval_nt;
 #else
-    typedef intervalRN interval_nt; // Seems that valgrind does not support RU
-    //typedef intervalRU interval_nt;
+    // interval_nt uses round to nearet (RN)
+    typedef intervalRN interval_nt;
+
+    // one could use round to upper (RU) instead, supposed to be slightly faster
+    // but we chose not to use it because:
+    //  - does not seem to be significantly faster
+    //  - makes the code more complicated, needs to change rounding mode)
+    //    (but it is handled properly with the Rounding class provided that
+    //     client code does not forget to declare one)
+    //  - needs the compilation flag -frounding-math (disable compiler
+    //    optimizations that suppose "round to nearest" mode)
+    // typedef intervalRU interval_nt;
 #endif
 
 

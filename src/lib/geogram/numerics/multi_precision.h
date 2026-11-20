@@ -62,6 +62,7 @@
 
 namespace GEO {
 
+    extern bool expansion_initialized_;
     extern double expansion_splitter_;
     extern double expansion_epsilon_;
 
@@ -141,6 +142,7 @@ namespace GEO {
      * \relates expansion
      */
     inline void split(double a, double& ahi, double& alo) {
+	geo_debug_assert(expansion_initialized_);
         double c = expansion_splitter_ * a;
         double abig = c - a;
         ahi = c - abig;

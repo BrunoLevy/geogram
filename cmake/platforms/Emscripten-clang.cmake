@@ -46,6 +46,11 @@ set(FULL_WARNINGS
     -Wno-disabled-macro-expansion # else we got a warning each time cout is used
     -Wno-padded # Disable generating a message each time padding is used
     -Wno-float-equal # Sometimes we compare floats (against 0.0 or 1.0 mainly)
+    # -Wswitch-default (clang 18+) contradicts -Wcovered-switch-default: a
+    # switch that covers every enumerator warns without a default label and
+    # with one. Geogram keeps covered enum switches default-free so -Wswitch
+    # reports a missing enumerator. Same as Darwin-clang.cmake.
+    -Wno-switch-default
     -Wno-global-constructors
     -Wno-exit-time-destructors
     -Wno-old-style-cast # Yes, old-style cast is sometime more legible...
@@ -57,16 +62,27 @@ set(FULL_WARNINGS
     -Wno-reserved-identifier
     -Wno-c++98-compat-pedantic
     -Wno-unused-but-set-variable
+    # Clang's C++ Safe Buffers model (-Wunsafe-buffer-usage, clang 16+): flags
+    # every raw pointer subscript / arithmetic. Geogram's numerics, predicates
+    # and mesh code are built on raw arrays by design, so this opt-in
+    # hardening model does not apply.
+    -Wno-unsafe-buffer-usage
+    -Wno-unknown-warning-option # silence warnings on unknown warnings...
 )
 
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-arguments)
 
-# Enable setting FPU rounding mode (needed by FPG) and
-# disable automatic generation of FMAs (would break exact
-# predicates)
-add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
-add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+# Since C++23 libc++ is in the process of splitting larger headers
+# into smaller modular headers.  Force this behavior for the older
+# dialects to keep the C++23 build green.  See
+# https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
+add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
+
+# Disable automatic generation of FMAs (would break exact
+# predicates).
+add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
 # Compile with full warnings by default
 add_definitions(${FULL_WARNINGS})
@@ -87,7 +103,8 @@ endif()
 #       the name in EXPORTED_FUNCTIONS).
 set(EM_COMMON_FLAGS
   -sUSE_GLFW=3
-# -sUSE_WEBGL2=1 -DGEO_WEBGL2
+  -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2
+  -DGEO_WEBGL2
   -sTOTAL_MEMORY=268435456
   -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
   -sEXPORTED_RUNTIME_METHODS='["ccall"]'

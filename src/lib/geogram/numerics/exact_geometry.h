@@ -46,7 +46,7 @@
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/numerics/interval_nt.h>
 
-#include <geogram/numerics/predicates.h>
+// #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/exact_geometry.h>
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
@@ -487,8 +487,30 @@ namespace GEO {
          * \brief rational with exact numerator and denominator
          */
         typedef rationalg<scalar> rational;
-
     }
+
+    #ifndef GEOGRAM_PSM
+    namespace PCK {
+        /**
+         * \brief Computes the orientation predicate in 3d.
+         * \details Computes the sign of the signed volume of
+         *  the tetrahedron p0, p1, p2, p3.
+         * \param[in] p0 , p1 , p2 , p3 vertices of the tetrahedron as
+	 *   points with homogeneous coordinates represented in arbitrary
+	 *   precision (expansion_nt or exact_nt if geogram+ is available).
+         * \retval POSITIVE if the tetrahedron is oriented positively
+         * \retval NEGATIVE if the tetrahedron is oriented negatively
+         * \retval perturb() if the tetrahedron is flat,
+         *  where \c perturb() denotes a globally
+         *  consistent perturbation, that returns either POSITIVE or NEGATIVE
+         */
+        Sign GEOGRAM_API orient_3d_SOS(
+            const exact::vec3h& p0, const exact::vec3h& p1,
+            const exact::vec3h& p2, const exact::vec3h& p3
+        );
+    }
+    #endif
+
 }
 
 #endif

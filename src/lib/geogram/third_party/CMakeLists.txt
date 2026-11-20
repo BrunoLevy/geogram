@@ -10,6 +10,7 @@ else()
     add_definitions(-Wno-maybe-uninitialized)
     add_definitions(-Wno-clobbered)    # libMeshb
     add_definitions(-Wno-sign-compare) # libMeshb
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-discarded-qualifiers") #lua
   endif()
   if(
       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR

@@ -13,7 +13,7 @@
 
 
 
-![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2026_3.png)
+![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2026_4.png)
 
 
 Geogram is a programming library with geometric algorithms. It has
@@ -62,6 +62,14 @@ Links
   - [Geogram in-browser demos](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten#examples)
     (How is it possible ? _more on this [here](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten)_)
   - [Data](https://github.com/BrunoLevy/GraphiteThree/wiki/Data)
+
+Language bindings
+-----------------
+  - Python, Node.js, WebAssembly, TypeScript and Lua: [Rosetta geogram](https://github.com/rosetta-bindings/geogram-rosetta)
+  - Python, Lua: [pyGeogram](https://github.com/BrunoLevy/pygeogram)
+  - [Julia](https://github.com/COMODO-research/Geogram.jl)
+  - [Rust (predicates)](https://crates.io/crates/geogram_predicates)
+
 
 How does it compare to other geometry-processing libraries ?
 ------------------------------------------------------------

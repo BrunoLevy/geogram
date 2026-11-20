@@ -110,14 +110,19 @@ namespace GEO {
         }
 
         T& operator[](coord_index_t i) {
-            geo_debug_assert(i < 2);
+            geo_debug_assert(i <= 2);
             return data()[i];
         }
 
         const T& operator[](coord_index_t i) const {
-            geo_debug_assert(i < 2);
+            geo_debug_assert(i <= 2);
             return data()[i];
         }
+
+	rationalg<T> cartesian(coord_index_t i) const {
+	    geo_debug_assert(i < 2);
+	    return rationalg<T>(data()[i], data()[2]);
+	}
 
         void optimize() {
             Numeric::optimize_number_representation(x);
@@ -240,14 +245,19 @@ namespace GEO {
         }
 
         T& operator[](coord_index_t i) {
-            geo_debug_assert(i < 3);
+            geo_debug_assert(i <= 3);
             return data()[i];
         }
 
         const T& operator[](coord_index_t i) const {
-            geo_debug_assert(i < 3);
+            geo_debug_assert(i <= 3);
             return data()[i];
         }
+
+	rationalg<T> cartesian(coord_index_t i) const {
+	    geo_debug_assert(i < 3);
+	    return rationalg<T>(data()[i], data()[3]);
+	}
 
         void optimize() {
             Numeric::optimize_number_representation(x);

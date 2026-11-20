@@ -60,7 +60,7 @@ namespace GEO {
      * \param[in] id optional index, if specified, appended to the name,
      *  padded with zeros (5 digits)
      */
-    DebugStream(const std::string& name, index_t id = index_t(-1));
+    DebugStream(const std::string& name, index_t id = NO_INDEX);
     /**
      * \brief DebugStream destructor
      */

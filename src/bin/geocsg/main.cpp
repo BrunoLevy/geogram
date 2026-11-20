@@ -70,79 +70,89 @@ namespace {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.sphere(25.0),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                ),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 0, -1, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                ),
-                B.multmatrix(
-                    {{0, 0, 1, 0}, {0, 1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                )
-            });
+	return B.difference(
+	    B.sphere(25.0),
+	    B.rotate(90.0, {0,0,1}, B.cylinder(62.5, 12.5, 12.5, true)),
+	    B.rotate(90.0, {1,0,0}, B.cylinder(62.5, 12.5, 12.5, true)),
+	    B.rotate(90.0, {0,1,0}, B.cylinder(62.5, 12.5, 12.5, true))
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example002() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.intersection({
-                B.difference({
-                        B.union_instr({
-                                B.cube({30,30,30}),
-                                B.multmatrix(
-                                    {{1, 0, 0,  0},
-                                     {0, 1, 0,  0},
-                                     {0, 0, 1, -25},
-                                     {0, 0, 0, 1}},
-                                    {B.cube({15,15,40})}
-                                )
-                            }),
-                        B.union_instr({
-                                B.cube({50,10,10}),
-                                B.cube({10,50,10}),
-                                B.cube({10,10,50})
-                            }),
-                    }),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 5}, {0, 0, 0, 1}},
-                    { B.cylinder(50, 20, 5) }
-                )
-            });
+	return B.intersection(
+	    B.difference(
+		B.union_instr(
+		    B.cube({30, 30, 30}, true),
+		    B.translate({0, 0, -25}, B.cube({15, 15, 50}, true))
+		),
+		B.union_instr(
+		    B.cube({50, 10, 10}, true),
+		    B.cube({10, 50, 10}, true),
+		    B.cube({10, 10, 50}, true)
+		)
+	    ),
+	    B.translate({0, 0, 5}, B.cylinder(50,20,5, true))
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example003() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.union_instr({
-                        B.cube({30, 30, 30}),
-                        B.cube({40, 15, 15}),
-                        B.cube({15, 40, 15}),
-                        B.cube({15, 15, 40})
-                    }),
-                B.union_instr({
-                        B.cube({50, 10, 10}),
-                        B.cube({10, 50, 10}),
-                        B.cube({10, 10, 50})
-                    })
-            });
+        return B.difference(
+	    B.union_instr(
+		B.cube({30, 30, 30}, true),
+		B.cube({40, 15, 15}, true),
+		B.cube({15, 40, 15}, true),
+		B.cube({15, 15, 40}, true)
+	    ),
+	    B.union_instr(
+		B.cube({50, 10, 10}, true),
+		B.cube({10, 50, 10}, true),
+		B.cube({10, 10, 50}, true)
+	    )
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example004() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.cube({30,30,30}),
-                B.sphere(20)
-            });
+        return B.difference(
+	    B.cube({30,30,30},true),
+	    B.sphere(20)
+	);
+    }
+
+    std::shared_ptr<GEO::Mesh> example005() {
+        using namespace GEO;
+        CSGBuilder B;
+	configure_builder(B);
+
+	CSGScope columns;
+	for(double i=0; i<6.0; ++i) {
+	    columns.emplace_back(
+		B.translate(
+		    {sin(2.0*M_PI*i/6.0)*80, cos(2.0*M_PI*i/6.0)*80, 0.0},
+		    B.cylinder(200,10,10)
+		)
+	    );
+	}
+	return B.translate(
+	    {0, 0, -120},
+	    B.union_instr(
+		B.difference(
+		    B.cylinder(50, 100, 100, false),
+		    B.translate({0, 0, 10}, B.cylinder(50, 80, 80)),
+		    B.translate({100, 0, 35}, B.cube({50,50,50},true))
+		),
+		B.union_instr(columns),
+		B.translate({0, 0, 200}, B.cylinder(80, 120, 0))
+	    )
+	);
     }
 }
 
@@ -228,6 +238,8 @@ int main(int argc, char** argv) {
             result = example003();
         } else if(csg_filename == "example004") {
             result = example004();
+	} else if(csg_filename == "example005") {
+            result = example005();
 	} else {
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());

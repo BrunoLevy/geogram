@@ -555,7 +555,7 @@ namespace ImGui_lua_wrappers {
 	  "void ImGui::PushStyleVar_2(ImGuiStyleVar idx, ImVec2 val)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<ImVec2> val(L,2);
-      LUAWRAP_CHECK_ARGS(idx, val);
+      LUAWRAP_CHECK_ARGS(idx, val)
       ImGui::PushStyleVar(idx.value, val.value);
       return 0;
    }
@@ -565,7 +565,7 @@ namespace ImGui_lua_wrappers {
 	  "void ImGui::PushStyleColor_2(ImGuiCol idx, ImVec4 col)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<ImVec4> col(L,2);
-      LUAWRAP_CHECK_ARGS(idx, col);
+      LUAWRAP_CHECK_ARGS(idx, col)
       ImGui::PushStyleColor(idx.value, col.value);
       return 0;
    }

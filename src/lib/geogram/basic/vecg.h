@@ -574,15 +574,15 @@ namespace GEO {
         /** \copydoc vecng::vecng(const vecng<DIM, T2>&) */
         template <class T2>
         explicit vecng(const vecng<dim, T2>& v) :
-            x(v.x),
-            y(v.y) {
+            x(T(v.x)),
+            y(T(v.y)) {
         }
 
         /** \copydoc vecng::vecng(const T2*) */
         template <class T2>
         explicit vecng(const T2* v) :
-            x(v[0]),
-            y(v[1]) {
+            x(T(v[0])),
+            y(T(v[1])) {
         }
 
         /** \copydoc vecng::vecng(const std::initializer_list<T>) */
@@ -814,17 +814,17 @@ namespace GEO {
         /** \copydoc vecng::vecng(const vecng<DIM, T2>&) */
         template <class T2>
         explicit vecng(const vecng<dim, T2>& v) :
-            x(v.x),
-            y(v.y),
-            z(v.z) {
+            x(T(v.x)),
+            y(T(v.y)),
+            z(T(v.z)) {
         }
 
         /** \copydoc vecng::vecng(const T2*) */
         template <class T2>
         explicit vecng(const T2* v) :
-            x(v[0]),
-            y(v[1]),
-            z(v[2]) {
+            x(T(v[0])),
+            y(T(v[1])),
+            z(T(v[2])) {
         }
 
         /** \copydoc vecng::vecng(const std::initializer_list<T>) */
@@ -1099,19 +1099,19 @@ namespace GEO {
         /** \copydoc vecng::vecng(const vecng<DIM, T2>&) */
         template <class T2>
         explicit vecng(const vecng<dim, T2>& v) :
-            x(v.x),
-            y(v.y),
-            z(v.z),
-            w(v.w) {
+            x(T(v.x)),
+            y(T(v.y)),
+            z(T(v.z)),
+            w(T(v.w)) {
         }
 
         /** \copydoc vecng::vecng(const T2*) */
         template <class T2>
         explicit vecng(const T2* v) :
-            x(v[0]),
-            y(v[1]),
-            z(v[2]),
-            w(v[3]) {
+            x(T(v[0])),
+            y(T(v[1])),
+            z(T(v[2])),
+            w(T(v[3])) {
         }
 
         /** \copydoc vecng::vecng(const std::initializer_list<T>) */

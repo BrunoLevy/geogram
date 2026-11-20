@@ -159,6 +159,10 @@ namespace GEO {
 		false, adjust_border_importance
 	    );
         }
+
+	if(Geom::mesh_enclosed_volume(M_out) < 0.0) {
+	    M_out.facets.flip();
+	}
     }
 
     /************************************************************************/

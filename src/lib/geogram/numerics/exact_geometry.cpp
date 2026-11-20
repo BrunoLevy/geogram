@@ -693,7 +693,73 @@ namespace GEO {
         Nz->assign_det2x2(Ux,Uy,Vx,Vy);
         return vec3E(expansion_nt(Nx), expansion_nt(Ny), expansion_nt(Nz));
     }
-
 #endif
-
 }
+
+/**************************************************************************/
+
+#ifndef GEOGRAM_PSM
+namespace GEO {
+    namespace PCK {
+        Sign orient_3d_SOS(
+            const exact::vec3h& p0, const exact::vec3h& p1,
+            const exact::vec3h& p2, const exact::vec3h& p3
+        ) {
+
+	    struct SOS {
+		enum {W=3};
+
+		SOS(
+		    const exact::vec3h& p0, const exact::vec3h& p1,
+		    const exact::vec3h& p2, const exact::vec3h& p3
+		) : p_orig{&p0, &p1, &p2, &p3}, p_sort{&p0, &p1, &p2, &p3} {
+		    std::sort(
+			p_sort, p_sort+4,
+			[](
+			    const exact::vec3h* pp1, const exact::vec3h* pp2
+			)->bool {
+			    vec3HgLexicoCompare<exact::scalar> cmp;
+			    return cmp(*pp1,*pp2);
+			}
+		    );
+		    parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
+			? NEGATIVE : POSITIVE;
+		}
+
+		Sign orient_1d(index_t i, index_t j, index_t axis) const {
+		    coord_index_t ax = coord_index_t(axis);
+		    Sign s = geo_cmp(
+			exact::rational((*p_sort[i])[ax], (*p_sort[i])[W]),
+			exact::rational((*p_sort[j])[ax], (*p_sort[j])[W])
+		    );
+		    return Sign(s*parity);
+		}
+
+		Sign orient_2d(
+		    index_t i, index_t j, index_t k, index_t axis1, index_t axis2
+		) const {
+		    coord_index_t ax1 = coord_index_t(axis1);
+		    coord_index_t ax2 = coord_index_t(axis2);
+		    exact::vec2h pi{
+			(*p_sort[i])[ax1], (*p_sort[i])[ax2], (*p_sort[i])[W]
+		    };
+		    exact::vec2h pj{
+			(*p_sort[j])[ax1], (*p_sort[j])[ax2], (*p_sort[j])[W]
+		    };
+		    exact::vec2h pk{
+			(*p_sort[k])[ax1], (*p_sort[k])[ax2], (*p_sort[k])[W]
+		    };
+		    Sign s = PCK::orient_2d(pi,pj,pk);
+		    return Sign(s*parity);
+		}
+
+		const exact::vec3h* p_orig[4];
+		const exact::vec3h* p_sort[4];
+		Sign parity;
+	    };
+
+	    return orient_3d_SOS_impl<exact::vec3h, SOS>(p0,p1,p2,p3);
+	}
+    }
+}
+#endif

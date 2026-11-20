@@ -327,14 +327,6 @@ namespace {
         case GL_OUT_OF_MEMORY:
             result = "out of memory";
             break;
-/*
-  case GL_STACK_UNDERFLOW:
-  result = "stack underflow";
-  break;
-  case GL_STACK_OVERFLOW:
-  result = "stack over";
-  break;
-*/
         default:
             result = "unknown errorcode";
         }
@@ -731,9 +723,7 @@ namespace GEO {
             GL_TEXTURE_2D, 0,
             GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba
         );
-#ifndef __EMSCRIPTEN__
         glGenerateMipmap(GL_TEXTURE_2D);
-#endif
         free(rgba);
     }
 

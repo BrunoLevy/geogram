@@ -7,6 +7,8 @@ if(
   add_definitions(-Wno-unknown-warning-option)
   add_definitions(-Wno-zero-as-null-pointer-constant)
   add_definitions(-Wno-unused-parameter)
+  add_definitions(-Wno-ms-bitfield-padding)
+  add_definitions(-Wno-macro-redefined)
 endif()
 
 if(ANDROID)

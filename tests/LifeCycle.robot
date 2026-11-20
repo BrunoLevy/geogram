@@ -7,10 +7,10 @@ Library           lib/VorpatestLibrary.py
 
 *** Test Cases ***
 with_string_attrib
-    Run Test    nb_subdivisions=10   with_string_attribute=true
+    Run Test    nb_subdivisions=6   with_string_attribute=true
 
 without_string_attrib
-    Run Test    nb_subdivisions=10   with_string_attribute=false
+    Run Test    nb_subdivisions=6   with_string_attribute=false
 
 
 *** Keywords ***

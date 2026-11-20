@@ -691,6 +691,58 @@ namespace GEO {
         double xyz_min[3];
         double xyz_max[3];
 
+	/**
+	 * \brief Constructs an uninitialized box
+	 * \details Please note that the box is uninitialized. One may
+	 *  call clear() to get an initialized empty box.
+	 */
+	Box() {
+	}
+
+	/**
+	 * \brief Constructs a box from lower and upper bounds
+	 * \param[in] x1 , y1 , z1 the lower bounds
+	 * \param[in] x2 , y2 , z2 the upper bounds
+	 */
+	Box(double x1, double y1, double z1, double x2, double y2, double z2) {
+	    xyz_min[0] = x1;
+	    xyz_min[1] = y1;
+	    xyz_min[2] = z1;
+	    xyz_max[0] = x2;
+	    xyz_max[1] = y2;
+	    xyz_max[2] = z2;
+	}
+
+	/**
+	 * \brief Constructs a box from lower and upper bounds
+	 * \param[in] lo the lower bound as a vec3
+	 * \param[in] hi the upper bound as a vec3
+	 */
+	Box(const vec3& lo, const vec3& hi) {
+	    xyz_min[0] = lo.x;
+	    xyz_min[1] = lo.y;
+	    xyz_min[2] = lo.z;
+	    xyz_max[0] = hi.x;
+	    xyz_max[1] = hi.y;
+	    xyz_max[2] = hi.z;
+	}
+
+	/**
+	 * \brief Gets the lower bounds
+	 * \return the lower bounds as a vec3
+	 */
+	vec3 lo() const {
+	    return vec3(xyz_min);
+	}
+
+	/**
+	 * \brief Gets the higher bounds
+	 * \return the higher bounds as a vec3
+	 */
+	vec3 hi() const {
+	    return vec3(xyz_max);
+	}
+
         /**
          * \brief Tests whether a box contains a point.
          * \param[in] b the point
@@ -720,6 +772,32 @@ namespace GEO {
 	    xyz_max[0] += d;
 	    xyz_max[1] += d;
 	    xyz_max[2] += d;
+	}
+
+	/**
+	 * \brief Makes this box empty
+	 * \details Initializes the lower bounds to the greatest floating point
+	 *  number and the higher bounds to minus the greatest floating point
+	 *  number
+	 */
+	void clear() {
+	    for(index_t c=0; c<3; ++c) {
+		xyz_min[c] =  Numeric::max_float64();
+		xyz_max[c] = -Numeric::max_float64();
+	    }
+	}
+
+	/**
+	 * \brief Adds a point to this box
+	 * \param[in] p a const reference to the point to be added
+	 * \details The box is the smallest axis-aligned box enclosing
+	 *  all added points
+	 */
+	void add(const vec3& p) {
+	    for(index_t c=0; c<3; ++c) {
+		xyz_min[c] = std::min(xyz_min[c], p[c]);
+		xyz_max[c] = std::max(xyz_max[c], p[c]);
+	    }
 	}
 
     };
@@ -769,6 +847,54 @@ namespace GEO {
         double xy_min[2];
         double xy_max[2];
 
+	/**
+	 * \brief Constructs an uninitialized Box2d
+	 * \details Please note that the box is uninitialized. One may
+	 *  call clear() to get an initialized empty box.
+	 */
+	Box2d() {
+	}
+
+	/**
+	 * \brief Constructs a box from lower and upper bounds
+	 * \param[in] x1 , y1 the lower bounds
+	 * \param[in] x2 , y2 the upper bounds
+	 */
+	Box2d(double x1, double y1, double x2, double y2) {
+	    xy_min[0] = x1;
+	    xy_min[1] = y1;
+	    xy_max[0] = x2;
+	    xy_max[1] = y2;
+	}
+
+	/**
+	 * \brief Constructs a box from lower and upper bounds
+	 * \param[in] lo the lower bound as a vec2
+	 * \param[in] hi the upper bound as a vec2
+	 */
+	Box2d(const vec2& lo, const vec2& hi) {
+	    xy_min[0] = lo.x;
+	    xy_min[1] = lo.y;
+	    xy_max[0] = hi.x;
+	    xy_max[1] = hi.y;
+	}
+
+	/**
+	 * \brief Gets the lower bounds
+	 * \return the lower bounds as a vec2
+	 */
+	vec2 lo() const {
+	    return vec2(xy_min);
+	}
+
+	/**
+	 * \brief Gets the higher bounds
+	 * \return the higher bounds as a vec2
+	 */
+	vec2 hi() const {
+	    return vec2(xy_max);
+	}
+
         /**
          * \brief Tests whether a box contains a point.
          * \param[in] b the point
@@ -796,6 +922,32 @@ namespace GEO {
 	    xy_min[1] -= d;
 	    xy_max[0] += d;
 	    xy_max[1] += d;
+	}
+
+	/**
+	 * \brief Makes this box empty
+	 * \details Initializes the lower bounds to the greatest floating point
+	 *  number and the higher bounds to minus the greatest floating point
+	 *  number
+	 */
+	void clear() {
+	    for(index_t c=0; c<2; ++c) {
+		xy_min[c] =  Numeric::max_float64();
+		xy_max[c] = -Numeric::max_float64();
+	    }
+	}
+
+	/**
+	 * \brief Adds a point to this box
+	 * \param[in] p a const reference to the point to be added
+	 * \details The box is the smallest axis-aligned box enclosing
+	 *  all added points
+	 */
+	void add(const vec2& p) {
+	    for(index_t c=0; c<2; ++c) {
+		xy_min[c] = std::min(xy_min[c], p[c]);
+		xy_max[c] = std::max(xy_max[c], p[c]);
+	    }
 	}
     };
 

@@ -64,6 +64,7 @@
 #pragma clang diagnostic ignored "-Wcast-qual"
 #pragma clang diagnostic ignored "-Wunused-macros"
 #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+#pragma clang diagnostic ignored "-Wreserved-identifier"
 #endif
 
 // We need to change stb-c-lexer configuration
@@ -324,14 +325,18 @@ namespace GEO {
         }
 
 	builder_->begin_instruction();
-        next_token_check('{');
-        for(;;) {
-            if(lookahead_token().type == '}') {
-                break;
-            }
-            parse_instruction_or_object();
-        }
-        next_token_check('}');
+	if(lookahead_token().type == '{') {
+	    next_token_check('{');
+	    for(;;) {
+		if(lookahead_token().type == '}') {
+		    break;
+		}
+		parse_instruction_or_object();
+	    }
+	    next_token_check('}');
+	} else {
+	    parse_instruction_or_object();
+	}
 
         if(builder_->verbose()) {
             Logger::out("CSG") << instr_name << " at line: "
@@ -353,8 +358,7 @@ namespace GEO {
             if(lookahead_token().type == ')') {
                 break;
             }
-            std::string arg_name =
-                "arg_" + String::to_string(result.size());
+            std::string arg_name = "";
             if(lookahead_token().type == CLEX_id) {
                 arg_name = next_token().str_val;
                 next_token_check('=');

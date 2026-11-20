@@ -1,0 +1,25 @@
+REMARK   aspirin -- from the WebGPU skin-surface prototype (aspirin.json).
+REMARK   21 atoms, van der Waals radii C 1.70, O 1.52, H 1.20 A --
+REMARK   exactly geomol's table, so leave the radius scale at 1.00.
+ATOM      1  C1  LIG A   1       0.644   0.804   0.598  1.00  1.70           C
+ATOM      2  C2  LIG A   1       0.349  -0.160  -0.359  1.00  1.70           C
+ATOM      3  C3  LIG A   1       0.716   0.590  -1.470  1.00  1.70           C
+ATOM      4  C4  LIG A   1       0.274   1.802  -1.988  1.00  1.70           C
+ATOM      5  C5  LIG A   1      -0.050   2.678  -0.959  1.00  1.70           C
+ATOM      6  C6  LIG A   1      -0.062   1.941   0.220  1.00  1.70           C
+ATOM      7  C7  LIG A   1       1.396   0.954   1.875  1.00  1.70           C
+ATOM      8  O1  LIG A   1       0.913   0.566   2.915  1.00  1.52           O
+ATOM      9  O2  LIG A   1       2.583   1.306   2.389  1.00  1.52           O
+ATOM     10  H1  LIG A   1       3.366   1.466   2.920  1.00  1.20           H
+ATOM     11  O3  LIG A   1      -0.255  -1.410  -0.296  1.00  1.52           O
+ATOM     12  C8  LIG A   1      -0.987  -2.545  -0.135  1.00  1.70           C
+ATOM     13  O4  LIG A   1      -0.117  -3.379  -0.253  1.00  1.52           O
+ATOM     14  C9  LIG A   1      -2.270  -3.301   0.054  1.00  1.70           C
+ATOM     15  H2  LIG A   1      -2.166  -3.823  -0.911  1.00  1.20           H
+ATOM     16  H3  LIG A   1      -2.867  -2.380   0.113  1.00  1.20           H
+ATOM     17  H4  LIG A   1      -1.916  -3.782   0.974  1.00  1.20           H
+ATOM     18  H5  LIG A   1       1.396   0.292  -2.255  1.00  1.20           H
+ATOM     19  H6  LIG A   1       0.155   2.215  -2.979  1.00  1.20           H
+ATOM     20  H7  LIG A   1      -0.259   3.708  -1.207  1.00  1.20           H
+ATOM     21  H8  LIG A   1      -0.846   2.458   0.753  1.00  1.20           H
+END

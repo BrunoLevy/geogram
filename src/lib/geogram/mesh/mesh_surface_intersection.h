@@ -44,6 +44,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/numerics/exact_geometry.h>
+#include <geogram/numerics/predicates.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/attributes.h>
 #include <geogram/basic/debug_stream.h>
@@ -95,7 +96,11 @@ namespace GEO {
      */
     void remove_internal_shells();
 
-
+    /**
+     * \brief Not implemented yet
+     * \details The goal here is to remove degenerate facet pairs that are
+     *  attached to the border, and that may appear due to snap rounding issues.
+     */
     void remove_fins();
 
     /**
@@ -123,46 +128,33 @@ namespace GEO {
      */
     void classify(const std::string& expr);
 
-
     /**
-     * \brief Classifies a connected component
+     * \brief Finds the operands in which a component is included
      * \param[in] component a connected component
      * \param[in] v a vertex of the connected component
      * \return the inclusion bits of the connected component relative
      *  to the operands
      */
-    index_t classify_component(index_t component, index_t v);
+    index_t compute_component_inclusion_bits(index_t component, index_t v);
 
     /**
-     * \brief Classifies a vertex of the computed intersection
-     * \param[in] component a component
-     * \param[in] v a vertex of the component
-     * \return the operand inclusion bits, or NO_INDEX if classification
-     *  was not successful.
-     * \details Uses raytracing along a random direction. The classification
-     *  can be not successful if degenerate ray-triangle intersections are
-     *  encountered. Then one needs to try again
-     *  using tentatively_classify_component_vertex() (multiple times if
-     *  required).
+     * \brief Like compute_component_inclusion_bits(), but when v is not an
+     *   original vertex.
+     * \details Called by compute_component_inclusion_bits()
+     * \see compute_component_inclusion_bits()
      */
-    index_t tentatively_classify_component_vertex_fast(
-        index_t component, index_t v
-    );
+    index_t compute_component_inclusion_bits_exact(index_t component, index_t v);
 
     /**
-     * \brief Classifies a vertex of the computed intersection
-     * \param[in] component a component
-     * \param[in] v a vertex of the component
-     * \return the operand inclusion bits, or NO_INDEX if classification
-     *  was not successful.
-     * \details Uses raytracing along a random direction. The classification
-     *  can be not successful if degenerate ray-triangle intersections are
-     *  encountered. Then one needs to try again.
+     * \brief Like compute_component_inclusion_bits(), but uses computed
+     *  intersection mesh, and exact coordinates everywhere.
+     * \details Kept for reference. Does not give correct result on mesh_bowl
+     *   (to be understood).
+     * \see componte_component_inclusion_bits()
      */
-    index_t tentatively_classify_component_vertex(
-        index_t component, index_t v
+    index_t compute_component_inclusion_bits_exact_exact(
+	index_t component, index_t v
     );
-
 
     /**
      * \brief Merge coplanar facets and retriangulate them using a

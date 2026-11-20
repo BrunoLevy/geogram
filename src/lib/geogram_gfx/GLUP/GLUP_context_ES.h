@@ -132,6 +132,11 @@ namespace GLUP {
             std::vector<GLSL::Source>& sources
         ) override;
 
+	/**
+	 * \copydoc Context::GLSL_version_directive()
+	 */
+	const char* GLSL_version_directive() const override;
+
     protected:
 
         /**

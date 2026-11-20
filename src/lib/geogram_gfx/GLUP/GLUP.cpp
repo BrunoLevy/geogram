@@ -334,6 +334,12 @@ void glupBindUniformState(GLUPuint program) {
     GEO_CHECK_GL();
 }
 
+void glupUpdateUniformState() {
+    GEO_CHECK_GL();
+    GLUP::current_context_->update_uniform_buffer();
+    GEO_CHECK_GL();
+}
+
 
 #if !defined(GEO_OS_EMSCRIPTEN) &&              \
     !defined(GEO_OS_APPLE) &&                   \
@@ -491,8 +497,14 @@ GLUPcontext glupCreateContext() {
 #ifdef GEO_GL_140
     if(GLUP_profile == "GLUP140") {
         try {
+	    GEO::Logger::out("GLUP") << "Creating GLUP140 context"
+				     << std::endl;
             result = new GLUP::Context_GLSL140;
+	    GEO::Logger::out("GLUP") << "Setting up GLUP140 context"
+				     << std::endl;
             result->setup();
+	    GEO::Logger::out("GLUP") << "GLUP140 context ready"
+				     << std::endl;
         } catch(...) {
             GEO::Logger::warn("GLUP")
                 << "Caught an exception in GLUP140, downgrading to GLUPES2"
@@ -1581,7 +1593,7 @@ void glupTexCoord4d(GLUPdouble s, GLUPdouble t, GLUPdouble u, GLUPdouble v) {
 }
 
 
-void glupNormal3fv(GLUPfloat* xyz) {
+void glupNormal3fv(const GLUPfloat* xyz) {
     GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         xyz[0],xyz[1],xyz[2]
@@ -1595,7 +1607,7 @@ void glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
     );
 }
 
-void glupNormal3dv(GLUPdouble* xyz) {
+void glupNormal3dv(const GLUPdouble* xyz) {
     GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         GLfloat(xyz[0]),
@@ -1613,9 +1625,48 @@ void glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     );
 }
 
+void glupNormal4fv(const GLUPfloat* xyzw) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        xyzw[0],xyzw[1],xyzw[2],xyzw[3]
+    );
+}
+
+void glupNormal4f(GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        x,y,z,w
+    );
+}
+
+void glupNormal4dv(const GLUPdouble* xyzw) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        GLfloat(xyzw[0]),
+        GLfloat(xyzw[1]),
+        GLfloat(xyzw[2]),
+	GLfloat(xyzw[3])
+    );
+}
+
+void glupNormal4d(GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w) {
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_normal(
+        GLfloat(x),
+        GLfloat(y),
+        GLfloat(z),
+	GLfloat(w)
+    );
+}
+
 void glupUseProgram(GLUPuint program) {
     GEO_CHECK_GL();
     GLUP::current_context_->set_user_program(program);
+}
+
+GLUPuint glupGetCurrentProgram() {
+    GEO_CHECK_GL();
+    return GLUP::current_context_->user_program();
 }
 
 
@@ -1944,9 +1995,6 @@ namespace GLUP {
 
 }
 
-// TODO1: ArraysOES()/Arrays() switch based on OpenGL profile
-// (runtime) rather than GEO_OS_EMSCRIPTEN macro (compile-time)
-
 void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
     if(GLUP::vertex_array_emulate) {
         for(GLUPsizei i=0; i<n; ++i) {
@@ -1955,7 +2003,7 @@ void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
 
     } else {
 #ifdef GEO_OS_EMSCRIPTEN
-        glGenVertexArraysOES(n, arrays);
+        glGenVertexArrays(n, arrays);
 #else
         if(!glGenVertexArrays) {
             GLUP::vertex_array_emulate = true;
@@ -1974,7 +2022,7 @@ void glupDeleteVertexArrays(GLUPsizei n, const GLUPuint *arrays) {
         }
     } else {
 #if defined(GEO_OS_EMSCRIPTEN)
-        glDeleteVertexArraysOES(n, arrays);
+        glDeleteVertexArrays(n, arrays);
 #else
         if(!glDeleteVertexArrays) {
             GLUP::vertex_array_emulate = true;
@@ -2003,7 +2051,7 @@ void glupBindVertexArray(GLUPuint array) {
         }
     } else {
 #if defined(GEO_OS_EMSCRIPTEN)
-        glBindVertexArrayOES(array);
+        glBindVertexArray(array);
 #else
         if(!glBindVertexArray) {
             GLUP::vertex_array_emulate = true;

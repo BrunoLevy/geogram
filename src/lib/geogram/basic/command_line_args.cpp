@@ -721,6 +721,9 @@ namespace {
 	    "gfx:monitor", -1,
 	    "monitor where to open window, or -1 for default"
 	);
+	declare_arg(
+	    "gfx:buffers", "default", "one of default,TEXTURE_2D,TBO,SSBO"
+	);
     }
 
     /**

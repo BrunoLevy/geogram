@@ -621,6 +621,26 @@ namespace GEO {
             rep_->to_string()   ;
     }
 
+    /**
+     * \brief Tests whether an expansion_nt is equal to one.
+     * \details Optimized using the low-level API
+     * \retval true if \p x is equal to one
+     * \retval false otherwise
+     */
+    bool is_one() const {
+	return rep().equals(1.0);
+    }
+
+    /**
+     * \brief Tests whether an expansion_nt is equal to zero
+     * \details Optimized using the low-level API
+     * \retval true if \p x is equal to zero
+     * \retval false otherwise
+     */
+    bool is_zero() const {
+	return sign() == ZERO;
+    }
+
     protected:
 
     /**

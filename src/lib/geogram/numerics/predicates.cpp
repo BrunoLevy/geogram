@@ -38,13 +38,12 @@
  */
 
 #include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
 
 // This makes sure the compiler will not optimize y = a*x+b
 // with fused multiply-add, this would break the exact
 // predicates.
-#ifdef GEO_COMPILER_MSVC
-#pragma fp_contract(off)
-#endif
+GEO_FP_CONTRACT_OFF
 
 #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/multi_precision.h>
@@ -165,6 +164,7 @@ namespace {
             }
         }
     }
+
 
     /**
      * \brief Gets the maximum of 4 double precision numbers.
@@ -455,14 +455,8 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side2.log_SOS();
-
-            const double* p_sort[3];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-
+            const double* p_sort[3] = {p0, p1, p2};
             SOS_sort(p_sort, p_sort + 3, dim);
-
             for(index_t i = 0; i < 3; ++i) {
                 if(p_sort[i] == p0) {
                     const expansion& z1 = expansion_diff(Delta, a21);
@@ -635,12 +629,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side3.log_SOS();
-
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, dim);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -757,13 +746,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side3h.log_SOS();
-
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, 3);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -980,13 +963,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
             stats_side4.log_SOS();
-
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, 3);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1134,13 +1111,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side4.log_SOS();
-
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, dim);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1243,7 +1214,7 @@ namespace {
     }
 
     /**
-     * \brief Implements side4() in 7d.
+     * \brief Implements side4() in 8d.
      */
     Sign side4_8d_SOS(
         const double* p0,
@@ -1257,32 +1228,22 @@ namespace {
         return result;
     }
 
-    // ============ orient2d ==============================================
+    // ============ orient2d ====================================================
 
-    Sign orient_2d_exact(
-        const double* p0, const double* p1, const double* p2
-    ) {
+    Sign orient_2d_exact(const double* p0, const double* p1, const double* p2) {
         stats_orient2d.log_exact();
-
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
-
         const expansion& a21 = expansion_diff(p2[0], p0[0]);
         const expansion& a22 = expansion_diff(p2[1], p0[1]);
-
-        const expansion& Delta = expansion_det2x2(
-            a11, a12, a21, a22
-        );
-
+        const expansion& Delta = expansion_det2x2(a11, a12, a21, a22);
         return Delta.sign();
     }
 
-
-    // ============ orient3d ==============================================
+    // ============ orient3d ===================================================
 
     Sign orient_3d_exact(
-        const double* p0, const double* p1,
-        const double* p2, const double* p3
+        const double* p0, const double* p1, const double* p2, const double* p3
     ) {
 	stats_orient3d.log_exact();
 
@@ -1371,13 +1332,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
             stats_orient3dh.log_SOS();
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
-
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, 3);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1456,11 +1411,7 @@ namespace {
 
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, 2);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -1887,7 +1838,6 @@ namespace GEO {
             return result;
         }
 
-
         Sign orient_3d(
             const double* p0, const double* p1,
             const double* p2, const double* p3
@@ -1900,6 +1850,42 @@ namespace GEO {
             return result;
         }
 
+        Sign orient_3d_SOS(
+            const double* p0, const double* p1,
+	    const double* p2, const double* p3
+        ) {
+	    struct SOS {
+		SOS(
+		    const double* p0, const double* p1,
+		    const double* p2, const double* p3
+		) : p_orig{p0,p1,p2,p3}, p_sort{p0, p1, p2, p3} {
+		    SOS_sort(p_sort, p_sort+4, 3);
+		    parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
+			? NEGATIVE : POSITIVE;
+		}
+		Sign orient_1d(index_t i, index_t j, index_t ax) const {
+		    return Sign(parity * geo_cmp(p_sort[i][ax], p_sort[j][ax]));
+		}
+		Sign orient_2d(
+		    index_t i, index_t j, index_t k, index_t ax1, index_t ax2
+		) const {
+		    double x0 = p_sort[i][ax1]; double y0 = p_sort[i][ax2];
+		    double x1 = p_sort[j][ax1]; double y1 = p_sort[j][ax2];
+		    double x2 = p_sort[k][ax1]; double y2 = p_sort[k][ax2];
+		    const expansion& a11 = expansion_diff(x1, x0);
+		    const expansion& a12 = expansion_diff(y1, y0);
+		    const expansion& a21 = expansion_diff(x2, x0);
+		    const expansion& a22 = expansion_diff(y2, y0);
+		    const expansion& D = expansion_det2x2(a11, a12, a21, a22);
+		    return Sign(parity * D.sign());
+		}
+		const double* p_orig[4];
+		const double* p_sort[4];
+		Sign parity;
+	    };
+
+	    return orient_3d_SOS_impl<const double*, SOS>(p0,p1,p2,p3);
+        }
 
         Sign orient_3dlifted(
             const double* p0, const double* p1,

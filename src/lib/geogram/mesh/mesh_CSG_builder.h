@@ -73,7 +73,6 @@ namespace GEO {
     /** \see set_fn() */
     static constexpr double DEFAULT_FN = 0.0;
 
-
     /**
      * \brief AbstractCSGBuilder constructor
      */
@@ -234,6 +233,9 @@ namespace GEO {
     /****** Instructions ************************************/
 
     virtual void eval_multmatrix(const ArgList& args);
+    virtual void eval_translate(const ArgList& args);
+    virtual void eval_rotate(const ArgList& args);
+    virtual void eval_scale(const ArgList& args);
     virtual void eval_resize(const ArgList& args);
     virtual void eval_union(const ArgList& args);
     virtual void eval_intersection(const ArgList& args);
@@ -278,7 +280,75 @@ namespace GEO {
      *  in OpenSCAD, arguments of an operation. It is implemented as a vector
      *  of meshes.
      */
-    typedef std::vector<std::shared_ptr<Mesh>> CSGScope;
+    class CSGScope {
+    public:
+	/**
+	 * \brief Constructs an empty CSGScope
+	 */
+	CSGScope() {
+	}
+
+	/**
+	 * \brief Constructs a CSGScope that contains a single mesh
+	 * \param[in] M a shared_ptr to the mesh
+	 */
+	CSGScope(std::shared_ptr<Mesh> M) {
+	    emplace_back(M);
+	}
+
+	/**
+	 * \brief Constructs a CSGScope from a list of meshes
+	 * \param[in] Ms the list of meshes (specified between curly braces)
+	 */
+        CSGScope(
+	    const std::initializer_list<std::shared_ptr<Mesh>>& Ms
+	) : meshes_(Ms) {
+	}
+
+	void push_back(std::shared_ptr<Mesh> M) {
+	    meshes_.push_back(M);
+	}
+
+	void emplace_back(std::shared_ptr<Mesh> M) {
+	    meshes_.emplace_back(M);
+	}
+
+	void pop_back() {
+	    meshes_.pop_back();
+	}
+
+	index_t size() const {
+	    return index_t(meshes_.size());
+	}
+
+	const std::shared_ptr<Mesh>& operator[](index_t i) const {
+	    geo_debug_assert(i < size());
+	    return meshes_[i];
+	}
+
+	auto begin() { return meshes_.begin(); }
+	auto end() { return meshes_.end(); }
+	auto begin() const { return meshes_.begin(); }
+	auto end() const { return meshes_.end(); }
+	auto rbegin() { return meshes_.rbegin(); }
+	auto rend() { return meshes_.rend(); }
+	auto rbegin() const { return meshes_.rbegin(); }
+	auto rend() const { return meshes_.rend(); }
+
+	void append(std::shared_ptr<Mesh> M) {
+	    emplace_back(M);
+	}
+
+	template <typename...Types> void append(
+	    std::shared_ptr<Mesh> head, Types... tail
+	) {
+	    append(head);
+	    append(tail...);
+	}
+
+    private:
+	std::vector<std::shared_ptr<Mesh>> meshes_;
+    };
 
     /**
      * \brief Implements CSG objects and instructions.
@@ -292,9 +362,11 @@ namespace GEO {
 
     /****** Objects **********/
 
-    virtual std::shared_ptr<Mesh> square(
-	vec2 size = vec2(1.0,1.0), bool center=true
-    );
+    virtual std::shared_ptr<Mesh> square(vec2 size, bool center=false);
+
+    std::shared_ptr<Mesh> square(double size=1.0, bool center=false) {
+	return square(vec2(size,size), center);
+    }
 
     /**
      * \param[in] nu number of fragments. If left unspecified, then it
@@ -302,14 +374,16 @@ namespace GEO {
      */
     virtual std::shared_ptr<Mesh> circle(double r=1.0, index_t nu=0);
 
-    virtual std::shared_ptr<Mesh> cube(
-	vec3 size = vec3(1.0, 1.0, 1.0), bool center=true
-    );
+    virtual std::shared_ptr<Mesh> cube(vec3 size, bool center=false);
+
+    std::shared_ptr<Mesh> cube(double size=1.0, bool center=false) {
+	return cube(vec3(size,size,size), center);
+    }
 
     virtual std::shared_ptr<Mesh> sphere(double r=1.0);
 
     virtual std::shared_ptr<Mesh> cylinder(
-        double h=1.0, double r1=1.0, double r2=1.0, bool center=true
+        double h, double r1, double r2, bool center=false
     );
 
     virtual std::shared_ptr<Mesh> import(
@@ -352,15 +426,45 @@ namespace GEO {
 
     /**
      * \brief Computes the union of two or more meshes.
-     * \param[in] scope the meshes
+     * \param[in] scope the meshes. One can use a CSGScope object, or a
+     *   curly-braced list of meshes (list of shared_ptr to meshes in fact).
+     * \return a mesh with the union of the meshes in \p scope.
      */
     virtual std::shared_ptr<Mesh> union_instr(const CSGScope& scope);
 
     /**
+     * \brief Computes the union of two or more meshes.
+     * \param[in] args the list of meshes to be unioned,
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the union of the meshes in \p args.
+     */
+    template <typename...Types> std::shared_ptr<Mesh> union_instr(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return union_instr(scope);
+    }
+
+    /**
      * \brief Computes the intersection between two or more meshes.
      * \param[in] scope the meshes
+     * \return a mesh with the intersection of the meshes in \p scope
      */
     virtual std::shared_ptr<Mesh> intersection(const CSGScope& scope);
+
+    /**
+     * \brief Computes the mutual intersection between meshes
+     * \param[in] args the list of meshes to be intersected
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the mutual intersection of the meshes in \p args
+     */
+    template <typename...Types> std::shared_ptr<Mesh>
+    intersection(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return intersection(scope);
+    }
 
     /**
      * \brief Computes the intersection between two meshes.
@@ -369,6 +473,22 @@ namespace GEO {
      * \param[in] scope the meshes
      */
     virtual std::shared_ptr<Mesh> difference(const CSGScope& scope);
+
+    /**
+     * \brief Computes the difference between meshes
+     * \details If \p args contains more than two meshes, it computes
+     *   the difference between the first mesh and the union of the rest.
+     * \param[in] args the list of meshes
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the difference between the meshes in \p args
+     */
+    template <typename...Types> std::shared_ptr<Mesh>
+    difference(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return difference(scope);
+    }
 
     /**
      * \brief synonym for union.
@@ -465,8 +585,10 @@ namespace GEO {
 
     /****** Instructions (AbstractCSGBuilder API) ****************/
 
-
     void eval_multmatrix(const ArgList& args) override;
+    void eval_translate(const ArgList& args) override;
+    void eval_rotate(const ArgList& args) override;
+    void eval_scale(const ArgList& args) override;
     void eval_resize(const ArgList& args) override;
     void eval_union(const ArgList& args) override;
     void eval_intersection(const ArgList& args) override;
@@ -479,6 +601,136 @@ namespace GEO {
     void eval_projection(const ArgList& args) override;
     void eval_minkowski(const ArgList& args) override;
     void eval_render(const ArgList& args) override;
+
+    /****** Commodity functions **********************************/
+
+    /**
+     * \brief Builds a translation matrix
+     * \param[in] T the translation matrix
+     * \return a 4x4 homogeneous coordinate translation matrix
+     */
+    static mat4 translation_matrix(const vec3& T) {
+	return mat4{{1, 0, 0, T.x},
+		    {0, 1, 0, T.y},
+		    {0, 0, 1, T.z},
+		    {0, 0, 0, 1  }};
+    }
+
+    /**
+     * \brief Builds a scaling matrix
+     * \param[in] sx , sy , sz scaling along each axis
+     * \return a 4x4 homogeneous coordinate scaling matrix
+     */
+    static mat4 scaling_matrix(double sx, double sy, double sz) {
+	return mat4{{sx, 0,  0,  0},
+		    {0,  sy, 0,  0},
+		    {0,  0,  sz, 0},
+		    {0,  0,  0,  1}};
+    }
+
+    /**
+     * \brief Builds a rotation matrix
+     * \param[in] axis rotation axis
+     * \param[in] angle rotation angle in degrees
+     * \return a 4x4 homogeneous coordinate rotation matrix
+     */
+    static mat4 rotation_matrix(double angle, vec3 axis = {0.0, 0.0, 0.0}) {
+	if(axis.x == 0.0 && axis.y == 0.0 && axis.z == 0.0) {
+	    axis.z = 1.0; // special case, OpenSCAD convention
+	}
+	vec3 N = normalize(axis);
+	double x = N.x;
+	double y = N.y;
+	double z = N.z;
+	angle = angle * M_PI / 180;
+	double s = sin(angle);
+	double c = cos(angle);
+	double t = 1.0-c;
+	return mat4{{t*x*x + c,   t*x*y - s*z, t*x*z + s*y, 0.0},
+		    {t*x*y + s*z, t*y*y + c,   t*y*z - s*x, 0.0},
+		    {t*x*z - s*y, t*y*z + s*x, t*z*z + c,   0.0},
+		    {0.0,         0.0,         0.0,         1.0}};
+    }
+
+    /**
+     * \brief Builds a rotation matrix
+     * \param[in] angles rotation angles around each axis in degrees
+     * \return a 4x4 homogeneous coordinate rotation matrix
+     */
+    static mat4 rotation_matrix(const vec3& angles) {
+	double a = angles[0] * M_PI / 180.0;
+	double b = angles[1] * M_PI / 180.0;
+	double c = angles[2] * M_PI / 180.0;
+	double sa = sin(a); double ca = cos(a);
+	double sb = sin(b); double cb = cos(b);
+	double sc = sin(c); double cc = cos(c);
+	return mat4{{cc*cb,  cc*sb*sa - sc*ca,  cc*sb*ca + sc*sa,  0.0},
+		    {sc*cb,  sc*sb*sa + cc*ca,  sc*sb*ca - cc*sa,  0.0},
+		    {  -sb,             cb*sa,             cb*ca,  0.0},
+		    {  0.0,               0.0,               0.0,  1.0}};
+    }
+
+    /**
+     * \brief Commodity function for translating a CSGScope using OpenSCAD syntax
+     * \param[in] T translation vector
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> translate(const vec3& T, const CSGScope& scope) {
+	return multmatrix(translation_matrix(T),scope);
+    }
+
+    /**
+     * \brief Commodity function for 2D-rotating a CSGScope using OpenSCAD syntax
+     * \param[in] angle rotation angle in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(double angle, const CSGScope& scope) {
+	return multmatrix(rotation_matrix(angle),scope);
+    }
+
+    /**
+     * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
+     * \details if \p angle is 0, then \p axis corresponds to the three rotation
+     *   angles around x,y and z
+     * \param[in] angle rotation angle in degrees
+     * \param[in] axis rotation axis
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(
+	double angle, const vec3& axis, const CSGScope& scope
+    ) {
+	return multmatrix(rotation_matrix(angle,axis),scope);
+    }
+
+    /**
+     * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
+     * \param[in] angles rotation angles along the three axes in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(const vec3& angles, const CSGScope& scope) {
+	return multmatrix(rotation_matrix(angles),scope);
+    }
+
+    /**
+     * \brief Commodity function for scaling a CSGScope using OpenSCAD syntax
+     * \param[in] sx , sy , sz scaling factors along each axis
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> scale(
+	double sx, double sy, double sz, const CSGScope& scope
+    ) {
+	return multmatrix(scaling_matrix(sx,sy,sz),scope);
+    }
 
     /**************************/
 

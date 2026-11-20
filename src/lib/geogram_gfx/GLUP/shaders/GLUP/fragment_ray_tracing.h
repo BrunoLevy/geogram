@@ -25,7 +25,7 @@ Ray glup_primary_ray() {
 
 // Updates fragment depth from a point in world space
 void glup_update_depth(in vec3 M_world_space) {
-    vec4 M_clip_space = GLUP.modelviewprojection_matrix * vec4(M_world_space,1.0);
+    vec4 M_clip_space = GLUP.modelviewprojection_matrix*vec4(M_world_space,1.0);
     float z = 0.5*(1.0 + M_clip_space.z/M_clip_space.w);
     glup_FragDepth = (1.0-z)*gl_DepthRange.near + z*gl_DepthRange.far;
 }

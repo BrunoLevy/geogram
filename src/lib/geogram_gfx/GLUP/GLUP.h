@@ -132,6 +132,13 @@ extern "C" {
     void GLUP_API glupBindUniformState(GLUPuint program);
 
     /**
+     * \brief Updates the GPU-side representation of the uniform state
+     * \details Useful when some user custom shaders that access the GLUP state
+     *  are combined with GLUP rendering.
+     */
+    void GLUP_API glupUpdateUniformState();
+
+    /**
      * @}
      */
 
@@ -563,11 +570,21 @@ extern "C" {
     );
 
 
-    void GLUP_API glupNormal3fv(GLUPfloat* xyz);
+    void GLUP_API glupNormal3fv(const GLUPfloat* xyz);
     void GLUP_API glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);
 
-    void GLUP_API glupNormal3dv(GLUPdouble* xyz);
+    void GLUP_API glupNormal3dv(const GLUPdouble* xyz);
     void GLUP_API glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);
+
+    void GLUP_API glupNormal4fv(const GLUPfloat* xyzw);
+    void GLUP_API glupNormal4f(
+	GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w
+    );
+
+    void GLUP_API glupNormal4dv(const GLUPdouble* xyzw);
+    void GLUP_API glupNormal4d(
+	GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w
+    );
 
 
     /**
@@ -581,6 +598,13 @@ extern "C" {
      * \param[in] program the id of the GLSL program to be used.
      */
     void GLUP_API glupUseProgram(GLUPuint program);
+
+    /**
+     * \brief Gets the current GLSL program
+     * \retval the latest program bound using glupUseProgram()
+     * \retval 0 if there is no currently bound program
+     */
+    GLUPuint GLUP_API glupGetCurrentProgram();
 
     /**
      * @}

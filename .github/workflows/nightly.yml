@@ -11,12 +11,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-26.04]
         config: [Debug, Release]
         options: [Standard, Gargantua]
         tool: [valgrind, gcov]
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-26.04
             name: Linux
     steps:
       - name: Checkout repository
@@ -45,6 +45,10 @@ jobs:
         run: |
           pip3 install robotframework
           robot --version || true
+
+      - name: ValgrindCI
+        run: |
+          pip3 install ValgrindCI
 
 ################### Linux/MacOS ###############################################
 
@@ -86,6 +90,7 @@ jobs:
             build_log.txt
             coverage.*
             TESTS_SUCCESS
+            *.html
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v3
