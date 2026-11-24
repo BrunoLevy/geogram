@@ -1762,8 +1762,8 @@ namespace GEO {
 	    // Pass 1: prefer original vertices
 	    for(index_t v:mesh_.vertices) {
 		index_t comp = vertex_component[v];
+		geo_assert(comp != NO_INDEX);
 		if(
-		    comp != NO_INDEX &&
 		    comp != NON_MANIFOLD &&
 		    is_original_vertex(v)
 		) {
@@ -1774,12 +1774,19 @@ namespace GEO {
 	    // Pass 2: treat non-manifold vertices
 	    for(index_t v:mesh_.vertices) {
 		index_t comp = vertex_component[v];
+		geo_assert(comp != NO_INDEX);
 		if(
-		    component_vertex[comp] == NON_MANIFOLD &&
-		    comp != NON_MANIFOLD
+		    comp != NON_MANIFOLD &&
+		    vertex_component[component_vertex[comp]] == NON_MANIFOLD
 		) {
 		    component_vertex[comp] = v;
 		}
+	    }
+
+	    for(index_t v: component_vertex) {
+		geo_assert(v != NO_INDEX);
+		geo_assert(v != NON_MANIFOLD);
+		geo_assert(vertex_component[v] != NON_MANIFOLD);
 	    }
 
 	    /*
