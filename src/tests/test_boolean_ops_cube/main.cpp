@@ -35,7 +35,7 @@ static bool check(
     const Mesh& A, const Mesh& B, const char* op, double expected_volume
 ) {
     Mesh R;
-    mesh_boolean_operation(R, A, B, op);
+    mesh_boolean_operation(R, A, B, op, GEO::MESH_BOOL_OPS_VERBOSE);
     R.facets.connect();
     double vol = ::GEO::Geom::mesh_enclosed_volume(R);
 
