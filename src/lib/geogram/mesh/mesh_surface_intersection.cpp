@@ -1727,15 +1727,19 @@ namespace GEO {
 	// TODO: Switch to vector when I will not need to visualize anymore
         // vector<index_t> facet_component(mesh_.facets.nb(), NO_INDEX);
 
-        // one vertex per component
-        vector<index_t> component_vertex;
-	vector<index_t> component_vertex_2;
+	// one vertex per component, can be non-manifold
+        vector<index_t> component_origin;
+
+	// symbolic constant for vertex shared by several components
+	static constexpr index_t NON_MANIFOLD = index_t(-2);
+
+	// one vertex per component or NON_MANIFOLD if component has no manifold
+	// vertex (that is, only vertices shared with other components)
+	vector<index_t> component_vertex;
 
         // ith bit is 1 if component is inside ith operand
         vector<index_t> component_inclusion_bits;
 
-	// symbolic constant for vertex shared by several components
-	static constexpr index_t NON_MANIFOLD = index_t(-2);
 
 	// one facet per component
 	vector<index_t> component_facet;
@@ -1746,7 +1750,7 @@ namespace GEO {
             for(index_t f:mesh_.facets) {
                 if(facet_component[f] == NO_INDEX) {
 
-                    component_vertex.push_back(mesh_.facets.vertex(f,0));
+                    component_origin.push_back(mesh_.facets.vertex(f,0));
                     component_inclusion_bits.push_back(0);
 
                     std::stack<index_t> S;
@@ -1786,7 +1790,7 @@ namespace GEO {
                 }
             }
 
-	    component_vertex_2.assign(nb_components, NON_MANIFOLD);
+	    component_vertex.assign(nb_components, NON_MANIFOLD);
 	    component_facet.assign(nb_components, NO_INDEX);
 
 	    vector<index_t> vertex_component(mesh_.vertices.nb(), NO_INDEX);
@@ -1803,13 +1807,6 @@ namespace GEO {
 		}
 	    }
 
-	    std::cerr << mesh_.vertices.nb() << std::endl;
-	    for(index_t c: vertex_component) {
-		std::cerr << ((c == NON_MANIFOLD) ? 'N' : char('0' + c));
-	    }
-	    std::cerr << std::endl;
-
-
 	    // Pass 1: prefer original vertices
 	    for(index_t v:mesh_.vertices) {
 		index_t comp = vertex_component[v];
@@ -1818,7 +1815,7 @@ namespace GEO {
 		    comp != NON_MANIFOLD &&
 		    is_original_vertex(v)
 		) {
-		    component_vertex_2[comp] = v;
+		    component_vertex[comp] = v;
 		}
 	    }
 
@@ -1828,27 +1825,14 @@ namespace GEO {
 		geo_assert(comp != NO_INDEX);
 		if(
 		    comp != NON_MANIFOLD &&
-		    vertex_component[component_vertex_2[comp]] == NON_MANIFOLD
+		    vertex_component[component_vertex[comp]] == NON_MANIFOLD
 		) {
-		    component_vertex_2[comp] = v;
+		    component_vertex[comp] = v;
 		}
 	    }
 
-	    for(index_t comp=0; comp<nb_components; ++comp) {
-		std::cerr << "comp " << comp << " : ";
-		for(index_t v: mesh_.vertices) {
-		    if(vertex_component[v] == comp) {
-			std::cerr << v << " ";
-		    }
-		}
-		std::cerr << std::endl;
-		std::cerr << "    " << component_vertex_2[comp] << std::endl;
-	    }
-
-
-	    for(index_t v: component_vertex_2) {
+	    for(index_t v: component_vertex) {
 		geo_assert(v != NO_INDEX);
-		// geo_assert(v != NON_MANIFOLD);
 	    }
         }
 
@@ -1860,7 +1844,7 @@ namespace GEO {
            // as a common local origin for all charts in that component. Absolute
            // coordinates can corrupt the volume sign of small translated shells.
             const vec3& origin = mesh_.vertices.point(
-                component_vertex[facet_component[f]]
+                component_origin[facet_component[f]]
             );
             vec3 p1 = mesh_.facets.point(f,0) - origin;
             vec3 p2 = mesh_.facets.point(f,1) - origin;
@@ -1931,8 +1915,7 @@ namespace GEO {
 		    // with other components), for classifying the component
 		    // we start raytracing from the barycenter of the first
 		    // facet of the component.
-		    if(component_vertex_2[component] == NON_MANIFOLD) {
-			Logger::out("Weiler") << "Exact " << std::endl;
+		    if(component_vertex[component] == NON_MANIFOLD) {
 			index_t f = component_facet[component];
 			index_t v1 = mesh_.facets.vertex(f,0);
 			index_t v2 = mesh_.facets.vertex(f,1);
@@ -1946,10 +1929,9 @@ namespace GEO {
 				component, p
 			    );
 		    } else {
-			Logger::out("Weiler") << "Mesh vertex " << std::endl;
 			component_inclusion_bits[component] =
 			    compute_component_inclusion_bits(
-				component, component_vertex_2[component]
+				component, component_vertex[component]
 			    );
 		    }
                 }
