@@ -1729,6 +1729,7 @@ namespace GEO {
 
         // one vertex per component
         vector<index_t> component_vertex;
+	vector<index_t> component_vertex_2;
 
         // ith bit is 1 if component is inside ith operand
         vector<index_t> component_inclusion_bits;
@@ -1785,6 +1786,7 @@ namespace GEO {
                 }
             }
 
+	    component_vertex_2.assign(nb_components, NON_MANIFOLD);
 	    component_facet.assign(nb_components, NO_INDEX);
 
 	    vector<index_t> vertex_component(mesh_.vertices.nb(), NO_INDEX);
@@ -1801,6 +1803,13 @@ namespace GEO {
 		}
 	    }
 
+	    std::cerr << mesh_.vertices.nb() << std::endl;
+	    for(index_t c: vertex_component) {
+		std::cerr << ((c == NON_MANIFOLD) ? 'N' : char('0' + c));
+	    }
+	    std::cerr << std::endl;
+
+
 	    // Pass 1: prefer original vertices
 	    for(index_t v:mesh_.vertices) {
 		index_t comp = vertex_component[v];
@@ -1809,7 +1818,7 @@ namespace GEO {
 		    comp != NON_MANIFOLD &&
 		    is_original_vertex(v)
 		) {
-		    component_vertex[comp] = v;
+		    component_vertex_2[comp] = v;
 		}
 	    }
 
@@ -1819,15 +1828,27 @@ namespace GEO {
 		geo_assert(comp != NO_INDEX);
 		if(
 		    comp != NON_MANIFOLD &&
-		    vertex_component[component_vertex[comp]] == NON_MANIFOLD
+		    vertex_component[component_vertex_2[comp]] == NON_MANIFOLD
 		) {
-		    component_vertex[comp] = v;
+		    component_vertex_2[comp] = v;
 		}
 	    }
 
-	    for(index_t v: component_vertex) {
+	    for(index_t comp=0; comp<nb_components; ++comp) {
+		std::cerr << "comp " << comp << " : ";
+		for(index_t v: mesh_.vertices) {
+		    if(vertex_component[v] == comp) {
+			std::cerr << v << " ";
+		    }
+		}
+		std::cerr << std::endl;
+		std::cerr << "    " << component_vertex_2[comp] << std::endl;
+	    }
+
+
+	    for(index_t v: component_vertex_2) {
 		geo_assert(v != NO_INDEX);
-		geo_assert(v != NON_MANIFOLD);
+		// geo_assert(v != NON_MANIFOLD);
 	    }
         }
 
@@ -1910,7 +1931,8 @@ namespace GEO {
 		    // with other components), for classifying the component
 		    // we start raytracing from the barycenter of the first
 		    // facet of the component.
-		    if(component_vertex[component] == NON_MANIFOLD) {
+		    if(component_vertex_2[component] == NON_MANIFOLD) {
+			Logger::out("Weiler") << "Exact " << std::endl;
 			index_t f = component_facet[component];
 			index_t v1 = mesh_.facets.vertex(f,0);
 			index_t v2 = mesh_.facets.vertex(f,1);
@@ -1924,9 +1946,10 @@ namespace GEO {
 				component, p
 			    );
 		    } else {
+			Logger::out("Weiler") << "Mesh vertex " << std::endl;
 			component_inclusion_bits[component] =
 			    compute_component_inclusion_bits(
-				component, component_vertex[component]
+				component, component_vertex_2[component]
 			    );
 		    }
                 }
