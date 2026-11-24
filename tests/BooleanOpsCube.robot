@@ -6,5 +6,5 @@ Library           OperatingSystem
 Library           lib/VorpatestLibrary.py
 
 *** Test Cases ***
-Translated small solid and cavity retain their winding
-    run command    test_boolean_ops_cube 
+Boolean ops between two cubes sharing a vertex
+    run command    test_boolean_ops_cube
