@@ -1769,9 +1769,9 @@ namespace GEO {
 
         vector<double> chart_volume(nb_charts,0.0);
         for(index_t f: mesh_.facets) {
-            // Reuse the representative vertex recorded during component discovery
-            // as a common local origin for all charts in that component. Absolute
-            // coordinates can corrupt the volume sign of small translated shells.
+           // Reuse the representative vertex recorded during component discovery
+           // as a common local origin for all charts in that component. Absolute
+           // coordinates can corrupt the volume sign of small translated shells.
             const vec3& origin = mesh_.vertices.point(
                 component_vertex[facet_component[f]]
             );

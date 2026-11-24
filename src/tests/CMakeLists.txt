@@ -17,4 +17,5 @@ endif()
 add_subdirectory(test_orient_3d_SOS)
 add_subdirectory(test_delaunay_3d)
 add_subdirectory(test_intersection_volume)
+add_subdirectory(test_boolean_ops_cube)
 
