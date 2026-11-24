@@ -1746,6 +1746,43 @@ namespace GEO {
                 }
             }
 
+	    static constexpr index_t NON_MANIFOLD = index_t(-2);
+	    vector<index_t> vertex_component(mesh_.vertices.nb(), NO_INDEX);
+	    for(index_t f: mesh_.facets) {
+		index_t comp = facet_component[f];
+		for(index_t v: mesh_.facets.vertices(f)) {
+		    if(vertex_component[v] == NO_INDEX) {
+			vertex_component[v] = comp;
+		    } else if(vertex_component[v] != comp) {
+			vertex_component[v] = NON_MANIFOLD;
+		    }
+		}
+	    }
+
+	    // Pass 1: prefer original vertices
+	    for(index_t v:mesh_.vertices) {
+		index_t comp = vertex_component[v];
+		if(
+		    comp != NO_INDEX &&
+		    comp != NON_MANIFOLD &&
+		    is_original_vertex(v)
+		) {
+		    component_vertex[comp] = v;
+		}
+	    }
+
+	    // Pass 2: treat non-manifold vertices
+	    for(index_t v:mesh_.vertices) {
+		index_t comp = vertex_component[v];
+		if(
+		    component_vertex[comp] == NON_MANIFOLD &&
+		    comp != NON_MANIFOLD
+		) {
+		    component_vertex[comp] = v;
+		}
+	    }
+
+	    /*
 	    // Prefer original vertices for starting raytracing
 	    for(index_t f: mesh_.facets) {
 		index_t component = facet_component[f];
@@ -1764,6 +1801,7 @@ namespace GEO {
 		    }
                 }
 	    }
+	    */
         }
 
         // Compute the volume enclosed by each chart
