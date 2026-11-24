@@ -58,6 +58,7 @@
 
 #include <sstream>
 #include <stack>
+#include <bitset>
 
 #ifdef GEO_COMPILER_CLANG
 // I'm using long long
@@ -1984,10 +1985,6 @@ namespace GEO {
 	    mesh_copy_.facets.attributes(), "component"
 	);
 
-        if(verbose_) {
-            Logger::out("Weiler") << " component" << component << std::endl;
-        }
-
 	index_t component_inclusion_bits = 0;
 
 	vec3 q1 = mesh_.vertices.point(v);
@@ -2014,6 +2011,13 @@ namespace GEO {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }
 	}
+
+        if(verbose_) {
+	    std::bitset<sizeof(index_t)*8> B(component_inclusion_bits);
+            Logger::out("Weiler") << " component " << component
+				  << ":" << B << std::endl;
+        }
+
         return component_inclusion_bits;
     }
 

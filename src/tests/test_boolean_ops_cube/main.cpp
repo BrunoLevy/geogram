@@ -16,9 +16,9 @@ static void cube(Mesh& M, double o) {
     M.vertices.create_vertices(8);
     for (index_t i = 0; i < 8; ++i)
         M.vertices.point(i) = vec3(
-	    double(o + (i & 1u)),
-	    double(o + ((i >> 1) & 1u)),
-	    double(o + ((i >> 2) & 1u))
+	    o + double(i & 1u),
+	    o + double((i >> 1) & 1u),
+	    o + double((i >> 2) & 1u)
 	);
     static const index_t t[12][3] = {
 	{0,2,1},{1,2,3},{4,5,6},{5,7,6},{0,1,4},{1,5,4},
