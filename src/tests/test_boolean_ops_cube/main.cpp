@@ -8,26 +8,25 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <cstdio>
+
 using namespace GEO;
 
-static void cube(Mesh& M, double o) {
-    M.clear();
-    M.vertices.set_dimension(3);
-    M.vertices.create_vertices(8);
+static void cube(Mesh& M, const vec3& o) {
+    index_t v0 = M.vertices.create_vertices(8);
     for (index_t i = 0; i < 8; ++i)
-        M.vertices.point(i) = vec3(
-	    o + double(i & 1u),
-	    o + double((i >> 1) & 1u),
-	    o + double((i >> 2) & 1u)
+        M.vertices.point(v0+i) = vec3(
+	    o.x + double(i & 1u),
+	    o.y + double((i >> 1) & 1u),
+	    o.z + double((i >> 2) & 1u)
 	);
     static const index_t t[12][3] = {
 	{0,2,1},{1,2,3},{4,5,6},{5,7,6},{0,1,4},{1,5,4},
 	{2,6,3},{3,6,7},{0,4,2},{2,4,6},{1,3,5},{3,7,5}
     };
-    M.facets.create_triangles(12);
+    index_t f0 = M.facets.create_triangles(12);
     for (index_t f = 0; f < 12; ++f) {
 	for (index_t k = 0; k < 3; ++k) {
-	    M.facets.set_vertex(f, k, t[f][k]);
+	    M.facets.set_vertex(f0+f, k, v0+t[f][k]);
 	}
     }
     M.facets.connect();
@@ -62,10 +61,12 @@ static bool check(
 int main() {
     GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     Logger::instance()->set_quiet(false);
+
+    // First test: A and B are two cubes sharing a vertex
     Mesh A;
     Mesh B;
-    cube(A, 0.0); // A = [0,1]^3
-    cube(B, 1.0); // B = [1,2]^3
+    cube(A, vec3(0.0,0.0,0.0)); // A = [0,1]^3
+    cube(B, vec3(1.0,1.0,1.0)); // B = [1,2]^3
     Logger::out("BooleanOp")
 	<< "volume A  = " << ::GEO::Geom::mesh_enclosed_volume(A)
 	<< std::endl;
@@ -73,9 +74,37 @@ int main() {
     Logger::out("BooleanOp")
 	<< "volume B  = " << ::GEO::Geom::mesh_enclosed_volume(B)
 	<< std::endl;
+
     bool OK =
 	check(A,B,"A+B",2.0) &&
 	check(A,B,"A*B",0.0) &&
 	check(A,B,"A-B",1.0) ;
+
+
+    Mesh C;
+    cube(C, vec3(-1.0,-1.0,-1.0));
+    cube(C, vec3(-1.0,-1.0, 1.0));
+    cube(C, vec3(-1.0, 1.0,-1.0));
+    cube(C, vec3(-1.0, 1.0, 1.0));
+    cube(C, vec3( 1.0,-1.0,-1.0));
+    cube(C, vec3( 1.0,-1.0, 1.0));
+    cube(C, vec3( 1.0, 1.0,-1.0));
+    cube(C, vec3( 1.0, 1.0, 1.0));
+
+    // Second test: A is a cube, B is a set of 8 cubes, each of them
+    // sharing a vertex with A
+    Logger::out("BooleanOp")
+	<< "volume C  = " << ::GEO::Geom::mesh_enclosed_volume(B)
+	<< std::endl;
+
+    mesh_save(A, "A.obj");
+    mesh_save(C, "C.obj");
+
+    OK = OK &&
+	check(A,C,"A+B",9.0) &&
+	check(A,C,"A*B",0.0) &&
+	check(A,C,"A-B",1.0) ;
+
+
     return OK ? 0 : 1;
 }

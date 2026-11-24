@@ -166,6 +166,39 @@ namespace {
         Sign s3 = PCK::orient_3d_SOS(q1,q2,p3,p1);
         return(s2*s3 > 0 && s3*s1 > 0);
     }
+
+    /**
+     * \brief Computes the barycenter of a triangle
+     * \param[in] p1 , p2 , p3 the exact coordinates of the three vertices of
+     *  the triangle in homogeneous form
+     * \return the exact barycenter of the triangle in homogenous form
+     */
+    exact::vec3h triangle_barycenter(
+	const exact::vec3h& p1, const exact::vec3h& p2, const exact::vec3h& p3
+    ) {
+
+	exact::vec3h p = p1;
+	if(p2.w == p.w) {
+	    p.x += p2.x;
+	    p.y += p2.y;
+	    p.z += p2.z;
+	} else {
+	    p.x = p2.w*p.x + p.w*p2.x;
+	    p.y = p2.w*p.y + p.w*p2.y;
+	    p.z = p2.w*p.z + p.w*p2.z;
+	}
+	if(p3.w == p.w) {
+	    p.x += p3.x;
+	    p.y += p3.y;
+	    p.z += p3.z;
+	} else {
+	    p.x = p3.w*p.x + p.w*p3.x;
+	    p.y = p3.w*p.y + p.w*p3.y;
+	    p.z = p3.w*p.z + p.w*p3.z;
+	}
+	p.w *= 3.0;
+	return p;
+    }
 }
 
 
@@ -1700,6 +1733,12 @@ namespace GEO {
         // ith bit is 1 if component is inside ith operand
         vector<index_t> component_inclusion_bits;
 
+	// symbolic constant for vertex shared by several components
+	static constexpr index_t NON_MANIFOLD = index_t(-2);
+
+	// one facet per component
+	vector<index_t> component_facet;
+
 	// get the connected components obtained by traversing both alpha2
 	// and alpha3 links
         {
@@ -1746,10 +1785,13 @@ namespace GEO {
                 }
             }
 
-	    static constexpr index_t NON_MANIFOLD = index_t(-2);
+	    component_facet.assign(nb_components, NO_INDEX);
+
 	    vector<index_t> vertex_component(mesh_.vertices.nb(), NO_INDEX);
+
 	    for(index_t f: mesh_.facets) {
 		index_t comp = facet_component[f];
+		component_facet[comp] = f;
 		for(index_t v: mesh_.facets.vertices(f)) {
 		    if(vertex_component[v] == NO_INDEX) {
 			vertex_component[v] = comp;
@@ -1786,29 +1828,7 @@ namespace GEO {
 	    for(index_t v: component_vertex) {
 		geo_assert(v != NO_INDEX);
 		geo_assert(v != NON_MANIFOLD);
-		geo_assert(vertex_component[v] != NON_MANIFOLD);
 	    }
-
-	    /*
-	    // Prefer original vertices for starting raytracing
-	    for(index_t f: mesh_.facets) {
-		index_t component = facet_component[f];
-		index_t v = component_vertex[component];
-		// If component's vertex is already an original vertex
-		// we are done.
-		if(is_original_vertex(v)) {
-		    continue;
-		}
-		// See if we can find an original vertex in facet's vertices,
-		// if yes, replace component's vertex.
-		for(index_t w: mesh_.facets.vertices(f)) {
-		    if(is_original_vertex(w)) {
-			component_vertex[component] = w;
-			break;
-		    }
-                }
-	    }
-	    */
         }
 
         // Compute the volume enclosed by each chart
@@ -1886,10 +1906,29 @@ namespace GEO {
             }
             parallel_for(
                 0, nb_components, [&](index_t component) {
-                    component_inclusion_bits[component] =
-			compute_component_inclusion_bits(
-			    component, component_vertex[component]
-			);
+		    // If component has only non-manifold vertices (shared
+		    // with other components), for classifying the component
+		    // we start raytracing from the barycenter of the first
+		    // facet of the component.
+		    if(component_vertex[component] == NON_MANIFOLD) {
+			index_t f = component_facet[component];
+			index_t v1 = mesh_.facets.vertex(f,0);
+			index_t v2 = mesh_.facets.vertex(f,1);
+			index_t v3 = mesh_.facets.vertex(f,2);
+			ExactPoint p1 = exact_vertex(v1);
+			ExactPoint p2 = exact_vertex(v2);
+			ExactPoint p3 = exact_vertex(v3);
+			ExactPoint p = triangle_barycenter(p1,p2,p3);
+			component_inclusion_bits[component] =
+			    compute_component_inclusion_bits_exact(
+				component, p
+			    );
+		    } else {
+			component_inclusion_bits[component] =
+			    compute_component_inclusion_bits(
+				component, component_vertex[component]
+			    );
+		    }
                 }
             );
             if(verbose_) {
@@ -2019,7 +2058,9 @@ namespace GEO {
         index_t component, index_t v
     ) {
 	if(!is_original_vertex(v)) {
-	    return compute_component_inclusion_bits_exact(component, v);
+	    return compute_component_inclusion_bits_exact(
+		component, exact_vertex(v)
+	    );
 	}
 
         Attribute<index_t> operand_bit_copy(
@@ -2067,7 +2108,7 @@ namespace GEO {
     }
 
     index_t MeshSurfaceIntersection::compute_component_inclusion_bits_exact(
-        index_t component, index_t v
+        index_t component, const ExactPoint& q1
     ) {
         Attribute<index_t> operand_bit_copy(
 	    mesh_copy_.facets.attributes(), "operand_bit"
@@ -2083,7 +2124,6 @@ namespace GEO {
 
 	index_t component_inclusion_bits = 0;
 
-	ExactPoint q1 = exact_vertex(v);
 	ExactPoint q2 = q1;
 	if(q2.w.is_one()) {
 	    q2.z += exact::scalar(1e6);
@@ -2104,52 +2144,6 @@ namespace GEO {
 	    ExactPoint p1(mesh_copy_.facets.point(f,0));
 	    ExactPoint p2(mesh_copy_.facets.point(f,1));
 	    ExactPoint p3(mesh_copy_.facets.point(f,2));
-	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
-		component_inclusion_bits ^= facet_operand_bits;
-	    }
-	}
-        return component_inclusion_bits;
-    }
-
-    index_t
-    MeshSurfaceIntersection::compute_component_inclusion_bits_exact_exact(
-        index_t component, index_t v
-    ) {
-        Attribute<index_t> operand_bit(
-	    mesh_.facets.attributes(), "operand_bit"
-	);
-
-	Attribute<index_t> facet_component(
-	    mesh_.facets.attributes(), "component"
-	);
-
-        if(verbose_) {
-            Logger::out("Weiler") << " componentEE" << component << std::endl;
-        }
-
-	index_t component_inclusion_bits = 0;
-
-	ExactPoint q1 = exact_vertex(v);
-	ExactPoint q2 = q1;
-	if(q2.w.is_one()) {
-	    q2.z += exact::scalar(1e6);
-	} else {
-	    q2.z += (q2.w * exact::scalar(1e6));
-	}
-
-	for(index_t f: mesh_.facets) {
-	    if(facet_component[f] == NO_INDEX) {
-		continue;
-	    }
-
-	    if(facet_component[f] == component) {
-		continue;
-	    }
-
-	    index_t facet_operand_bits = operand_bit[f];
-	    ExactPoint p1 = exact_vertex(mesh_.facets.vertex(f,0));
-	    ExactPoint p2 = exact_vertex(mesh_.facets.vertex(f,1));
-	    ExactPoint p3 = exact_vertex(mesh_.facets.vertex(f,2));
 	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }

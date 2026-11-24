@@ -140,20 +140,15 @@ namespace GEO {
     /**
      * \brief Like compute_component_inclusion_bits(), but when v is not an
      *   original vertex.
+     * \param[in] component a connected component
+     * \param[in] p a point on the connected component
+     * \return the inclusion bits of the connected component relative
+     *  to the operands
      * \details Called by compute_component_inclusion_bits()
      * \see compute_component_inclusion_bits()
      */
-    index_t compute_component_inclusion_bits_exact(index_t component, index_t v);
-
-    /**
-     * \brief Like compute_component_inclusion_bits(), but uses computed
-     *  intersection mesh, and exact coordinates everywhere.
-     * \details Kept for reference. Does not give correct result on mesh_bowl
-     *   (to be understood).
-     * \see componte_component_inclusion_bits()
-     */
-    index_t compute_component_inclusion_bits_exact_exact(
-	index_t component, index_t v
+    index_t compute_component_inclusion_bits_exact(
+	index_t component, const ExactPoint& p
     );
 
     /**
