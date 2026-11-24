@@ -38,13 +38,20 @@ static bool check(
     mesh_boolean_operation(R, A, B, op);
     R.facets.connect();
     double vol = ::GEO::Geom::mesh_enclosed_volume(R);
-    printf("%s: %u facets, volume = %g\n", op, R.facets.nb(), vol);
 
     bool OK = ::fabs(expected_volume - vol) < 1e-6;
-    if(OK) {
-	printf("   OK\n");
-    } else {
-	printf("   KO (expected %g, got %g)\n", expected_volume, vol);
+
+    Logger::out("BooleanOp")
+	<< op << ": " << R.facets.nb() << " facets, volume = "
+	<< vol << (OK ? "  OK" : "") << std::endl;
+
+    if(!OK) {
+	Logger::err("BooleanOp") << "KO (expected "
+				 << expected_volume
+				 << ", got "
+				 << vol
+				 << ")"
+				 << std::endl;
     }
     return OK;
 }
@@ -52,15 +59,18 @@ static bool check(
 
 int main() {
     GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
-    Logger::instance()->set_quiet(true);
+    Logger::instance()->set_quiet(false);
     Mesh A;
     Mesh B;
     cube(A, 0.0); // A = [0,1]^3
     cube(B, 1.0); // B = [1,2]^3
-    printf("volume A = %g, volume B = %g\n",
-	   ::GEO::Geom::mesh_enclosed_volume(A),
-	   ::GEO::Geom::mesh_enclosed_volume(B)
-	  );
+    Logger::out("BooleanOp")
+	<< "volume A  = " << ::GEO::Geom::mesh_enclosed_volume(A)
+	<< std::endl;
+
+    Logger::out("BooleanOp")
+	<< "volume B  = " << ::GEO::Geom::mesh_enclosed_volume(B)
+	<< std::endl;
     bool OK =
 	check(A,B,"A+B",2.0) &&
 	check(A,B,"A*B",0.0) &&
