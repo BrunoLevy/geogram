@@ -603,21 +603,7 @@ namespace {
          *  four distinct indices with respect to the canonical order.
          */
         static bool odd_order(index_t i, index_t j, index_t k, index_t l) {
-            // Implementation: sort the elements (bubble sort is OK for
-            // such a small number), and invert parity each time
-            // two elements are swapped.
-            index_t tab[4] = { i, j, k, l };
-            constexpr int N = 4;
-            bool result = false;
-            for (int I = 0; I < N - 1; ++I) {
-                for (int J = 0; J < N - I - 1; ++J) {
-                    if (tab[J] > tab[J + 1]) {
-                        std::swap(tab[J], tab[J + 1]);
-                        result = !result;
-                    }
-                }
-            }
-            return result;
+	    return (i > j) ^ (i > k) ^ (i > l) ^ (j > k) ^ (j > l) ^ (k > l);
         }
 
         Sign orient2d(
