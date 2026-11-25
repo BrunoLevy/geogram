@@ -190,6 +190,12 @@ namespace GEO {
 	TriangleIsect data_[capacity_];
     };
 
+    enum TriangleIsectFlags {
+	TRIANGLES_INTERSECTION_DEFAULT = 0,
+	TRIANGLES_INTERSECTION_NO_DEGENERATE = 1,
+	TRIANGLES_INTERSECTION_NO_BBOX = 2
+    };
+
 
     /**
      * \brief Triangle-triangle intersection with symbolic information
@@ -212,7 +218,8 @@ namespace GEO {
     bool GEOGRAM_API triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2,
-        TriangleIsects& result
+        TriangleIsects& result,
+	TriangleIsectFlags flags = TRIANGLES_INTERSECTION_DEFAULT
     );
 
 
@@ -262,7 +269,8 @@ namespace GEO {
 	index_t q0_index,
 	index_t q1_index,
 	index_t q2_index,
-        TriangleIsects& result
+        TriangleIsects& result,
+	TriangleIsectFlags flags = TRIANGLES_INTERSECTION_DEFAULT
     );
 
 

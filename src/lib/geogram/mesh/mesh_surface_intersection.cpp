@@ -128,7 +128,11 @@ namespace {
 	    M.vertices.point(w3),
 	    v1,v2,v3,
 	    w1,w2,w3,
-	    I
+	    I,
+	    TriangleIsectFlags(
+		TRIANGLES_INTERSECTION_NO_DEGENERATE | // removed in pre-proc
+		TRIANGLES_INTERSECTION_NO_BBOX         // we use an AABB
+	    )
 	);
     }
 

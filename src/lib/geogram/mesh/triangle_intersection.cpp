@@ -68,8 +68,6 @@ namespace {
     class TriangleTriangleIntersection {
     public:
 
-        static constexpr int CACHE_UNINITIALIZED = -2;
-
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
             const vec3& q0, const vec3& q1, const vec3& q2,
@@ -81,14 +79,13 @@ namespace {
             p_[3] = q0;
             p_[4] = q1;
             p_[5] = q2;
-            for(index_t i=0; i<64; ++i) {
-                o3d_cache_[i] = CACHE_UNINITIALIZED;
-            }
+	    o3d_cached_ = 0;
             has_non_degenerate_intersection_ = false;
             for(index_t i=0; i<6; ++i) {
 		p_index_[i] = NO_INDEX;
 	    }
 	    has_global_indices_ = false;
+	    flags_ = TRIANGLES_INTERSECTION_DEFAULT;
 	}
 
         TriangleTriangleIntersection(
@@ -108,9 +105,7 @@ namespace {
             p_[3] = q0;
             p_[4] = q1;
             p_[5] = q2;
-            for(index_t i=0; i<64; ++i) {
-                o3d_cache_[i] = CACHE_UNINITIALIZED;
-            }
+	    o3d_cached_ = 0;
             has_non_degenerate_intersection_ = false;
 	    p_index_[0] = p0_index;
 	    p_index_[1] = p1_index;
@@ -119,7 +114,12 @@ namespace {
 	    p_index_[4] = q1_index;
 	    p_index_[5] = q2_index;
 	    has_global_indices_ = true;
+	    flags_ = TRIANGLES_INTERSECTION_DEFAULT;
         }
+
+	void set_flags(TriangleIsectFlags flags) {
+	    flags_ = flags;
+	}
 
         void compute() {
 #ifdef TT_DEBUG
@@ -130,18 +130,50 @@ namespace {
                 result_->resize(0);
             }
 
+	    bool test_degenerate = (
+		(flags_ & TRIANGLES_INTERSECTION_NO_DEGENERATE) == 0
+	    );
+
+	    bool test_bbox = (
+		(flags_ & TRIANGLES_INTERSECTION_NO_BBOX) == 0
+	    );
+
 	    // Test for degenerate triangles
-	    if(
-		triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
-		triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
-	    ) {
-		/*
-		  Logger::warn("PCK")
-		  << "Tri tri intersect: degenerate triangle "
-		  << "(not supported)"
-		  << std::endl;
-		*/
-		return;
+	    if(test_degenerate) {
+		if(
+		    triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
+		    triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
+		) {
+		    /*
+		      Logger::warn("PCK")
+		      << "Tri tri intersect: degenerate triangle "
+		      << std::endl;
+		    */
+		    return;
+		}
+	    } else {
+		// If client code says there is no degenerate triangle,
+		// double check in debug mode.
+		geo_debug_assert(
+		    triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) == 2
+		);
+		geo_debug_assert(
+		    triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) == 2
+		);
+	    }
+
+	    // test for disjoint bounding boxes if not specified otherwise
+	    // in TriangleIsectFlags (for instance, if caller already knows
+	    // that bbox intersect, as when using an AABB tree or Zomorodian
+	    // et.al's algorithm).
+	    if(test_bbox) {
+		for(index_t c = 0; c < 3; ++c) {
+		    double pmin = std::min({p_[0][c], p_[1][c], p_[2][c]});
+		    double pmax = std::max({p_[0][c], p_[1][c], p_[2][c]});
+		    double qmin = std::min({p_[3][c], p_[4][c], p_[5][c]});
+		    double qmax = std::max({p_[3][c], p_[4][c], p_[5][c]});
+		    if(pmax < qmin || qmax < pmin) return;
+		}
 	    }
 
 	    if(has_global_indices_) {
@@ -578,16 +610,20 @@ namespace {
 
             // If cache not initialized, set cache value
 
-            if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
-                int o = flip ? -int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) :
-                    int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
+	    Numeric::uint64 o3d_mask = (Numeric::uint64(1u) << o3d_idx);
+            if((o3d_cached_ & o3d_mask) == 0) {
+                int o = flip ?
+		    -int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) :
+                     int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
                 o3d_cache_[o3d_idx] = Numeric::int8(o);
+		o3d_cached_ |= o3d_mask;
             }
 
             // Get result from the cache
 
-            Sign result =  flip ? Sign(-o3d_cache_[o3d_idx])
-                : Sign( o3d_cache_[o3d_idx]);
+            Sign result = flip ?
+		Sign(-o3d_cache_[o3d_idx]) :
+		Sign( o3d_cache_[o3d_idx]) ;
 
             // Sanity check: did our cache return the same result as
             // directly calling the predicate ?
@@ -706,8 +742,10 @@ namespace {
         TriangleIsects* result_;
         bool has_non_degenerate_intersection_;
         mutable Numeric::int8 o3d_cache_[64];
+	mutable Numeric::uint64 o3d_cached_; // 1 bit set per cached value
 	index_t p_index_[6];
 	bool has_global_indices_;
+	TriangleIsectFlags flags_;
     };
 
 }
@@ -745,7 +783,7 @@ namespace GEO {
     bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2,
-        TriangleIsects& result
+        TriangleIsects& result, TriangleIsectFlags flags
     ) {
         result.resize(0);
         TriangleTriangleIntersection I(
@@ -753,6 +791,7 @@ namespace GEO {
             q0, q1, q2,
             &result
         );
+	I.set_flags(flags);
         I.compute();
         return I.has_non_degenerate_intersection();
     }
@@ -763,7 +802,7 @@ namespace GEO {
         const vec3& q0, const vec3& q1, const vec3& q2,
 	index_t p0_index, index_t p1_index, index_t p2_index,
 	index_t q0_index, index_t q1_index, index_t q2_index,
-        TriangleIsects& result
+        TriangleIsects& result, TriangleIsectFlags flags
     ) {
         result.resize(0);
         TriangleTriangleIntersection I(
@@ -773,6 +812,7 @@ namespace GEO {
 	    q0_index, q1_index, q2_index,
             &result
         );
+	I.set_flags(flags);
         I.compute();
         return I.has_non_degenerate_intersection();
     }
