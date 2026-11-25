@@ -1666,6 +1666,18 @@ namespace GEO {
 	}
 	Stopwatch W("Classify", verbose_);
 
+        // intersect_epilogue() restored the caller's SOS mode, so the ray
+        // casts below would break exact ties by point address (differs
+        // between platforms/allocators). Use the lexicographic mode, as
+        // during intersect(), and restore the caller's mode on exit.
+        struct SOSModeGuard {
+            SOSModeGuard() : bkp(PCK::get_SOS_mode()) {
+                PCK::set_SOS_mode(PCK::SOS_LEXICO);
+            }
+            ~SOSModeGuard() { PCK::set_SOS_mode(bkp); }
+            PCK::SOSMode bkp;
+        } sos_mode_guard;
+
         // Takes as input a Weiler model, with duplicated interfaces,
         // operand bit (that indices for each triangle the set of operands
         // it corresponds to), volumetric alpha3 links and correct facet
