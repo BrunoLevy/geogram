@@ -197,7 +197,7 @@ namespace {
 	    p.z = p3.w*p.z + p.w*p3.z;
 	    p.w *= p3.w;
 	}
-	p.w *= 3.0;
+	p.w *= exact::vec3h::value_type(3.0);
 	return p;
     }
 }
@@ -1670,6 +1670,9 @@ namespace GEO {
         // casts below would break exact ties by point address (differs
         // between platforms/allocators). Use the lexicographic mode, as
         // during intersect(), and restore the caller's mode on exit.
+	// It is necessary, because whenever component classification cannot
+	// be done using initial vertices, one needs to create exact points
+	// stored in temporaries, see compute_component_inclusion_bits_exact()
         struct SOSModeGuard {
             SOSModeGuard() : bkp(PCK::get_SOS_mode()) {
                 PCK::set_SOS_mode(PCK::SOS_LEXICO);
