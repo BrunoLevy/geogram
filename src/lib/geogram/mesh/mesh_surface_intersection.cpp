@@ -176,7 +176,6 @@ namespace {
     exact::vec3h triangle_barycenter(
 	const exact::vec3h& p1, const exact::vec3h& p2, const exact::vec3h& p3
     ) {
-
 	exact::vec3h p = p1;
 	if(p2.w == p.w) {
 	    p.x += p2.x;
@@ -186,6 +185,7 @@ namespace {
 	    p.x = p2.w*p.x + p.w*p2.x;
 	    p.y = p2.w*p.y + p.w*p2.y;
 	    p.z = p2.w*p.z + p.w*p2.z;
+	    p.w *= p2.w;
 	}
 	if(p3.w == p.w) {
 	    p.x += p3.x;
@@ -195,6 +195,7 @@ namespace {
 	    p.x = p3.w*p.x + p.w*p3.x;
 	    p.y = p3.w*p.y + p.w*p3.y;
 	    p.z = p3.w*p.z + p.w*p3.z;
+	    p.w *= p3.w;
 	}
 	p.w *= 3.0;
 	return p;
@@ -2123,10 +2124,6 @@ namespace GEO {
 	    mesh_copy_.facets.attributes(), "component"
 	);
 
-        if(verbose_) {
-            Logger::out("Weiler") << " componentE" << component << std::endl;
-        }
-
 	index_t component_inclusion_bits = 0;
 
 	ExactPoint q2 = q1;
@@ -2153,6 +2150,13 @@ namespace GEO {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }
 	}
+
+        if(verbose_) {
+	    std::bitset<sizeof(index_t)*8> B(component_inclusion_bits);
+            Logger::out("Weiler") << " component " << component
+				  << ":" << B << std::endl;
+        }
+
         return component_inclusion_bits;
     }
 
