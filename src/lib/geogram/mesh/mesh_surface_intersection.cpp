@@ -1927,28 +1927,26 @@ namespace GEO {
             }
             parallel_for(
                 0, nb_components, [&](index_t component) {
-		    // If component has only non-manifold vertices (shared
-		    // with other components), for classifying the component
-		    // we start raytracing from the barycenter of the first
-		    // facet of the component.
-		    if(component_vertex[component] == NON_MANIFOLD) {
+		    index_t v = component_vertex[component];
+		    if(v == NON_MANIFOLD) {
+			// If component has only non-manifold vertices (shared
+			// with other components), for classifying the component
+			// we start raytracing from the barycenter of the first
+			// facet of the component.
 			index_t f = component_facet[component];
-			index_t v1 = mesh_.facets.vertex(f,0);
-			index_t v2 = mesh_.facets.vertex(f,1);
-			index_t v3 = mesh_.facets.vertex(f,2);
-			ExactPoint p1 = exact_vertex(v1);
-			ExactPoint p2 = exact_vertex(v2);
-			ExactPoint p3 = exact_vertex(v3);
-			ExactPoint p = triangle_barycenter(p1,p2,p3);
+			ExactPoint p = triangle_barycenter(
+			    exact_vertex(mesh_.facets.vertex(f,0)),
+			    exact_vertex(mesh_.facets.vertex(f,1)),
+			    exact_vertex(mesh_.facets.vertex(f,2))
+			);
+			Numeric::optimize_number_representation(p);
 			component_inclusion_bits[component] =
 			    compute_component_inclusion_bits_exact(
 				component, p
 			    );
 		    } else {
 			component_inclusion_bits[component] =
-			    compute_component_inclusion_bits(
-				component, component_vertex[component]
-			    );
+			    compute_component_inclusion_bits(component, v);
 		    }
                 }
             );
