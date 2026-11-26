@@ -80,7 +80,8 @@ namespace {
 
     using namespace GEO;
 
-    GEO::PCK::SOSMode SOS_mode_ = GEO::PCK::SOS_ADDRESS;
+    GEO::PCK::SOSMode SOS_mode_ = GEO::PCK::SOS_LEXICO;
+                                  // GEO::PCK::SOS_ADDRESS;
 
     /**
      * \brief Comparator class for nD points using lexicographic order.
@@ -1564,7 +1565,8 @@ namespace GEO {
     namespace PCK {
 
         void set_SOS_mode(SOSMode m) {
-            SOS_mode_ = m;
+	    geo_argused(m);
+	    /* SOS_mode_ = m; */
         }
 
         SOSMode get_SOS_mode() {

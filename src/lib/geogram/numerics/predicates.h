@@ -77,6 +77,7 @@ namespace GEO {
          *  perturbation. SOS_LEXICO works for points that are generated
          *  dynamically (with no fixed address).
          */
+	[[deprecated("SOS mode is always lexico")]]
         void GEOGRAM_API set_SOS_mode(SOSMode m);
 
         /**
@@ -84,6 +85,7 @@ namespace GEO {
          * \return one of SOS_ADDRESS, SOS_LEXICO
          * \see set_SOS_mode()
          */
+	[[deprecated("SOS mode is always lexico")]]
         SOSMode GEOGRAM_API get_SOS_mode();
 
         /**
