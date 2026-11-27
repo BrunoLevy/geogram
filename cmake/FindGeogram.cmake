@@ -100,6 +100,18 @@ If (GEOGRAM_FOUND)
                   IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
                   IMPORTED_LOCATION "${GEOGRAM_GFX_LIBRARY}"
                 )
+
+                if(EXISTS "${GEOGRAM_INCLUDE_DIR}/geogram_gfx/basic/config.h")
+                  file(STRINGS "${GEOGRAM_INCLUDE_DIR}/geogram_gfx/basic/config.h"
+                    _geogram_system_editor REGEX "^#define GEOGRAM_USE_SYSTEM_TEXT_EDITOR")
+                  if(_geogram_system_editor)
+                    find_package(ImGuiColorTextEdit CONFIG REQUIRED)
+                    set_property(TARGET Geogram::geogram_gfx APPEND PROPERTY
+                      INTERFACE_LINK_LIBRARIES ImGuiColorTextEdit::ImGuiColorTextEdit)
+                    set_property(TARGET Geogram::geogram_gfx APPEND PROPERTY
+                      INTERFACE_COMPILE_FEATURES cxx_std_17)
+                  endif()
+                endif()
                 
         endif ()
 
